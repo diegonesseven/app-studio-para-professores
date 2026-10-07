@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { InstallPromptBanner } from '@/components/InstallPromptBanner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { STUDIO_LOGO_SRC } from '@/assets/logo'
 import {
   Dumbbell,
   Home,
@@ -69,29 +70,23 @@ export default function Layout() {
       {/* SIDEBAR TABLET/DESKTOP (>= 1024px) */}
       <aside className="hidden lg:flex flex-col w-64 bg-[#171717] border-r border-[#2A2A2A] z-20 shrink-0">
         {/* Header / Brand */}
-        <div className="p-5 border-b border-[#2A2A2A] flex items-center gap-3">
-          {appearance.logo_url ? (
-            <div className="h-10 w-10 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center p-1 shrink-0 overflow-hidden">
-              <img
-                src={appearance.logo_url}
-                alt={appearance.studio_name || 'Studio Logo'}
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
-          ) : (
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20 shrink-0 text-primary-foreground">
-              <Dumbbell className="w-5 h-5 stroke-[2.5]" />
-            </div>
-          )}
+        <div className="p-4 border-b border-[#2A2A2A] flex items-center gap-3">
+          <div className="h-11 w-11 rounded-xl bg-white border border-white/20 flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-sm">
+            <img
+              src={appearance.logo_url || STUDIO_LOGO_SRC}
+              alt={appearance.studio_name || 'Studio Bru Oliveira'}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
           <div className="flex flex-col min-w-0">
             <span
-              className="font-bold text-base tracking-tight text-white leading-tight truncate"
+              className="font-bold text-sm sm:text-base tracking-tight text-white leading-tight truncate"
               title={appearance.studio_name || 'Studio Bru Oliveira'}
             >
               {appearance.studio_name || 'Studio Bru Oliveira'}
             </span>
-            <span className="text-[11px] text-[#8A8F98] tracking-wider uppercase font-medium">
-              Personal & Studio
+            <span className="text-[11px] text-secondary font-semibold tracking-wider uppercase">
+              Personal &amp; Pilates
             </span>
           </div>
         </div>
@@ -145,7 +140,7 @@ export default function Layout() {
         {/* Footer / User info */}
         <div className="p-3 border-t border-[#2A2A2A] bg-[#141414]">
           <div className="flex items-center gap-3 p-2 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A]">
-            <div className="w-9 h-9 rounded-full bg-[#2A2A2A] border border-[#F06A2A]/40 flex items-center justify-center text-xs font-bold text-[#F06A2A] shrink-0">
+            <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-xs font-bold text-secondary shrink-0">
               {userInitials || 'P'}
             </div>
             <div className="flex flex-col min-w-0 flex-1">
@@ -155,7 +150,7 @@ export default function Layout() {
               <span className="text-[10px] text-[#8A8F98] flex items-center gap-1">
                 {role === 'admin' ? (
                   <>
-                    <ShieldCheck className="w-3 h-3 text-[#F06A2A]" /> Administrador
+                    <ShieldCheck className="w-3 h-3 text-secondary" /> Administrador
                   </>
                 ) : (
                   <>
@@ -181,22 +176,21 @@ export default function Layout() {
         <InstallPromptBanner />
         <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#171717] border-b border-[#2A2A2A] z-20 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            {appearance.logo_url ? (
-              <div className="h-8 w-8 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
-                <img
-                  src={appearance.logo_url}
-                  alt={appearance.studio_name || 'Logo'}
-                  className="max-h-full max-w-full object-contain"
-                />
-              </div>
-            ) : (
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shrink-0">
-                <Dumbbell className="w-4 h-4 stroke-[2.5]" />
-              </div>
-            )}
-            <span className="font-bold text-sm tracking-tight text-white truncate">
-              {appearance.studio_name || 'Studio Bru Oliveira'}
-            </span>
+            <div className="h-9 w-9 rounded-lg bg-white border border-white/20 flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-sm">
+              <img
+                src={appearance.logo_url || STUDIO_LOGO_SRC}
+                alt={appearance.studio_name || 'Logo'}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+            <div className="min-w-0 flex flex-col">
+              <span className="font-bold text-sm tracking-tight text-white truncate leading-tight">
+                {appearance.studio_name || 'Studio Bru Oliveira'}
+              </span>
+              <span className="text-[10px] text-secondary font-medium tracking-wider uppercase leading-none">
+                Personal &amp; Pilates
+              </span>
+            </div>
           </div>
 
           <button
@@ -217,19 +211,15 @@ export default function Layout() {
             />
             <div className="relative ml-auto w-4/5 max-w-xs bg-[#171717] border-l border-[#2A2A2A] h-full flex flex-col p-5 shadow-2xl animate-fade-in-up">
               <div className="flex items-center justify-between pb-4 border-b border-[#2A2A2A]">
-                <div className="flex items-center gap-2 min-w-0">
-                  {appearance.logo_url ? (
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="h-9 w-9 rounded-lg bg-white flex items-center justify-center p-1 shrink-0 overflow-hidden">
                     <img
-                      src={appearance.logo_url}
+                      src={appearance.logo_url || STUDIO_LOGO_SRC}
                       alt="Logo"
-                      className="h-7 w-auto max-w-[80px] object-contain rounded"
+                      className="max-h-full max-w-full object-contain"
                     />
-                  ) : (
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-                      <Dumbbell className="w-4 h-4" />
-                    </div>
-                  )}
-                  <span className="font-bold text-sm truncate">
+                  </div>
+                  <span className="font-bold text-sm truncate text-white">
                     {appearance.studio_name || 'Studio Bru Oliveira'}
                   </span>
                 </div>
@@ -243,7 +233,7 @@ export default function Layout() {
               </div>
 
               <div className="py-4 border-b border-[#2A2A2A] flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#2A2A2A] border border-[#F06A2A] flex items-center justify-center text-sm font-bold text-[#F06A2A]">
+                <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-sm font-bold text-secondary">
                   {userInitials || 'P'}
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -271,7 +261,7 @@ export default function Layout() {
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
                         isActive
-                          ? 'bg-[#F06A2A] text-white shadow-md'
+                          ? 'bg-primary text-primary-foreground shadow-md'
                           : 'text-[#8A8F98] hover:text-white hover:bg-[#1E1E1E]'
                       }`}
                     >

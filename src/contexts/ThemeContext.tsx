@@ -111,7 +111,7 @@ function applyThemeToDocument(appearance: AppAppearanceSettings) {
       metaTheme.setAttribute('name', 'theme-color')
       document.head.appendChild(metaTheme)
     }
-    metaTheme.setAttribute('content', appearance.primary_color || '#F06A2A')
+    metaTheme.setAttribute('content', appearance.primary_color || '#4B4FA0')
 
     // 2. Title do documento
     if (appearance.studio_name) {

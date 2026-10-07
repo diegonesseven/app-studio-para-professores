@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { STUDIO_LOGO_SRC } from '@/assets/logo'
 import { extractFieldErrors } from '@/lib/pocketbase/errors'
 import { Eye, EyeOff, Dumbbell, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -64,28 +65,23 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8 relative overflow-hidden">
       {/* Glow de fundo */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#F06A2A]/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/25 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
-        {/* Branding Studio Bru Oliveira */}
+      <div className="w-full max-w-md bg-[#181C2E] border border-[#252B3E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
+        {/* Branding Studio Bru Oliveira Oficial */}
         <div className="flex flex-col items-center text-center mb-8">
-          {appearance.logo_url ? (
-            <div className="h-16 w-auto max-w-[200px] mb-4 flex items-center justify-center">
-              <img
-                src={appearance.logo_url}
-                alt={appearance.studio_name || 'Studio Bru Oliveira'}
-                className="max-h-16 max-w-full object-contain"
-              />
-            </div>
-          ) : (
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25 mb-4 text-primary-foreground">
-              <Dumbbell className="w-9 h-9 stroke-[2.5]" />
-            </div>
-          )}
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <div className="h-20 w-auto max-w-[220px] mb-4 p-2 bg-white rounded-2xl shadow-lg border border-white/20 flex items-center justify-center">
+            <img
+              src={appearance.logo_url || STUDIO_LOGO_SRC}
+              alt={appearance.studio_name || 'Studio Bru Oliveira'}
+              className="max-h-16 max-w-full object-contain"
+            />
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             {appearance.studio_name || 'Studio Bru Oliveira'}
           </h1>
-          <p className="text-sm text-[#8A8F98] mt-1">Plataforma do Professor e Personal Trainer</p>
+          <p className="text-sm text-secondary font-medium mt-1">Personal Trainer &amp; Pilates</p>
+          <p className="text-xs text-[#9CA5B8] mt-0.5">Plataforma do Professor</p>
         </div>
 
         {error && (
@@ -116,7 +112,10 @@ export default function Login() {
               <Label htmlFor="password" className="text-sm text-[#FFFFFF] font-medium">
                 Senha
               </Label>
-              <Link to="/forgot-password" className="text-xs text-[#F06A2A] hover:underline">
+              <Link
+                to="/forgot-password"
+                className="text-xs text-secondary hover:underline font-medium"
+              >
                 Recuperar senha
               </Link>
             </div>
@@ -128,7 +127,7 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-11 focus-visible:ring-[#F06A2A]"
+                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-11 focus-visible:ring-primary"
               />
               <button
                 type="button"

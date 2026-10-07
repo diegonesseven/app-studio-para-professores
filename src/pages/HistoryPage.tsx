@@ -15,6 +15,7 @@ import {
   Eye,
   X,
   Filter,
+  GraduationCap,
 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -190,8 +191,14 @@ export default function HistoryPage() {
                         <Clock className="w-3.5 h-3.5" /> {timeFormatted}
                       </span>
                       <span className="flex items-center gap-1">
-                        <Dumbbell className="w-3.5 h-3.5" /> {exerciseCount} exercícios na série
+                        <Dumbbell className="w-3.5 h-3.5" /> {exerciseCount} exercícios
                       </span>
+                      {entry.expand?.teacher?.name && (
+                        <span className="flex items-center gap-1 text-secondary font-medium">
+                          <GraduationCap className="w-3.5 h-3.5" /> Prof.{' '}
+                          {entry.expand.teacher.name}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -229,12 +236,19 @@ export default function HistoryPage() {
             <DialogTitle className="text-lg font-bold text-white">
               {selectedSession?.expand?.student?.name || 'Aluno'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#8A8F98]">
-              Finalizado em{' '}
-              {selectedSession &&
-                new Date(selectedSession.completed_at || selectedSession.created).toLocaleString(
-                  'pt-BR',
-                )}
+            <DialogDescription className="text-xs text-[#8A8F98] flex items-center gap-2 flex-wrap pt-0.5">
+              <span>
+                Finalizado em{' '}
+                {selectedSession &&
+                  new Date(selectedSession.completed_at || selectedSession.created).toLocaleString(
+                    'pt-BR',
+                  )}
+              </span>
+              {selectedSession?.expand?.teacher?.name && (
+                <span className="text-secondary font-semibold flex items-center gap-1">
+                  • Professor responsável: {selectedSession.expand.teacher.name}
+                </span>
+              )}
             </DialogDescription>
           </DialogHeader>
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T13:21:57.304Z",
+  "generatedAt": "2026-10-07T13:41:51.670Z",
   "collections": [
     {
       "name": "users",
@@ -352,6 +352,25 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "teacher",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "completed_indices",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_completed",
+          "type": "bool",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [

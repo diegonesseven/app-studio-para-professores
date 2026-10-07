@@ -215,6 +215,9 @@ export default function StudentTrainingColumn({
             const name = ex?.name || 'Exercício'
             const muscle = ex?.muscle_group || 'Geral'
             const isDone = Boolean(completedExercises[idx])
+            // Descobre o primeiro exercício não concluído para dar destaque (continuidade)
+            const firstUndoneIndex = currentExercises.findIndex((_, i) => !completedExercises[i])
+            const isCurrentFocus = !isDone && idx === firstUndoneIndex
             const isEditingThis = editingIndex === idx
 
             const isNoteExpanded = Boolean(expandedNotes[idx])
@@ -224,12 +227,20 @@ export default function StudentTrainingColumn({
                 key={`${block.exercise_id}-${idx}`}
                 className={`p-3 sm:p-3.5 rounded-xl border transition-all ${
                   isEditingThis
-                    ? 'bg-[#181818] border-primary ring-2 ring-primary/30 shadow-xl'
+                    ? 'bg-[#181C2E] border-primary ring-2 ring-primary/30 shadow-xl'
                     : isDone
-                      ? 'bg-emerald-950/25 border-emerald-600/50 shadow-sm'
-                      : 'bg-[#151515] border-[#2E2E2E] hover:border-primary/50 shadow-sm'
+                      ? 'bg-secondary/10 border-secondary/40 shadow-sm'
+                      : isCurrentFocus
+                        ? 'bg-primary/10 border-primary ring-2 ring-primary/40 shadow-md'
+                        : 'bg-[#151515] border-[#2E2E2E] hover:border-primary/50 shadow-sm'
                 }`}
               >
+                {isCurrentFocus && (
+                  <div className="flex items-center gap-1.5 mb-2 text-[11px] font-extrabold uppercase tracking-wider text-secondary">
+                    <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                    <span>Próximo exercício • Continuar daqui</span>
+                  </div>
+                )}
                 {/* 1. TOPO: Checkmark + NOME DO EXERCÍCIO + Ações (lápis e vídeo) num bloco horizontal ampliado */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -239,8 +250,10 @@ export default function StudentTrainingColumn({
                       onClick={() => onToggleExercise(idx)}
                       className={`min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform active:scale-95 ${
                         isDone
-                          ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/35 animate-check-pop ring-2 ring-emerald-500/50'
-                          : 'border-2 border-[#454545] bg-[#1F1F1F] text-transparent hover:border-primary hover:text-primary/40'
+                          ? 'bg-secondary text-secondary-foreground shadow-md shadow-secondary/35 animate-check-pop ring-2 ring-secondary/50 font-bold'
+                          : isCurrentFocus
+                            ? 'border-2 border-primary bg-primary/20 text-primary hover:bg-primary/30'
+                            : 'border-2 border-[#454545] bg-[#1F1F1F] text-transparent hover:border-primary hover:text-primary/40'
                       }`}
                       aria-label={isDone ? 'Desmarcar exercício' : 'Marcar como concluído'}
                     >

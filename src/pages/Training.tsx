@@ -74,6 +74,9 @@ export default function Training() {
   // Exercícios marcados como feitos na sessão: { [studentId]: { [exerciseIndex]: true } }
   const [completedMap, setCompletedMap] = useState<Record<string, Record<number, boolean>>>({})
 
+  // ID do registro de progresso em andamento na nuvem: { [studentId]: recordId }
+  const [sessionRecordMap, setSessionRecordMap] = useState<Record<string, string>>({})
+
   // Mobile carrossel tab ativa (índice 0, 1 ou 2)
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0)
 
@@ -166,29 +169,55 @@ export default function Training() {
         // Carregar fichas e histórico recente de cada aluno para determinar onde começar
         const newSheetsMap: Record<string, TrainingSheet | null> = {}
         const newSeriesMap: Record<string, SeriesKey> = { ...activeSeriesMap }
+        const newCompletedMap: Record<string, Record<number, boolean>> = { ...completedMap }
+        const newSessionRecords: Record<string, string> = { ...sessionRecordMap }
 
         await Promise.all(
           studentsData.map(async (st) => {
             const sheet = await trainingSheetsService.getByStudent(st.id)
             newSheetsMap[st.id] = sheet
 
-            // Se o aluno ainda não tem série selecionada no estado, consulta o último progresso
-            if (!newSeriesMap[st.id]) {
-              const latest = await workoutProgressService.getLatestByStudent(st.id)
-              if (latest) {
+            // Descobre o último registro do aluno no backend
+            const latest = await workoutProgressService.getLatestByStudent(st.id)
+
+            let seriesToOpen: SeriesKey = newSeriesMap[st.id] || 'A'
+            let initialCompleted: Record<number, boolean> = {}
+
+            if (latest && !newSeriesMap[st.id]) {
+              // Verifica se a série mais recente NÃO foi concluída inteiramente (continuidade)
+              const seriesExercises = sheet?.series_data?.[latest.series_completed] || []
+              const totalEx = seriesExercises.length
+              const savedIndices = latest.completed_indices || []
+              const hasUnfinishedExercises =
+                latest.is_completed === false ||
+                (totalEx > 0 && savedIndices.length < totalEx && latest.is_completed !== true)
+
+              if (hasUnfinishedExercises) {
+                // CONTINUIDADE: mantém a mesma série aberta no ponto onde parou!
+                seriesToOpen = latest.series_completed
+                savedIndices.forEach((i) => {
+                  initialCompleted[i] = true
+                })
+                newSessionRecords[st.id] = latest.id
+              } else {
+                // Série 100% concluída: avança para a próxima série
                 const keys: SeriesKey[] = ['A', 'B', 'C', 'D', 'E']
                 const idx = keys.indexOf(latest.series_completed)
-                const nextKey = keys[(idx + 1) % keys.length]
-                newSeriesMap[st.id] = nextKey
-              } else {
-                newSeriesMap[st.id] = 'A'
+                seriesToOpen = keys[(idx + 1) % keys.length]
               }
+            }
+
+            newSeriesMap[st.id] = seriesToOpen
+            if (Object.keys(initialCompleted).length > 0) {
+              newCompletedMap[st.id] = initialCompleted
             }
           }),
         )
 
         setSheetsMap(newSheetsMap)
         setActiveSeriesMap(newSeriesMap)
+        setCompletedMap(newCompletedMap)
+        setSessionRecordMap(newSessionRecords)
       } catch (err: unknown) {
         toast({
           title: 'Erro ao carregar sessão',
@@ -238,16 +267,93 @@ export default function Training() {
     }
   }
 
-  // Marcar/Desmarcar exercício do aluno
-  const handleToggleExercise = (studentId: string, idx: number) => {
-    setCompletedMap((prev) => {
-      const studentMap = { ...(prev[studentId] || {}) }
-      studentMap[idx] = !studentMap[idx]
-      return {
-        ...prev,
-        [studentId]: studentMap,
+  // Carrega continuidade ao alternar manualmente a aba de série do aluno
+  const handleSelectSeriesForStudent = async (studentId: string, seriesKey: SeriesKey) => {
+    setActiveSeriesMap((prev) => ({
+      ...prev,
+      [studentId]: seriesKey,
+    }))
+
+    const sheet = sheetsMap[studentId]
+    if (!sheet) return
+
+    try {
+      const existing = await workoutProgressService.getActiveSession(studentId, sheet.id, seriesKey)
+      if (existing && existing.completed_indices) {
+        const cMap: Record<number, boolean> = {}
+        existing.completed_indices.forEach((idx) => {
+          cMap[idx] = true
+        })
+        setCompletedMap((prev) => ({
+          ...prev,
+          [studentId]: cMap,
+        }))
+        setSessionRecordMap((prev) => ({
+          ...prev,
+          [studentId]: existing.id,
+        }))
+      } else {
+        setCompletedMap((prev) => ({
+          ...prev,
+          [studentId]: {},
+        }))
       }
-    })
+    } catch {
+      /* intentionally ignored */
+    }
+  }
+
+  // Marcar/Desmarcar exercício do aluno com persistência imediata na nuvem
+  const handleToggleExercise = async (studentId: string, idx: number) => {
+    const studentMap = { ...(completedMap[studentId] || {}) }
+    const nextVal = !studentMap[idx]
+    if (nextVal) {
+      studentMap[idx] = true
+    } else {
+      delete studentMap[idx]
+    }
+
+    setCompletedMap((prev) => ({
+      ...prev,
+      [studentId]: studentMap,
+    }))
+
+    // Persistência na nuvem (PocketBase) para sincronizar entre dispositivos
+    const sheet = sheetsMap[studentId]
+    const currentSeries = activeSeriesMap[studentId] || 'A'
+    if (!sheet) return
+
+    const exercisesInSeries = sheet.series_data?.[currentSeries] || []
+    const completedIndices = Object.keys(studentMap)
+      .map(Number)
+      .filter((i) => studentMap[i])
+      .sort((a, b) => a - b)
+
+    const isAllDone =
+      exercisesInSeries.length > 0 && completedIndices.length === exercisesInSeries.length
+
+    try {
+      const saved = await workoutProgressService.saveExerciseProgress({
+        id: sessionRecordMap[studentId],
+        student: studentId,
+        training_sheet: sheet.id,
+        series_completed: currentSeries,
+        completed_indices: completedIndices,
+        is_completed: isAllDone,
+        exercises_snapshot: exercisesInSeries,
+        notes: isAllDone
+          ? `Série ${currentSeries} 100% concluída`
+          : `Em andamento (${completedIndices.length}/${exercisesInSeries.length})`,
+      })
+      if (saved && saved.id) {
+        setSessionRecordMap((prev) => ({
+          ...prev,
+          [studentId]: saved.id,
+        }))
+      }
+    } catch (err) {
+      console.error('Erro ao sincronizar exercício no backend:', err)
+    }
   }
 
   // Atualização inline de um bloco de exercício da ficha
@@ -310,11 +416,15 @@ export default function Training() {
     const currentSeries = activeSeriesMap[student.id] || 'A'
     const exercisesInSeries = sheet.series_data?.[currentSeries] || []
 
+    const allIndices = exercisesInSeries.map((_, i) => i)
     try {
-      await workoutProgressService.recordCompletion({
+      await workoutProgressService.saveExerciseProgress({
+        id: sessionRecordMap[student.id],
         student: student.id,
         training_sheet: sheet.id,
         series_completed: currentSeries,
+        completed_indices: allIndices,
+        is_completed: true,
         exercises_snapshot: exercisesInSeries,
         notes: `Concluído em aula pelo Studio Bru Oliveira`,
       })
@@ -336,6 +446,11 @@ export default function Training() {
         ...prev,
         [student.id]: {},
       }))
+      setSessionRecordMap((prev) => {
+        const next = { ...prev }
+        delete next[student.id]
+        return next
+      })
 
       toast({
         title: `Série ${currentSeries} concluída!`,
@@ -369,16 +484,21 @@ export default function Training() {
     try {
       // Registra a série atual como salva no histórico
       const currentSeries = activeSeriesMap[student.id] || 'A'
-      await workoutProgressService.recordCompletion({
+      const currentExercises = sheet.series_data?.[currentSeries] || []
+      const allIndices = currentExercises.map((_, i) => i)
+
+      await workoutProgressService.saveExerciseProgress({
+        id: sessionRecordMap[student.id],
         student: student.id,
         training_sheet: sheet.id,
         series_completed: currentSeries,
+        completed_indices: allIndices,
+        is_completed: true,
         exercises_snapshot: sheet.series_data?.[currentSeries] || [],
         notes: `Ficha inteira concluída na sessão`,
       })
 
       // Marcar todos os exercícios como checados visualmente
-      const currentExercises = sheet.series_data?.[currentSeries] || []
       const allDone: Record<number, boolean> = {}
       currentExercises.forEach((_, i) => {
         allDone[i] = true
@@ -557,12 +677,7 @@ export default function Training() {
                     student={st}
                     sheet={sheet}
                     activeSeries={activeSeries}
-                    onSelectSeries={(series) =>
-                      setActiveSeriesMap((prev) => ({
-                        ...prev,
-                        [st.id]: series,
-                      }))
-                    }
+                    onSelectSeries={(series) => handleSelectSeriesForStudent(st.id, series)}
                     completedExercises={completedExercises}
                     onToggleExercise={(idx) => handleToggleExercise(st.id, idx)}
                     onOpenAnamnese={() => setAnamneseStudent(st)}
@@ -650,10 +765,7 @@ export default function Training() {
                   sheet={sheetsMap[selectedStudents[mobileActiveIndex].id] || null}
                   activeSeries={activeSeriesMap[selectedStudents[mobileActiveIndex].id] || 'A'}
                   onSelectSeries={(series) =>
-                    setActiveSeriesMap((prev) => ({
-                      ...prev,
-                      [selectedStudents[mobileActiveIndex].id]: series,
-                    }))
+                    handleSelectSeriesForStudent(selectedStudents[mobileActiveIndex].id, series)
                   }
                   completedExercises={completedMap[selectedStudents[mobileActiveIndex].id] || {}}
                   onToggleExercise={(idx) =>

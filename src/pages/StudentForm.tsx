@@ -1,7 +1,28 @@
-import React, { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
+import { toast } from '@/hooks/use-toast'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { studentsService } from '@/services/students'
-import { type ExperienceLevel, type GoalOption, GOAL_OPTIONS } from '@/types'
+import { workoutProgressService } from '@/services/workoutProgress'
+import { exercisesService } from '@/services/exercises'
+import {
+  type ExperienceLevel,
+  type GoalOption,
+  GOAL_OPTIONS,
+  type WorkoutProgress,
+  type Exercise,
+} from '@/types'
 import {
   ArrowLeft,
   User,
@@ -10,29 +31,21 @@ import {
   Trash2,
   Calendar,
   Phone,
-  FileText,
   AlertCircle,
   ChevronDown,
   ChevronUp,
+  History,
+  GraduationCap,
+  Clock,
+  Dumbbell,
+  CheckCircle2,
+  Eye,
 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { toast } from '@/hooks/use-toast'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 
 export default function StudentForm() {
   const { id } = useParams<{ id: string }>()
-  const isEditing = Boolean(id)
   const navigate = useNavigate()
+  const isEditing = Boolean(id)
 
   // Dados Básicos
   const [name, setName] = useState('')
@@ -50,6 +63,11 @@ export default function StudentForm() {
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>('Iniciante')
   const [teacherObservations, setTeacherObservations] = useState('')
 
+  // Histórico de treinos do aluno com o professor
+  const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+  const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -57,9 +75,12 @@ export default function StudentForm() {
   useEffect(() => {
     if (id) {
       setLoading(true)
-      studentsService
-        .getById(id)
-        .then((st) => {
+      Promise.all([
+        studentsService.getById(id),
+        workoutProgressService.getAll(id, 50),
+        exercisesService.getAll(),
+      ])
+        .then(([st, history, exList]) => {
           setName(st.name)
           setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
           setPhone(st.phone || '')
@@ -73,7 +94,13 @@ export default function StudentForm() {
           setExperienceLevel(st.experience_level || 'Iniciante')
           setTeacherObservations(st.teacher_observations || '')
 
-          // Abre a seção de anamnese se houver dados
+          setStudentHistory(history)
+          const map: Record<string, Exercise> = {}
+          exList.forEach((e) => {
+            map[e.id] = e
+          })
+          setExercisesMap(map)
+
           if (
             st.health_history ||
             st.injuries ||
@@ -144,7 +171,6 @@ export default function StudentForm() {
         })
       }
 
-      // Conforme especificação: "A successful save shows a toast 'Aluno salvo com sucesso' and navigates to the student's training screen."
       navigate(`/treino?students=${savedId}`)
     } catch (err: unknown) {
       toast({
@@ -202,16 +228,16 @@ export default function StudentForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Bloco 1: Dados Básicos */}
-        <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-xl space-y-5">
-          <div className="flex items-center gap-3 pb-4 border-b border-[#2E2E2E]">
-            <div className="w-10 h-10 rounded-xl bg-[#F06A2A]/15 border border-[#F06A2A]/30 text-[#F06A2A] flex items-center justify-center">
+        <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl p-6 sm:p-8 shadow-xl space-y-5">
+          <div className="flex items-center gap-3 pb-4 border-b border-[#252B3E]">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 text-secondary flex items-center justify-center">
               <User className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-lg font-bold text-white">
                 {isEditing ? 'Editar Aluno' : 'Cadastrar Novo Aluno'}
               </h2>
-              <p className="text-xs text-[#8A8F98]">
+              <p className="text-xs text-[#9CA5B8]">
                 Informações de contato e dados pessoais básicos
               </p>
             </div>
@@ -227,7 +253,7 @@ export default function StudentForm() {
               placeholder="Ex: Mariana Costa"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-[#F06A2A]"
+              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
             />
           </div>
 
@@ -242,7 +268,7 @@ export default function StudentForm() {
                   type="date"
                   value={birthdate}
                   onChange={(e) => setBirthdate(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white h-12 focus-visible:ring-[#F06A2A]"
+                  className="bg-[#121212] border-[#2E2E2E] text-white h-12 focus-visible:ring-primary"
                 />
                 <Calendar className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98] pointer-events-none" />
               </div>
@@ -258,7 +284,7 @@ export default function StudentForm() {
                   placeholder="(11) 98765-4321"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-[#F06A2A]"
+                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
                 />
                 <Phone className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98] pointer-events-none" />
               </div>
@@ -275,13 +301,140 @@ export default function StudentForm() {
               placeholder="Ex: Dias e horários de preferência, metas pessoais, profissão..."
               value={generalObservations}
               onChange={(e) => setGeneralObservations(e.target.value)}
-              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-[#F06A2A]"
+              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
             />
           </div>
         </div>
 
-        {/* Bloco 2: Anamnese (Colapsável / Opcional) */}
-        <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl shadow-xl overflow-hidden">
+        {/* Bloco 2: Histórico de Treinos e Professor (Exibido na edição do aluno) */}
+        {isEditing && (
+          <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl p-6 sm:p-8 space-y-5">
+            <div className="flex items-center justify-between pb-4 border-b border-[#252B3E] gap-2 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary/20 border border-secondary/40 text-secondary flex items-center justify-center">
+                  <History className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    Histórico de Treinos com Professor
+                    <span className="text-xs bg-primary/30 text-white font-semibold px-2 py-0.5 rounded-full">
+                      {studentHistory.length} sessões
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#9CA5B8]">
+                    Séries treinadas (A–E), dias, horários e professores responsáveis que
+                    acompanharam o aluno
+                  </p>
+                </div>
+              </div>
+
+              <Link to={`/treino?students=${id}`}>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs h-9 px-3.5"
+                >
+                  Abrir Treino Deste Aluno
+                </Button>
+              </Link>
+            </div>
+
+            {studentHistory.length === 0 ? (
+              <div className="py-8 text-center text-xs text-[#9CA5B8] bg-[#121522] rounded-xl border border-[#252B3E] p-6 space-y-1">
+                <History className="w-8 h-8 text-[#9CA5B8] opacity-40 mx-auto mb-2" />
+                <p className="font-semibold text-white text-sm">Nenhum treino registrado ainda</p>
+                <p>
+                  Assim que o professor iniciar as séries na Tela de Treino, o histórico detalhado
+                  aparecerá aqui.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
+                {studentHistory.map((sess) => {
+                  const dateObj = new Date(sess.completed_at || sess.created)
+                  const dateFormatted = dateObj.toLocaleDateString('pt-BR', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                  const timeFormatted = dateObj.toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })
+                  const teacherName = sess.expand?.teacher?.name || 'Professor'
+                  const totalExercises = sess.exercises_snapshot?.length || 0
+                  const completedIndices = sess.completed_indices || []
+                  const countDone =
+                    completedIndices.length > 0
+                      ? completedIndices.length
+                      : sess.is_completed !== false && totalExercises > 0
+                        ? totalExercises
+                        : 0
+
+                  return (
+                    <div
+                      key={sess.id}
+                      className="bg-[#121522] border border-[#252B3E] hover:border-primary/50 rounded-xl p-3.5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/40 text-primary font-black text-sm flex items-center justify-center shrink-0">
+                          {sess.series_completed}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-bold text-sm text-white">
+                              Série {sess.series_completed}
+                            </span>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                sess.is_completed
+                                  ? 'bg-secondary/20 text-secondary border border-secondary/40'
+                                  : 'bg-primary/20 text-primary border border-primary/30'
+                              }`}
+                            >
+                              {sess.is_completed ? 'Concluída' : 'Em andamento'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-[#9CA5B8] mt-1 flex-wrap">
+                            <span className="flex items-center gap-1 capitalize">
+                              <Calendar className="w-3.5 h-3.5" /> {dateFormatted}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3.5 h-3.5" /> {timeFormatted}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Dumbbell className="w-3.5 h-3.5" /> {countDone}/{totalExercises}{' '}
+                              exercícios
+                            </span>
+                            <span className="flex items-center gap-1 font-semibold text-secondary">
+                              <GraduationCap className="w-3.5 h-3.5" /> Prof. {teacherName}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-end shrink-0">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedHistorySession(sess)}
+                          className="border-[#2E2E2E] bg-[#171717] hover:bg-[#252525] text-white text-xs h-8 px-2.5 flex items-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-secondary" /> Ver Exercícios
+                        </Button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bloco 3: Anamnese (Colapsável / Opcional) */}
+        <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl overflow-hidden">
           <button
             type="button"
             onClick={() => setAnamneseOpen(!anamneseOpen)}
@@ -327,7 +480,7 @@ export default function StudentForm() {
                         onClick={() => setExperienceLevel(level)}
                         className={`h-11 rounded-lg text-xs sm:text-sm font-semibold transition-all border ${
                           experienceLevel === level
-                            ? 'bg-[#F06A2A] border-[#F06A2A] text-white shadow-md shadow-[#F06A2A]/20'
+                            ? 'bg-primary border-primary text-primary-foreground shadow-md'
                             : 'bg-[#121212] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
                         }`}
                       >
@@ -351,7 +504,7 @@ export default function StudentForm() {
                         onClick={() => toggleGoal(goal)}
                         className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-all ${
                           isSelected
-                            ? 'bg-[#F06A2A]/20 border-[#F06A2A] text-[#F06A2A]'
+                            ? 'bg-primary/20 border-primary text-secondary font-bold'
                             : 'bg-[#121212] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
                         }`}
                       >
@@ -391,7 +544,7 @@ export default function StudentForm() {
                   placeholder="Ex: Hérnia de disco L4-L5 em 2021, tendinite no ombro..."
                   value={injuries}
                   onChange={(e) => setInjuries(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-[#F06A2A]"
+                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
                 />
               </div>
 
@@ -406,7 +559,7 @@ export default function StudentForm() {
                   placeholder="Ex: Artroscopia joelho esquerdo, apendicectomia..."
                   value={surgeries}
                   onChange={(e) => setSurgeries(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-[#F06A2A]"
+                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
                 />
               </div>
 
@@ -421,7 +574,7 @@ export default function StudentForm() {
                   placeholder="Ex: Histórico familiar de cardiopatias, diabetes, medicamentos de uso contínuo..."
                   value={healthHistory}
                   onChange={(e) => setHealthHistory(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-[#F06A2A]"
+                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
                 />
               </div>
 
@@ -436,7 +589,7 @@ export default function StudentForm() {
                   placeholder="Ex: Avaliação postural inicial, testes de mobilidade de quadril e tornozelo..."
                   value={teacherObservations}
                   onChange={(e) => setTeacherObservations(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-[#F06A2A]"
+                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
                 />
               </div>
             </div>
@@ -457,7 +610,7 @@ export default function StudentForm() {
           <Button
             type="submit"
             disabled={saving}
-            className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-bold h-12 px-8 shadow-lg text-base"
+            className="bg-primary hover:opacity-90 text-primary-foreground font-bold h-12 px-8 shadow-lg text-base"
           >
             <Save className="w-5 h-5 mr-2" />
             {saving ? 'Salvando...' : 'Salvar Aluno'}
@@ -465,19 +618,123 @@ export default function StudentForm() {
         </div>
       </form>
 
-      {/* Confirmação de Exclusão */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white">
-              Excluir cadastro de aluno?
-            </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
-              Esta ação removerá permanentemente o aluno &quot;{name}&quot; e suas fichas associadas
-              do sistema.
+      {/* Modal de Detalhes dos Exercícios Concluídos no Treino */}
+      <Dialog
+        open={Boolean(selectedHistorySession)}
+        onOpenChange={(open) => !open && setSelectedHistorySession(null)}
+      >
+        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-lg max-h-[85vh] flex flex-col">
+          <DialogHeader className="border-b border-[#252B3E] pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase tracking-wider text-secondary font-bold">
+                Detalhes da Aula
+              </span>
+              <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                Série {selectedHistorySession?.series_completed}
+              </span>
+            </div>
+            <DialogTitle className="text-lg font-bold text-white">{name || 'Aluno'}</DialogTitle>
+            <DialogDescription className="text-xs text-[#9CA5B8] flex items-center gap-2 flex-wrap pt-0.5">
+              <span>
+                {selectedHistorySession &&
+                  new Date(
+                    selectedHistorySession.completed_at || selectedHistorySession.created,
+                  ).toLocaleString('pt-BR')}
+              </span>
+              <span className="text-secondary font-semibold">
+                • Professor: {selectedHistorySession?.expand?.teacher?.name || 'Professor'}
+              </span>
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="flex sm:justify-end gap-2 pt-2">
+
+          <div className="py-3 overflow-y-auto space-y-2.5 flex-1 pr-1">
+            <span className="text-xs font-semibold text-[#9CA5B8] uppercase tracking-wider block">
+              Exercícios da Série {selectedHistorySession?.series_completed}:
+            </span>
+
+            {selectedHistorySession?.exercises_snapshot &&
+            selectedHistorySession.exercises_snapshot.length > 0 ? (
+              selectedHistorySession.exercises_snapshot.map((block, i) => {
+                const ex = exercisesMap[block.exercise_id]
+                const exName = ex?.name || 'Exercício'
+                const muscle = ex?.muscle_group || 'Geral'
+                const isMarkedDone = selectedHistorySession.completed_indices
+                  ? selectedHistorySession.completed_indices.includes(i)
+                  : Boolean(selectedHistorySession.is_completed)
+
+                return (
+                  <div
+                    key={i}
+                    className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
+                      isMarkedDone
+                        ? 'bg-secondary/10 border-secondary/40'
+                        : 'bg-[#121522] border-[#252B3E] opacity-75'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
+                          isMarkedDone
+                            ? 'bg-secondary text-secondary-foreground font-bold'
+                            : 'border border-[#454545] text-transparent'
+                        }`}
+                      >
+                        <CheckCircle2 className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-bold text-white block truncate">{exName}</span>
+                        <span className="text-[11px] text-[#9CA5B8]">{muscle}</span>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="font-semibold text-white block">
+                        {block.sets}x {block.reps || '10'}
+                      </span>
+                      <span className="text-[11px] text-secondary font-medium">
+                        {block.load ? `Carga: ${block.load}` : 'Carga padrão'}
+                      </span>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <p className="text-xs text-[#9CA5B8] italic">
+                Nenhum detalhe de exercício registrado para esta sessão.
+              </p>
+            )}
+
+            {selectedHistorySession?.notes && (
+              <div className="p-3 rounded-xl bg-[#121522] border border-[#252B3E] text-xs">
+                <span className="font-bold text-[#9CA5B8] block mb-1">Anotações:</span>
+                <p className="text-white">{selectedHistorySession.notes}</p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="border-t border-[#252B3E] pt-3">
+            <Button
+              type="button"
+              onClick={() => setSelectedHistorySession(null)}
+              className="w-full sm:w-auto bg-primary hover:opacity-90 text-primary-foreground text-xs h-9 font-semibold"
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmação de Exclusão */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white">
+          <DialogHeader>
+            <DialogTitle>Excluir Aluno?</DialogTitle>
+            <DialogDescription className="text-[#9CA5B8]">
+              Esta ação removerá o aluno "{name}" do sistema. Fichas vinculadas também poderão ser
+              afetadas. Deseja prosseguir?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
             <Button
               type="button"
               variant="outline"
@@ -486,12 +743,8 @@ export default function StudentForm() {
             >
               Cancelar
             </Button>
-            <Button
-              type="button"
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              Sim, Excluir
+            <Button type="button" variant="destructive" onClick={handleDelete}>
+              Confirmar Exclusão
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -499,3 +752,5 @@ export default function StudentForm() {
     </div>
   )
 }
+
+export { StudentForm }

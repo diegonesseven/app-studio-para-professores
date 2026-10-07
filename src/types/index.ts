@@ -120,11 +120,15 @@ export interface WorkoutProgress {
   completed_at: string
   exercises_snapshot?: ExerciseBlock[]
   notes?: string
+  teacher?: string
+  completed_indices?: number[]
+  is_completed?: boolean
   created: string
   updated: string
   expand?: {
     student?: Student
     training_sheet?: TrainingSheet
+    teacher?: User
   }
 }
 

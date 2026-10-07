@@ -34,11 +34,25 @@ interface ColorPreset {
 
 const PRESETS: ColorPreset[] = [
   {
-    name: 'Padrão Studio Bru (Laranja Charcoal)',
-    primary: '#F06A2A',
-    bg: '#121212',
-    surface: '#1E1E1E',
-    description: 'Visual oficial escuro com laranja vibrante de alto contraste.',
+    name: 'Oficial Studio Bru (Índigo & Menta)',
+    primary: '#4B4FA0',
+    bg: '#0E111D',
+    surface: '#181C2E',
+    description: 'Identidade oficial da logo: Azul-Índigo profundo com Verde-Menta/Teal.',
+  },
+  {
+    name: 'Menta / Soft Teal & White',
+    primary: '#7EC8B6',
+    bg: '#0F1C18',
+    surface: '#172B26',
+    description: 'Foco em Pilates, leveza, postura e saúde integrativa.',
+  },
+  {
+    name: 'Studio Bru (Dark Indigo Elegance)',
+    primary: '#5B60BD',
+    bg: '#090A12',
+    surface: '#131522',
+    description: 'Visual noturno aprofundado com contraste elegante para tablets.',
   },
   {
     name: 'Dourado / Gold Performance',
@@ -55,25 +69,11 @@ const PRESETS: ColorPreset[] = [
     description: 'Foco em saúde, reabilitação, movimento e frescor.',
   },
   {
-    name: 'Azul Elétrico / Cyber Blue',
-    primary: '#0284C7',
-    bg: '#0B1120',
-    surface: '#131D33',
-    description: 'Estilo moderno e tecnológico, focado em foco e precisão.',
-  },
-  {
-    name: 'Rubi / Crimson Power',
-    primary: '#E11D48',
-    bg: '#140D0F',
-    surface: '#221418',
-    description: 'Intensidade, força bruta e energia para cross training.',
-  },
-  {
-    name: 'Violeta / Ultra Purple',
-    primary: '#8B5CF6',
-    bg: '#120F1D',
-    surface: '#1E1A30',
-    description: 'Identidade moderna, jovem e envolvente para estúdios boutique.',
+    name: 'Laranja Energético / Sunrise',
+    primary: '#F06A2A',
+    bg: '#121212',
+    surface: '#1E1E1E',
+    description: 'Intensidade e calor para aulas de alta energia.',
   },
 ]
 
@@ -202,7 +202,8 @@ export default function Appearance() {
       setActivePreset(PRESETS[0].name)
       toast({
         title: 'Tema padrão restaurado',
-        description: 'Charcoal #121212 com primário Laranja #F06A2A reaplicado em nuvem.',
+        description:
+          'Azul-Índigo #4B4FA0 com Verde-Menta oficial Studio Bru Oliveira reaplicado em nuvem.',
       })
     } catch (err: unknown) {
       toast({
