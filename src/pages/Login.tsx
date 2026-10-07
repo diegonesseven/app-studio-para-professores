@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { STUDIO_LOGO_SRC } from '@/assets/logo'
 import { extractFieldErrors } from '@/lib/pocketbase/errors'
-import { Eye, EyeOff, Dumbbell, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -49,17 +49,6 @@ export default function Login() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const handleFillDemo = (type: 'admin' | 'professor') => {
-    if (type === 'admin') {
-      setEmail('moreiradiego.seven@gmail.com')
-      setPassword('Skip@Pass')
-    } else {
-      setEmail('professor@studiobru.com.br')
-      setPassword('Skip@Pass')
-    }
-    setError(null)
   }
 
   return (
@@ -148,33 +137,6 @@ export default function Login() {
             {isLoading ? 'Entrando...' : 'Entrar'}
           </Button>
         </form>
-
-        {/* Acesso rápido demo */}
-        <div className="mt-6 pt-6 border-t border-[#2E2E2E]">
-          <p className="text-xs text-[#8A8F98] text-center mb-3">
-            Acesso rápido para teste de perfis:
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => handleFillDemo('professor')}
-              className="text-xs border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white h-9"
-            >
-              Professor Bru
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => handleFillDemo('admin')}
-              className="text-xs border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white h-9"
-            >
-              Admin Diego
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   )
