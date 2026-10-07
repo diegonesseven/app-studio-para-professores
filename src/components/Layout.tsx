@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import {
   Dumbbell,
   Home,
@@ -8,6 +9,7 @@ import {
   Video,
   ClipboardList,
   History,
+  Palette,
   LogOut,
   Menu,
   X,
@@ -26,7 +28,8 @@ import {
 } from '@/components/ui/dialog'
 
 export default function Layout() {
-  const { user, role, logout } = useAuth()
+  const { user, role, isAdmin, logout } = useAuth()
+  const { appearance } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -39,6 +42,9 @@ export default function Layout() {
     { name: 'Fichas de Treino', path: '/treinos', icon: ClipboardList },
     { name: 'Acervo de Vídeos', path: '/acervo', icon: Video },
     { name: 'Histórico', path: '/historico', icon: History },
+    ...(isAdmin
+      ? [{ name: 'Aparência & Logo', path: '/aparencia', icon: Palette, adminOnly: true }]
+      : []),
   ]
 
   const handleLogout = () => {
@@ -59,12 +65,25 @@ export default function Layout() {
       <aside className="hidden lg:flex flex-col w-64 bg-[#171717] border-r border-[#2A2A2A] z-20 shrink-0">
         {/* Header / Brand */}
         <div className="p-5 border-b border-[#2A2A2A] flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#F06A2A] to-[#FF8A4C] flex items-center justify-center shadow-md shadow-[#F06A2A]/20 shrink-0">
-            <Dumbbell className="w-5 h-5 text-white stroke-[2.5]" />
-          </div>
+          {appearance.logo_url ? (
+            <div className="h-10 w-10 rounded-xl bg-black/30 border border-white/10 flex items-center justify-center p-1 shrink-0 overflow-hidden">
+              <img
+                src={appearance.logo_url}
+                alt={appearance.studio_name || 'Studio Logo'}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20 shrink-0 text-primary-foreground">
+              <Dumbbell className="w-5 h-5 stroke-[2.5]" />
+            </div>
+          )}
           <div className="flex flex-col min-w-0">
-            <span className="font-bold text-base tracking-tight text-white leading-tight truncate">
-              Studio Bru Oliveira
+            <span
+              className="font-bold text-base tracking-tight text-white leading-tight truncate"
+              title={appearance.studio_name || 'Studio Bru Oliveira'}
+            >
+              {appearance.studio_name || 'Studio Bru Oliveira'}
             </span>
             <span className="text-[11px] text-[#8A8F98] tracking-wider uppercase font-medium">
               Personal & Studio
@@ -85,27 +104,32 @@ export default function Layout() {
               <NavLink
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all group relative ${
+                className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-semibold transition-all group relative ${
                   isActive
-                    ? 'bg-[#F06A2A] text-white shadow-md shadow-[#F06A2A]/25'
+                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
                     : item.highlight
-                      ? 'text-[#F06A2A] bg-[#F06A2A]/10 hover:bg-[#F06A2A]/20'
+                      ? 'text-primary bg-primary/10 hover:bg-primary/20'
                       : 'text-[#8A8F98] hover:text-white hover:bg-[#1E1E1E]'
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 shrink-0 ${
                     isActive
-                      ? 'text-white'
+                      ? 'text-current'
                       : item.highlight
-                        ? 'text-[#F06A2A]'
+                        ? 'text-primary'
                         : 'text-[#8A8F98] group-hover:text-white'
                   }`}
                 />
                 <span className="truncate">{item.name}</span>
                 {item.highlight && !isActive && (
-                  <span className="ml-auto text-[10px] font-semibold bg-[#F06A2A]/20 text-[#F06A2A] px-2 py-0.5 rounded-full">
+                  <span className="ml-auto text-[10px] font-bold bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                     Ao vivo
+                  </span>
+                )}
+                {item.adminOnly && !isActive && (
+                  <span className="ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">
+                    Admin
                   </span>
                 )}
               </NavLink>
@@ -150,16 +174,28 @@ export default function Layout() {
       {/* TOPBAR MOBILE (< 1024px) */}
       <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
         <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#171717] border-b border-[#2A2A2A] z-20 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#F06A2A] to-[#FF8A4C] flex items-center justify-center">
-              <Dumbbell className="w-4 h-4 text-white stroke-[2.5]" />
-            </div>
-            <span className="font-bold text-sm tracking-tight text-white">Studio Bru Oliveira</span>
+          <div className="flex items-center gap-2.5 min-w-0">
+            {appearance.logo_url ? (
+              <div className="h-8 w-8 rounded-lg bg-black/30 border border-white/10 flex items-center justify-center p-0.5 shrink-0 overflow-hidden">
+                <img
+                  src={appearance.logo_url}
+                  alt={appearance.studio_name || 'Logo'}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shrink-0">
+                <Dumbbell className="w-4 h-4 stroke-[2.5]" />
+              </div>
+            )}
+            <span className="font-bold text-sm tracking-tight text-white truncate">
+              {appearance.studio_name || 'Studio Bru Oliveira'}
+            </span>
           </div>
 
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg text-white hover:bg-[#2A2A2A] active:bg-[#333333]"
+            className="p-2 rounded-lg text-white hover:bg-[#2A2A2A] active:bg-[#333333] shrink-0"
             aria-label="Abrir menu"
           >
             <Menu className="w-6 h-6" />
@@ -175,11 +211,21 @@ export default function Layout() {
             />
             <div className="relative ml-auto w-4/5 max-w-xs bg-[#171717] border-l border-[#2A2A2A] h-full flex flex-col p-5 shadow-2xl animate-fade-in-up">
               <div className="flex items-center justify-between pb-4 border-b border-[#2A2A2A]">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-[#F06A2A] flex items-center justify-center">
-                    <Dumbbell className="w-4 h-4 text-white" />
-                  </div>
-                  <span className="font-bold text-sm">Menu</span>
+                <div className="flex items-center gap-2 min-w-0">
+                  {appearance.logo_url ? (
+                    <img
+                      src={appearance.logo_url}
+                      alt="Logo"
+                      className="h-7 w-auto max-w-[80px] object-contain rounded"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                      <Dumbbell className="w-4 h-4" />
+                    </div>
+                  )}
+                  <span className="font-bold text-sm truncate">
+                    {appearance.studio_name || 'Studio Bru Oliveira'}
+                  </span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}

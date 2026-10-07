@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-07T11:30:58.603Z",
+  "generatedAt": "2026-10-07T12:10:12.721Z",
   "collections": [
     {
       "name": "users",
@@ -358,6 +358,76 @@
         "CREATE INDEX idx_workout_progress_student ON workout_progress (student)",
         "CREATE INDEX idx_workout_progress_completed ON workout_progress (completed_at DESC)"
       ]
+    },
+    {
+      "name": "app_settings",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "key",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "primary_color",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "background_color",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "surface_color",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "logo_url",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "studio_name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "custom_css",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE UNIQUE INDEX idx_app_settings_key ON app_settings (key)"]
     }
   ]
 }

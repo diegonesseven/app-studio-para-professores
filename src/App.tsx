@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 import Layout from './components/Layout'
 
 // Páginas Públicas / Auth
@@ -23,6 +24,7 @@ import SheetList from './pages/SheetList'
 import SheetForm from './pages/SheetForm'
 import Training from './pages/Training'
 import HistoryPage from './pages/HistoryPage'
+import Appearance from './pages/Appearance'
 import NotFound from './pages/NotFound'
 
 /**
@@ -50,53 +52,58 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          {/* Rotas Públicas de Auth */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <Routes>
+            {/* Rotas Públicas de Auth */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
 
-          {/* Rotas Autenticadas protegidas pelo Layout */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <Layout />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="/" element={<Index />} />
+            {/* Rotas Autenticadas protegidas pelo Layout */}
+            <Route
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="/" element={<Index />} />
 
-            {/* Gestão de Alunos */}
-            <Route path="/alunos" element={<StudentList />} />
-            <Route path="/alunos/novo" element={<StudentForm />} />
-            <Route path="/alunos/:id/editar" element={<StudentForm />} />
+              {/* Gestão de Alunos */}
+              <Route path="/alunos" element={<StudentList />} />
+              <Route path="/alunos/novo" element={<StudentForm />} />
+              <Route path="/alunos/:id/editar" element={<StudentForm />} />
 
-            {/* Acervo de Exercícios */}
-            <Route path="/acervo" element={<ExerciseList />} />
-            <Route path="/acervo/novo" element={<ExerciseForm />} />
-            <Route path="/acervo/:id/editar" element={<ExerciseForm />} />
+              {/* Acervo de Exercícios */}
+              <Route path="/acervo" element={<ExerciseList />} />
+              <Route path="/acervo/novo" element={<ExerciseForm />} />
+              <Route path="/acervo/:id/editar" element={<ExerciseForm />} />
 
-            {/* Fichas de Treino */}
-            <Route path="/treinos" element={<SheetList />} />
-            <Route path="/fichas/nova" element={<SheetForm />} />
-            <Route path="/fichas/:id/editar" element={<SheetForm />} />
+              {/* Fichas de Treino */}
+              <Route path="/treinos" element={<SheetList />} />
+              <Route path="/fichas/nova" element={<SheetForm />} />
+              <Route path="/fichas/:id/editar" element={<SheetForm />} />
 
-            {/* Tela Principal de Treino (Condução ao vivo) */}
-            <Route path="/treino" element={<Training />} />
+              {/* Tela Principal de Treino (Condução ao vivo) */}
+              <Route path="/treino" element={<Training />} />
 
-            {/* Histórico de Treinos */}
-            <Route path="/historico" element={<HistoryPage />} />
-          </Route>
+              {/* Histórico de Treinos */}
+              <Route path="/historico" element={<HistoryPage />} />
 
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
+              {/* Personalização de Aparência e Cores (Admin) */}
+              <Route path="/aparencia" element={<Appearance />} />
+            </Route>
+
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </ThemeProvider>
     </AuthProvider>
   </BrowserRouter>
 )

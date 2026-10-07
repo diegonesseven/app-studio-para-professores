@@ -97,8 +97,8 @@ export type SeriesData = {
 
 export interface TrainingSheet {
   id: string
-  collectionId?: string
-  collectionName?: string
+  collectionId: string
+  collectionName: string
   student: string
   expand?: {
     student?: Student
@@ -112,8 +112,8 @@ export interface TrainingSheet {
 
 export interface WorkoutProgress {
   id: string
-  collectionId?: string
-  collectionName?: string
+  collectionId: string
+  collectionName: string
   student: string
   training_sheet: string
   series_completed: SeriesKey
@@ -126,4 +126,19 @@ export interface WorkoutProgress {
     student?: Student
     training_sheet?: TrainingSheet
   }
+}
+
+export interface AppAppearanceSettings {
+  id: string
+  collectionId: string
+  collectionName: string
+  key: string
+  primary_color: string
+  background_color: string
+  surface_color: string
+  logo_url: string
+  studio_name: string
+  custom_css?: string
+  created: string
+  updated: string
 }

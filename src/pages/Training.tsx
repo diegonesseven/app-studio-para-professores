@@ -356,7 +356,7 @@ export default function Training() {
           {/* Alunos Selecionados (Chips) */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs uppercase tracking-wider text-[#8A8F98] font-bold mr-1 flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-[#F06A2A]" /> Sessão ({selectedStudents.length}/3):
+              <Users className="w-4 h-4 text-primary" /> Sessão ({selectedStudents.length}/3):
             </span>
 
             {selectedStudents.length === 0 ? (
@@ -394,7 +394,7 @@ export default function Training() {
                   setStudentSearch(e.target.value)
                   setSearchDropdownOpen(true)
                 }}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-10 pl-9 pr-3 text-xs focus-visible:ring-[#F06A2A]"
+                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-11 pl-9 pr-3 text-sm focus-visible:ring-primary"
               />
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
             </div>
@@ -422,7 +422,7 @@ export default function Training() {
                           {st.phone || 'Sem telefone'}
                         </span>
                       </div>
-                      <span className="text-[11px] font-semibold text-[#F06A2A] shrink-0">
+                      <span className="text-[11px] font-semibold text-primary shrink-0">
                         {isAlreadySelected ? 'Na sessão' : '+ Adicionar'}
                       </span>
                     </button>
@@ -437,14 +437,14 @@ export default function Training() {
       {/* ÁREA DE TREINO PRINCIPAL */}
       {loading ? (
         <div className="flex-1 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
-          <Loader2 className="w-9 h-9 animate-spin text-[#F06A2A]" />
+          <Loader2 className="w-9 h-9 animate-spin text-primary" />
           <p className="text-sm">Carregando painel de condução de treinos...</p>
         </div>
       ) : selectedStudents.length === 0 ? (
         /* Empty State com busca em destaque */
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="w-full max-w-lg bg-[#1E1E1E] border border-[#2E2E2E] rounded-3xl p-8 sm:p-12 text-center shadow-2xl space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#F06A2A] to-[#FF8A4C] flex items-center justify-center shadow-lg shadow-[#F06A2A]/25 mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto">
               <PlaySquare className="w-8 h-8 text-white stroke-[2.5]" />
             </div>
 
@@ -560,9 +560,9 @@ export default function Training() {
                     key={st.id}
                     type="button"
                     onClick={() => setMobileActiveIndex(idx)}
-                    className={`flex-1 min-w-[100px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all border ${
+                    className={`flex-1 min-w-[110px] min-h-[44px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all border ${
                       isActive
-                        ? 'bg-[#F06A2A] border-[#F06A2A] text-white shadow-md shadow-[#F06A2A]/25'
+                        ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25'
                         : 'bg-[#1E1E1E] border-[#2E2E2E] text-[#8A8F98]'
                     }`}
                   >

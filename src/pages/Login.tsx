@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Eye, EyeOff, Dumbbell, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +10,7 @@ import { Label } from '@/components/ui/label'
 export default function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const { appearance } = useTheme()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -55,11 +57,21 @@ export default function Login() {
       <div className="w-full max-w-md bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
         {/* Branding Studio Bru Oliveira */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#F06A2A] to-[#FF8A4C] flex items-center justify-center shadow-lg shadow-[#F06A2A]/25 mb-4">
-            <Dumbbell className="w-9 h-9 text-white stroke-[2.5]" />
-          </div>
+          {appearance.logo_url ? (
+            <div className="h-16 w-auto max-w-[200px] mb-4 flex items-center justify-center">
+              <img
+                src={appearance.logo_url}
+                alt={appearance.studio_name || 'Studio Bru Oliveira'}
+                className="max-h-16 max-w-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/25 mb-4 text-primary-foreground">
+              <Dumbbell className="w-9 h-9 stroke-[2.5]" />
+            </div>
+          )}
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Studio Bru Oliveira
+            {appearance.studio_name || 'Studio Bru Oliveira'}
           </h1>
           <p className="text-sm text-[#8A8F98] mt-1">Plataforma do Professor e Personal Trainer</p>
         </div>
@@ -120,7 +132,7 @@ export default function Login() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full h-12 bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-semibold text-base transition-colors shadow-md mt-2"
+            className="w-full h-12 bg-primary hover:opacity-90 text-primary-foreground font-semibold text-base transition-colors shadow-md mt-2"
           >
             {isLoading ? 'Entrando...' : 'Entrar'}
           </Button>
