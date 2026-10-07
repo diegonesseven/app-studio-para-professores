@@ -34,46 +34,46 @@ interface ColorPreset {
 
 const PRESETS: ColorPreset[] = [
   {
-    name: 'Oficial Studio Bru (Índigo & Menta)',
+    name: 'Padrão Bru (Roxo Oficial)',
+    primary: '#8B5CF6',
+    bg: '#0F0E17',
+    surface: '#1A1829',
+    description: 'Identidade oficial Studio Bru: Roxo vibrante com contraste escuro moderno.',
+  },
+  {
+    name: 'Roxo Elétrico / Violet Power',
+    primary: '#7C3AED',
+    bg: '#0D0B18',
+    surface: '#181528',
+    description: 'Intensidade, modernidade e alta visibilidade para os treinos.',
+  },
+  {
+    name: 'Lavanda & Night / Elegance',
+    primary: '#A78BFA',
+    bg: '#0C0A14',
+    surface: '#161324',
+    description: 'Tons suaves de lavanda com fundo ultra escuro para tablets e Pilates.',
+  },
+  {
+    name: 'Fúcsia & Purple Neon',
+    primary: '#C026D3',
+    bg: '#130A18',
+    surface: '#201226',
+    description: 'Destaque vibrante e marcante com energia feminina e refinada.',
+  },
+  {
+    name: 'Azul-Índigo Studio Clássico',
     primary: '#4B4FA0',
     bg: '#0E111D',
     surface: '#181C2E',
-    description: 'Identidade oficial da logo: Azul-Índigo profundo com Verde-Menta/Teal.',
+    description: 'Azul-Índigo profundo com contraste equilibrado.',
   },
   {
-    name: 'Menta / Soft Teal & White',
-    primary: '#7EC8B6',
-    bg: '#0F1C18',
-    surface: '#172B26',
-    description: 'Foco em Pilates, leveza, postura e saúde integrativa.',
-  },
-  {
-    name: 'Studio Bru (Dark Indigo Elegance)',
-    primary: '#5B60BD',
-    bg: '#090A12',
-    surface: '#131522',
-    description: 'Visual noturno aprofundado com contraste elegante para tablets.',
-  },
-  {
-    name: 'Dourado / Gold Performance',
+    name: 'Dourado / Gold Premium',
     primary: '#EAB308',
     bg: '#111215',
     surface: '#1C1E24',
     description: 'Paleta nobre de estúdios premium e alta performance.',
-  },
-  {
-    name: 'Esmeralda / Vitality Green',
-    primary: '#10B981',
-    bg: '#0F1715',
-    surface: '#172320',
-    description: 'Foco em saúde, reabilitação, movimento e frescor.',
-  },
-  {
-    name: 'Laranja Energético / Sunrise',
-    primary: '#F06A2A',
-    bg: '#121212',
-    surface: '#1E1E1E',
-    description: 'Intensidade e calor para aulas de alta energia.',
   },
 ]
 
@@ -86,6 +86,8 @@ export default function Appearance() {
   const [surfaceColor, setSurfaceColor] = useState(appearance.surface_color)
   const [studioName, setStudioName] = useState(appearance.studio_name)
   const [logoUrl, setLogoUrl] = useState(appearance.logo_url)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [logoRemoved, setLogoRemoved] = useState(false)
 
   const [saving, setSaving] = useState(false)
   const [activePreset, setActivePreset] = useState<string | null>(null)
@@ -98,6 +100,8 @@ export default function Appearance() {
     setSurfaceColor(appearance.surface_color)
     setStudioName(appearance.studio_name)
     setLogoUrl(appearance.logo_url)
+    setSelectedFile(null)
+    setLogoRemoved(false)
   }, [appearance])
 
   // Aplica um preset pré-definido
@@ -112,7 +116,7 @@ export default function Appearance() {
     })
   }
 
-  // Upload de Logotipo (transforma em Base64 para sincronizar na nuvem via PocketBase)
+  // Upload de Logotipo (guarda o File real para envio multipart no PocketBase + preview imediato)
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -120,43 +124,46 @@ export default function Appearance() {
     if (!file.type.startsWith('image/')) {
       toast({
         title: 'Arquivo inválido',
-        description: 'Por favor selecione uma imagem PNG, JPG ou WebP.',
+        description: 'Por favor selecione uma imagem válida (PNG, JPG, WebP ou SVG).',
         variant: 'destructive',
       })
       return
     }
 
-    // Limite de 2.5MB para base64
-    if (file.size > 2.5 * 1024 * 1024) {
+    // Limite generoso de 10MB
+    if (file.size > 10 * 1024 * 1024) {
       toast({
         title: 'Imagem muito pesada',
-        description: 'A imagem deve ter no máximo 2.5MB para carregar com rapidez.',
+        description: 'A imagem deve ter no máximo 10MB.',
         variant: 'destructive',
       })
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      const result = reader.result as string
-      setLogoUrl(result)
-      toast({
-        title: 'Logotipo carregado',
-        description: 'Pré-visualização atualizada! Salve para sincronizar na nuvem.',
-      })
-    }
-    reader.readAsDataURL(file)
+    setSelectedFile(file)
+    setLogoRemoved(false)
+
+    // Cria URL local temporária para pré-visualização instantânea na tela
+    const objectUrl = URL.createObjectURL(file)
+    setLogoUrl(objectUrl)
+
+    toast({
+      title: 'Imagem selecionada! 📸',
+      description: `Arquivo "${file.name}" pronto para gravação. Clique em "Salvar Alterações".`,
+    })
   }
 
   // Remove logotipo
   const handleRemoveLogo = () => {
     setLogoUrl('')
+    setSelectedFile(null)
+    setLogoRemoved(true)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
     }
     toast({
-      title: 'Logotipo removido',
-      description: 'O app voltará a exibir o branding textual Studio Bru Oliveira.',
+      title: 'Logotipo marcado para remoção',
+      description: 'Clique em "Salvar Alterações" para confirmar a exclusão no backend.',
     })
   }
 
@@ -165,18 +172,25 @@ export default function Appearance() {
     e.preventDefault()
     setSaving(true)
     try {
-      await updateAppearance({
-        primary_color: primaryColor,
-        background_color: backgroundColor,
-        surface_color: surfaceColor,
-        studio_name: studioName.trim() || 'Studio Bru Oliveira',
-        logo_url: logoUrl,
-      })
+      await updateAppearance(
+        {
+          primary_color: primaryColor,
+          background_color: backgroundColor,
+          surface_color: surfaceColor,
+          studio_name: studioName.trim() || 'Studio Bru Oliveira',
+          logo_url: logoRemoved ? '' : logoUrl,
+        },
+        selectedFile,
+        logoRemoved,
+      )
+
+      setSelectedFile(null)
+      setLogoRemoved(false)
 
       toast({
         title: 'Aparência salva com sucesso! 🎨',
         description:
-          'Cores e logotipo gravados no backend e sincronizados em todos os dispositivos.',
+          'Cores e logotipo gravados com sucesso no PocketBase e propagados para todos os dispositivos!',
       })
     } catch (err: unknown) {
       toast({
@@ -199,11 +213,13 @@ export default function Appearance() {
       setSurfaceColor(DEFAULT_APPEARANCE.surface_color)
       setStudioName(DEFAULT_APPEARANCE.studio_name)
       setLogoUrl('')
+      setSelectedFile(null)
+      setLogoRemoved(true)
       setActivePreset(PRESETS[0].name)
       toast({
         title: 'Tema padrão restaurado',
         description:
-          'Azul-Índigo #4B4FA0 com Verde-Menta oficial Studio Bru Oliveira reaplicado em nuvem.',
+          'Roxo #8B5CF6 com fundo escuro oficial Studio Bru Oliveira reaplicado no backend.',
       })
     } catch (err: unknown) {
       toast({
@@ -363,7 +379,7 @@ export default function Appearance() {
                   <Input
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    placeholder="#F06A2A"
+                    placeholder="#8B5CF6"
                     className="bg-[#121212] border-[#2E2E2E] text-white font-mono text-sm h-12 uppercase focus-visible:ring-primary"
                   />
                 </div>
@@ -467,9 +483,11 @@ export default function Appearance() {
 
                   <div className="flex-1 text-center sm:text-left space-y-2">
                     <p className="text-xs text-[#8A8F98]">
-                      {logoUrl
-                        ? 'Logotipo carregado pronto para ser salvo na nuvem.'
-                        : 'Envie um logotipo para substituir o ícone padrão na barra lateral e na tela de login.'}
+                      {selectedFile
+                        ? `Arquivo selecionado: ${selectedFile.name} (${(selectedFile.size / 1024).toFixed(0)} KB)`
+                        : logoUrl
+                          ? 'Logotipo oficial ativo. Você pode trocar por uma nova imagem quando desejar.'
+                          : 'Envie uma imagem de logotipo para aplicar na barra lateral, no cabeçalho mobile e na tela de login.'}
                     </p>
                     <div className="flex items-center gap-2 justify-center sm:justify-start">
                       <input

@@ -6,7 +6,11 @@ import { useRealtime } from '@/hooks/use-realtime'
 interface ThemeContextType {
   appearance: AppAppearanceSettings
   isLoading: boolean
-  updateAppearance: (newSettings: Partial<AppAppearanceSettings>) => Promise<void>
+  updateAppearance: (
+    newSettings: Partial<AppAppearanceSettings>,
+    fileToUpload?: File | null,
+    removeLogoFile?: boolean,
+  ) => Promise<void>
   resetAppearance: () => Promise<void>
 }
 
@@ -111,7 +115,7 @@ function applyThemeToDocument(appearance: AppAppearanceSettings) {
       metaTheme.setAttribute('name', 'theme-color')
       document.head.appendChild(metaTheme)
     }
-    metaTheme.setAttribute('content', appearance.primary_color || '#4B4FA0')
+    metaTheme.setAttribute('content', appearance.primary_color || '#8B5CF6')
 
     // 2. Title do documento
     if (appearance.studio_name) {
@@ -166,22 +170,37 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [loadAppearance])
 
   // Sincronização em tempo real (qualquer outro dispositivo que alterar tema atualiza aqui na hora)
-  useRealtime<AppAppearanceSettings>('app_settings', (e) => {
+  useRealtime<AppAppearanceSettings>('app_settings', async (e) => {
     if (e.record && e.record.key === 'appearance') {
-      const updated: AppAppearanceSettings = {
-        ...DEFAULT_APPEARANCE,
-        ...e.record,
+      // Recarrega via service para resolver getURL caso tenha logo_file
+      try {
+        const fresh = await appSettingsService.getAppearance()
+        setAppearance(fresh)
+        applyThemeToDocument(fresh)
+      } catch (_) {
+        const updated: AppAppearanceSettings = {
+          ...DEFAULT_APPEARANCE,
+          ...e.record,
+        }
+        setAppearance(updated)
+        applyThemeToDocument(updated)
       }
-      setAppearance(updated)
-      applyThemeToDocument(updated)
     }
   })
 
-  const updateAppearance = async (newSettings: Partial<AppAppearanceSettings>) => {
-    const updated = await appSettingsService.saveAppearance({
-      ...appearance,
-      ...newSettings,
-    })
+  const updateAppearance = async (
+    newSettings: Partial<AppAppearanceSettings>,
+    fileToUpload?: File | null,
+    removeLogoFile?: boolean,
+  ) => {
+    const updated = await appSettingsService.saveAppearance(
+      {
+        ...appearance,
+        ...newSettings,
+      },
+      fileToUpload,
+      removeLogoFile,
+    )
     setAppearance(updated)
     applyThemeToDocument(updated)
   }

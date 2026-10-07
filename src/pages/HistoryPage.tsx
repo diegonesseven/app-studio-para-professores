@@ -89,7 +89,7 @@ export default function HistoryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <History className="w-7 h-7 text-[#F06A2A]" /> Histórico de Treinos
+            <History className="w-7 h-7 text-primary" /> Histórico de Treinos
           </h1>
           <p className="text-sm text-[#8A8F98] mt-1">
             Registro cronológico das séries realizadas pelos alunos em aula no Studio Bru Oliveira
@@ -104,7 +104,7 @@ export default function HistoryPage() {
             placeholder="Pesquisar por nome do aluno..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-[#F06A2A]"
+            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-primary"
           />
           <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
         </div>
@@ -113,7 +113,7 @@ export default function HistoryPage() {
           <select
             value={selectedStudentFilter}
             onChange={(e) => setSelectedStudentFilter(e.target.value)}
-            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#F06A2A]"
+            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">Todos os Alunos</option>
             {students.map((st) => (
@@ -129,7 +129,7 @@ export default function HistoryPage() {
       {/* Lista de Registros */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#F06A2A]" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando histórico do estúdio...</p>
         </div>
       ) : filteredList.length === 0 ? (
@@ -166,19 +166,19 @@ export default function HistoryPage() {
             return (
               <div
                 key={entry.id}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-[#F06A2A]/40 rounded-xl p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/40 rounded-xl p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-11 h-11 rounded-xl bg-[#F06A2A]/15 border border-[#F06A2A]/30 text-[#F06A2A] flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base font-bold text-white group-hover:text-[#F06A2A] transition-colors truncate">
+                      <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors truncate">
                         {studentName}
                       </h3>
-                      <Badge className="bg-[#F06A2A] text-white font-bold text-xs px-2.5">
+                      <Badge className="bg-primary text-primary-foreground font-bold text-xs px-2.5">
                         Treino {entry.series_completed}
                       </Badge>
                     </div>
@@ -209,7 +209,7 @@ export default function HistoryPage() {
                     onClick={() => setSelectedSession(entry)}
                     className="border-[#2E2E2E] bg-[#141414] hover:bg-[#2A2A2A] text-white text-xs h-9 px-3.5 flex items-center gap-1.5"
                   >
-                    <Eye className="w-3.5 h-3.5 text-[#F06A2A]" /> Ver Detalhes
+                    <Eye className="w-3.5 h-3.5 text-primary" /> Ver Detalhes
                   </Button>
                 </div>
               </div>
@@ -226,12 +226,12 @@ export default function HistoryPage() {
         <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-xl max-h-[85vh] flex flex-col">
           <DialogHeader className="border-b border-[#2E2E2E] pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider text-[#F06A2A] font-bold">
-                Detalhes do Registro
+              <span className="text-xs uppercase tracking-wider text-primary font-bold">
+                Resumo da Aula
               </span>
-              <Badge className="bg-[#F06A2A] text-white text-xs font-bold">
-                Série {selectedSession?.series_completed}
-              </Badge>
+              <Badge className="bg-primary text-primary-foreground text-xs font-bold">
+                Treino {selectedSession?.series_completed}
+              </Badge>{' '}
             </div>
             <DialogTitle className="text-lg font-bold text-white">
               {selectedSession?.expand?.student?.name || 'Aluno'}
@@ -283,7 +283,7 @@ export default function HistoryPage() {
                       <span className="font-semibold text-white block">
                         {block.sets}x {block.reps || '10'}
                       </span>
-                      <span className="text-[11px] text-[#F06A2A]">
+                      <span className="text-[11px] text-primary">
                         {block.load ? `Carga: ${block.load}` : 'Carga padrão'}
                       </span>
                     </div>
@@ -308,7 +308,7 @@ export default function HistoryPage() {
             <Button
               type="button"
               onClick={() => setSelectedSession(null)}
-              className="w-full sm:w-auto bg-[#F06A2A] hover:bg-[#D95C1C] text-white text-xs h-9"
+              className="w-full sm:w-auto bg-primary hover:opacity-90 text-primary-foreground text-xs h-9"
             >
               Fechar Detalhes
             </Button>

@@ -141,6 +141,7 @@ export interface AppAppearanceSettings {
   background_color: string
   surface_color: string
   logo_url: string
+  logo_file?: string
   studio_name: string
   custom_css?: string
   created: string

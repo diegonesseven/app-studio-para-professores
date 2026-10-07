@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
   <defs>
-    <linearGradient id="brandGradient192" x1="100%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#4B4FA0" />
-      <stop offset="55%" stop-color="#5575B5" />
-      <stop offset="100%" stop-color="#7EC8B6" />
+    <linearGradient id="purpleBrandGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#6D28D9" />
     </linearGradient>
-    <linearGradient id="tealGrad192" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#93D8C8" />
-      <stop offset="100%" stop-color="#6DBCA9" />
+    <linearGradient id="purpleAccentGrad192" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#C4B5FD" />
     </linearGradient>
   </defs>
 
-  <rect width="192" height="192" rx="42" fill="#FFFFFF" />
-  <rect width="188" height="188" x="2" y="2" rx="40" fill="none" stroke="#E6EAF0" stroke-width="1.5" />
+  <rect width="192" height="192" rx="42" fill="#0F0E17" />
+  <rect width="188" height="188" x="2" y="2" rx="40" fill="none" stroke="#2E284A" stroke-width="1.5" />
 
-  <g transform="translate(10, 6) scale(0.336)">
-    <path d="M 170 330 C 145 285, 155 210, 190 170 C 215 140, 248 130, 260 135 C 250 160, 230 200, 205 245 C 185 280, 172 315, 170 330 Z" fill="url(#tealGrad192)" />
-    <path d="M 180 165 C 210 130, 260 120, 285 140 C 310 160, 310 195, 280 220 C 260 236, 235 240, 218 242 C 255 244, 298 255, 308 288 C 320 325, 285 355, 240 355 C 195 355, 170 325, 175 305 C 180 290, 195 292, 192 305 C 190 325, 215 338, 242 338 C 275 338, 290 315, 282 290 C 272 262, 230 258, 195 258 C 215 220, 242 178, 265 152 C 275 140, 255 135, 240 145 C 210 165, 188 200, 172 235 C 165 210, 170 185, 180 165 Z" fill="url(#brandGradient192)" />
-    <path d="M 170 330 C 165 350, 180 375, 200 375 C 180 365, 172 345, 170 330 Z" fill="url(#tealGrad192)" />
-    <text x="256" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" letter-spacing="9" fill="#4B4FA0">STUDIO</text>
-    <text x="256" y="450" text-anchor="middle" font-family="Georgia, serif" font-size="27" font-weight="700" letter-spacing="1" fill="#373B7E">Bru Oliveira</text>
+  <g transform="translate(10, 4) scale(0.336)">
+    <path d="M 170 330 C 145 285, 155 210, 190 170 C 215 140, 248 130, 260 135 C 250 160, 230 200, 205 245 C 185 280, 172 315, 170 330 Z" fill="url(#purpleAccentGrad192)" />
+    <path d="M 180 165 C 210 130, 260 120, 285 140 C 310 160, 310 195, 280 220 C 260 236, 235 240, 218 242 C 255 244, 298 255, 308 288 C 320 325, 285 355, 240 355 C 195 355, 170 325, 175 305 C 180 290, 195 292, 192 305 C 190 325, 215 338, 242 338 C 275 338, 290 315, 282 290 C 272 262, 230 258, 195 258 C 215 220, 242 178, 265 152 C 275 140, 255 135, 240 145 C 210 165, 188 200, 172 235 C 165 210, 170 185, 180 165 Z" fill="url(#purpleBrandGrad192)" />
+    <path d="M 170 330 C 165 350, 180 375, 200 375 C 180 365, 172 345, 170 330 Z" fill="url(#purpleAccentGrad192)" />
+    <text x="256" y="420" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="800" letter-spacing="9" fill="#DDD6FE">STUDIO</text>
+    <text x="256" y="452" text-anchor="middle" font-family="Georgia, serif" font-size="28" font-weight="700" letter-spacing="1" fill="#FFFFFF">Bru Oliveira</text>
   </g>
 </svg>

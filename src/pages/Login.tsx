@@ -103,7 +103,7 @@ export default function Login() {
               placeholder="seu.email@studiobru.com.br"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-[#F06A2A]"
+              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
             />
           </div>
 

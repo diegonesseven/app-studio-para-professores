@@ -54,14 +54,13 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[#2E2E2E] bg-[#171717]">
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-xl bg-[#F06A2A]/15 border border-[#F06A2A]/30 text-[#F06A2A] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0">
               <HeartPulse className="w-5 h-5" />
             </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[11px] uppercase tracking-wider text-[#F06A2A] font-semibold">
-                Anamnese e Perfil de Saúde
-              </span>
-              <h3 className="text-lg font-bold text-white truncate">{student.name}</h3>
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-primary font-semibold">
+                Saúde & Anamnese
+              </span>              <h3 className="text-lg font-bold text-white truncate">{student.name}</h3>
             </div>
           </div>
 
@@ -97,7 +96,7 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             </div>
 
             <div className="flex items-center gap-2 col-span-2 sm:col-span-1">
-              <Sparkles className="w-4 h-4 text-[#F06A2A]" />
+              <Sparkles className="w-4 h-4 text-primary" />
               <div className="text-xs">
                 <span className="text-[#8A8F98] block">Nível de Experiência</span>
                 <span className="text-white font-medium">
@@ -111,15 +110,14 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
           {student.goals && student.goals.length > 0 && (
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[#8A8F98] uppercase tracking-wider">
-                <Target className="w-3.5 h-3.5 text-[#F06A2A]" /> Objetivos do Aluno
-              </div>
+                <Target className="w-3.5 h-3.5 text-primary" /> Objetivos do Aluno
+              </h4>
               <div className="flex flex-wrap gap-1.5">
                 {student.goals.map((g) => (
                   <Badge
                     key={g}
-                    className="bg-[#F06A2A]/20 text-[#F06A2A] border border-[#F06A2A]/40 text-xs px-2.5 py-0.5 font-medium"
-                  >
-                    {g}
+                    className="bg-primary/20 text-primary border border-primary/40 text-xs px-2.5 py-0.5 font-medium"
+                  >                    {g}
                   </Badge>
                 ))}
               </div>
@@ -170,7 +168,7 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
           {student.teacher_observations && (
             <div className="space-y-1 p-3 rounded-xl bg-[#141414] border border-[#2A2A2A]">
               <div className="flex items-center gap-2 text-xs text-[#8A8F98] font-semibold uppercase">
-                <FileText className="w-3.5 h-3.5 text-[#F06A2A]" /> Parecer do Professor
+                <FileText className="w-3.5 h-3.5 text-primary" /> Parecer do Professor
               </div>
               <p className="text-sm text-white">{student.teacher_observations}</p>
             </div>
@@ -202,7 +200,7 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         <div className="p-4 bg-[#171717] border-t border-[#2E2E2E] flex justify-end">
           <Button
             onClick={onClose}
-            className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white text-xs h-9 px-4"
+            className="bg-primary hover:opacity-90 text-primary-foreground text-xs h-9 px-4"
           >
             Entendido, Fechar
           </Button>

@@ -184,7 +184,7 @@ export default function SheetList() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <ClipboardList className="w-7 h-7 text-[#F06A2A]" /> Fichas de Treino
+            <ClipboardList className="w-7 h-7 text-primary" /> Fichas de Treino
           </h1>
           <p className="text-sm text-[#8A8F98] mt-1">
             Planejamento das séries A, B, C, D e E com cargas, repetições e observações

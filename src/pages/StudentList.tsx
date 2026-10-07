@@ -171,7 +171,7 @@ export default function StudentList() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Users className="w-7 h-7 text-[#F06A2A]" /> Gestão de Alunos
+            <Users className="w-7 h-7 text-primary" /> Gestão de Alunos
           </h1>
           <p className="text-sm text-[#8A8F98] mt-1">
             Cadastros, fichas de saúde, anamnese e atalhos rápidos para conduzir aulas
@@ -179,7 +179,7 @@ export default function StudentList() {
         </div>
 
         <Link to="/alunos/novo">
-          <Button className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-medium h-11 px-5 shadow-md flex items-center gap-2">
+          <Button className="bg-primary hover:opacity-90 text-primary-foreground font-medium h-11 px-5 shadow-md flex items-center gap-2">
             <Plus className="w-4 h-4" /> Cadastrar Aluno
           </Button>
         </Link>
@@ -192,7 +192,7 @@ export default function StudentList() {
             placeholder="Pesquisar aluno por nome..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-[#F06A2A]"
+            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-primary"
           />
           <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
         </div>
@@ -201,7 +201,7 @@ export default function StudentList() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'name' | '-updated')}
-            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#F06A2A]"
+            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="name">Ordem Alfabética</option>
             <option value="-updated">Atividade Recente</option>
@@ -213,7 +213,7 @@ export default function StudentList() {
       {/* Lista de Alunos */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#F06A2A]" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando alunos do Studio Bru Oliveira...</p>
         </div>
       ) : students.length === 0 ? (
@@ -226,7 +226,7 @@ export default function StudentList() {
             Não há registros com os critérios informados. Comece adicionando um novo aluno.
           </p>
           <Link to="/alunos/novo">
-            <Button className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground">
               <Plus className="w-4 h-4 mr-1.5" /> Cadastrar Novo Aluno
             </Button>
           </Link>
@@ -246,17 +246,17 @@ export default function StudentList() {
             return (
               <div
                 key={student.id}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-[#F06A2A]/40 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group"
+                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/40 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group"
               >
                 <div>
                   {/* Topo do Card */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border border-[#F06A2A]/30 text-[#F06A2A] font-bold text-sm flex items-center justify-center shrink-0">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border border-primary/30 text-primary font-bold text-sm flex items-center justify-center shrink-0">
                         {initials}
                       </div>
                       <div className="min-w-0">
-                        <h3 className="text-base font-bold text-white group-hover:text-[#F06A2A] transition-colors truncate">
+                        <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors truncate">
                           {student.name}
                         </h3>
                         <div className="flex items-center gap-2 text-xs text-[#8A8F98]">
@@ -274,7 +274,7 @@ export default function StudentList() {
                       </div>
                     </div>
 
-                    <Badge className="bg-[#F06A2A]/15 text-[#F06A2A] border border-[#F06A2A]/30 text-xs px-2.5 py-0.5 font-semibold shrink-0">
+                    <Badge className="bg-primary/15 text-primary border border-primary/30 text-xs px-2.5 py-0.5 font-semibold shrink-0">
                       Treino {nextSeries}
                     </Badge>
                   </div>

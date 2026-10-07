@@ -280,7 +280,7 @@ export default function SheetForm() {
   if (loading) {
     return (
       <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-[#F06A2A]" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <p className="text-sm">Carregando ficha de treino...</p>
       </div>
     )
@@ -299,7 +299,7 @@ export default function SheetForm() {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#F06A2A]">
+              <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                 Ficha de Treino
               </span>
               {student && (
@@ -370,7 +370,7 @@ export default function SheetForm() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Ex: Ficha Hipertrofia & Força Geral"
-            className="bg-[#121212] border-[#2E2E2E] text-white font-semibold h-11 focus-visible:ring-[#F06A2A]"
+            className="bg-[#121212] border-[#2E2E2E] text-white font-semibold h-11 focus-visible:ring-primary"
           />
         </div>
 
@@ -382,7 +382,7 @@ export default function SheetForm() {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             placeholder="Ex: Descanso controlado de 60s, priorizar cadência controlada"
-            className="bg-[#121212] border-[#2E2E2E] text-white h-11 focus-visible:ring-[#F06A2A]"
+            className="bg-[#121212] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
           />
         </div>
       </div>
@@ -401,7 +401,7 @@ export default function SheetForm() {
                   onClick={() => setActiveTab(key)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
                     isActive
-                      ? 'bg-[#F06A2A] text-white shadow-md shadow-[#F06A2A]/20'
+                      ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
                       : 'bg-[#141414] text-[#8A8F98] hover:text-white border border-[#2A2A2A]'
                   }`}
                 >
@@ -423,7 +423,7 @@ export default function SheetForm() {
             onClick={() => setPickerOpen(true)}
             className="bg-[#2A2A2A] hover:bg-[#333333] text-white text-xs font-semibold h-10 px-4 shrink-0 flex items-center gap-1.5 border border-[#3A3A3A]"
           >
-            <Plus className="w-4 h-4 text-[#F06A2A]" /> Adicionar Exercício
+            <Plus className="w-4 h-4 text-primary" /> Adicionar Exercício
           </Button>
         </div>
 
@@ -438,7 +438,7 @@ export default function SheetForm() {
             <Button
               type="button"
               onClick={() => setPickerOpen(true)}
-              className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white text-xs h-9 px-4"
+              className="bg-primary hover:opacity-90 text-primary-foreground text-xs h-9 px-4"
             >
               <Plus className="w-4 h-4 mr-1.5" /> Escolher Exercício para Série {activeTab}
             </Button>
@@ -455,7 +455,7 @@ export default function SheetForm() {
               return (
                 <div
                   key={`${block.exercise_id}-${index}`}
-                  className="bg-[#141414] border border-[#2A2A2A] hover:border-[#F06A2A]/40 rounded-xl p-4 transition-all space-y-3"
+                  className="bg-[#141414] border border-[#2A2A2A] hover:border-primary/40 rounded-xl p-4 transition-all space-y-3"
                 >
                   {/* Topo do Exercício */}
                   <div className="flex items-center justify-between gap-3">
@@ -558,7 +558,7 @@ export default function SheetForm() {
                         onChange={(e) =>
                           handleUpdateBlock(index, 'sets', parseInt(e.target.value) || 1)
                         }
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-[#F06A2A]"
+                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
                       />
                     </div>
 
@@ -568,7 +568,7 @@ export default function SheetForm() {
                         value={block.reps}
                         onChange={(e) => handleUpdateBlock(index, 'reps', e.target.value)}
                         placeholder="Ex: 10 a 12"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-[#F06A2A]"
+                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
                       />
                     </div>
 
@@ -578,7 +578,7 @@ export default function SheetForm() {
                         value={block.time}
                         onChange={(e) => handleUpdateBlock(index, 'time', e.target.value)}
                         placeholder="Ex: 60s"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-[#F06A2A]"
+                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
                       />
                     </div>
 
@@ -588,7 +588,7 @@ export default function SheetForm() {
                         value={block.load}
                         onChange={(e) => handleUpdateBlock(index, 'load', e.target.value)}
                         placeholder="Ex: 25kg"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-[#F06A2A]"
+                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
                       />
                     </div>
 
@@ -598,7 +598,7 @@ export default function SheetForm() {
                         value={block.notes}
                         onChange={(e) => handleUpdateBlock(index, 'notes', e.target.value)}
                         placeholder="Ex: Pegada aberta"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-[#F06A2A]"
+                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
                       />
                     </div>
                   </div>
@@ -613,8 +613,8 @@ export default function SheetForm() {
                 onClick={() => setPickerOpen(true)}
                 className="border-[#2E2E2E] bg-[#141414] hover:bg-[#252525] text-white text-xs h-10 px-5"
               >
-                <Plus className="w-4 h-4 mr-1 text-[#F06A2A]" /> Adicionar Mais um Exercício na
-                Série {activeTab}
+                <Plus className="w-4 h-4 mr-1 text-primary" /> Adicionar Mais um Exercício na Série{' '}
+                {activeTab}
               </Button>
             </div>
           </div>

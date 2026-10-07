@@ -32,9 +32,9 @@ export default function ForgotPassword() {
     <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8 relative">
       <div className="w-full max-w-md bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#F06A2A] to-[#FF8A4C] flex items-center justify-center shadow-lg shadow-[#F06A2A]/25 mb-4">
-            <Dumbbell className="w-7 h-7 text-white stroke-[2.5]" />
-          </div>
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mb-4">
+            <KeyRound className="w-7 h-7 text-white stroke-[2.5]" />
+          </div>{' '}
           <h1 className="text-2xl font-bold tracking-tight text-white">Recuperar Senha</h1>
           <p className="text-sm text-[#8A8F98] mt-1">Studio Bru Oliveira</p>
         </div>
@@ -51,7 +51,7 @@ export default function ForgotPassword() {
             </p>
             <div className="pt-4">
               <Link to="/login">
-                <Button className="w-full bg-[#F06A2A] hover:bg-[#D95C1C] text-white">
+                <Button className="w-full bg-primary hover:opacity-90 text-primary-foreground">
                   Voltar para o Login
                 </Button>
               </Link>
@@ -76,7 +76,7 @@ export default function ForgotPassword() {
                   placeholder="professor@studiobru.com.br"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-[#F06A2A]"
+                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-primary"
                 />
                 <Mail className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
               </div>
@@ -85,7 +85,7 @@ export default function ForgotPassword() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-semibold transition-colors shadow-md mt-2"
+              className="w-full h-12 bg-primary hover:opacity-90 text-primary-foreground font-semibold transition-colors shadow-md mt-2"
             >
               {isLoading ? 'Enviando...' : 'Enviar link de recuperação'}
             </Button>

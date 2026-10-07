@@ -135,14 +135,14 @@ export default function Index() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-[#252525]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs uppercase tracking-wider text-[#F06A2A] font-bold flex items-center gap-1">
+            <span className="text-xs uppercase tracking-wider text-primary font-bold flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" /> {capitalizedDate}
             </span>
             <span className="text-xs text-[#8A8F98]">•</span>
             <span className="text-xs text-[#8A8F98] flex items-center gap-1">
               {isAdmin ? (
                 <>
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#F06A2A]" /> Perfil Administrador
+                  <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Perfil Administrador
                 </>
               ) : (
                 <>
@@ -162,7 +162,7 @@ export default function Index() {
         {/* Botão de Destaque Treino ao Vivo */}
         <Button
           onClick={() => navigate('/treino')}
-          className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-bold h-12 px-6 shadow-xl shadow-[#F06A2A]/20 flex items-center gap-2 rounded-xl"
+          className="bg-primary hover:opacity-90 text-primary-foreground font-bold h-12 px-6 shadow-xl shadow-primary/20 flex items-center gap-2 rounded-xl"
         >
           <PlaySquare className="w-5 h-5" /> Abrir Tela de Treino
         </Button>
@@ -179,9 +179,9 @@ export default function Index() {
               setSearchQuery(e.target.value)
               setDropdownOpen(true)
             }}
-            className="w-full h-14 bg-[#1E1E1E] border-[#2E2E2E] hover:border-[#F06A2A]/50 text-white placeholder:text-[#8A8F98] pl-12 pr-4 text-base rounded-2xl shadow-lg focus-visible:ring-2 focus-visible:ring-[#F06A2A]"
+            className="w-full h-14 bg-[#1E1E1E] border-[#2E2E2E] hover:border-primary/50 text-white placeholder:text-[#8A8F98] pl-12 pr-4 text-base rounded-2xl shadow-lg focus-visible:ring-2 focus-visible:ring-primary"
           />
-          <Search className="w-6 h-6 absolute left-4 top-1/2 -translate-y-1/2 text-[#F06A2A]" />
+          <Search className="w-6 h-6 absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
         </div>
 
         {/* Dropdown de Alunos Encontrados */}
@@ -198,11 +198,11 @@ export default function Index() {
                 className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#2A2A2A] text-left transition-colors group"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-[#2A2A2A] border border-[#F06A2A]/40 text-[#F06A2A] font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[#2A2A2A] border border-primary/40 text-primary font-bold text-xs flex items-center justify-center shrink-0">
                     {st.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div className="min-w-0">
-                    <span className="text-sm font-bold text-white group-hover:text-[#F06A2A] transition-colors block truncate">
+                    <span className="text-sm font-bold text-white group-hover:text-primary transition-colors block truncate">
                       {st.name}
                     </span>
                     <span className="text-xs text-[#8A8F98] truncate block">
@@ -212,7 +212,7 @@ export default function Index() {
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <Badge className="bg-[#F06A2A]/20 text-[#F06A2A] border border-[#F06A2A]/40 text-xs">
+                  <Badge className="bg-primary/20 text-primary border border-primary/40 text-xs">
                     Abrir Treino
                   </Badge>
                   <ChevronRight className="w-4 h-4 text-[#8A8F98] group-hover:text-white" />
@@ -232,13 +232,13 @@ export default function Index() {
           {/* Card 1: Cadastrar Aluno */}
           <Link
             to="/alunos/novo"
-            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-[#F06A2A]/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 group"
+            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-[#F06A2A]/15 border border-[#F06A2A]/30 text-[#F06A2A] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
               <UserPlus className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white group-hover:text-[#F06A2A] transition-colors">
+              <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors">
                 Cadastrar Aluno
               </h3>
               <p className="text-xs text-[#8A8F98]">Dados básicos e anamnese completa</p>
@@ -248,13 +248,13 @@ export default function Index() {
           {/* Card 2: Novo Exercício */}
           <Link
             to="/acervo/novo"
-            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-[#F06A2A]/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 group"
+            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-[#F06A2A]/15 border border-[#F06A2A]/30 text-[#F06A2A] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
               <Dumbbell className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white group-hover:text-[#F06A2A] transition-colors">
+              <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors">
                 Novo Exercício
               </h3>
               <p className="text-xs text-[#8A8F98]">Cadastrar movimento com vídeo do YouTube</p>
@@ -264,13 +264,13 @@ export default function Index() {
           {/* Card 3: Nova Ficha de Treino */}
           <div
             onClick={() => setSheetModalOpen(true)}
-            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-[#F06A2A]/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 cursor-pointer group"
+            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 cursor-pointer group"
           >
-            <div className="w-12 h-12 rounded-xl bg-[#F06A2A]/15 border border-[#F06A2A]/30 text-[#F06A2A] flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white group-hover:text-[#F06A2A] transition-colors">
+              <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors">
                 Nova Ficha de Treino
               </h3>
               <p className="text-xs text-[#8A8F98]">Montar séries A–E com cargas e repetições</p>
@@ -288,7 +288,7 @@ export default function Index() {
             </span>
             <div className="text-3xl font-extrabold text-white mt-1">{totalStudents}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-[#F06A2A] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center">
             <Users className="w-5 h-5" />
           </div>
         </div>
@@ -331,7 +331,7 @@ export default function Index() {
           </div>
           <Link
             to="/alunos"
-            className="text-xs text-[#F06A2A] hover:underline flex items-center gap-1 font-semibold"
+            className="text-xs text-primary hover:underline flex items-center gap-1 font-semibold"
           >
             Ver todos <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -360,11 +360,11 @@ export default function Index() {
                   className="py-3.5 flex items-center justify-between gap-3 hover:bg-[#252525] px-3 rounded-xl transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-[#2A2A2A] border border-[#F06A2A]/40 text-[#F06A2A] font-bold text-sm flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-[#2A2A2A] border border-primary/40 text-primary font-bold text-sm flex items-center justify-center shrink-0">
                       {initials}
                     </div>
                     <div className="min-w-0">
-                      <span className="text-sm font-bold text-white group-hover:text-[#F06A2A] transition-colors block truncate">
+                      <span className="text-sm font-bold text-white group-hover:text-primary transition-colors block truncate">
                         {st.name}
                       </span>
                       <span className="text-xs text-[#8A8F98] truncate block">
@@ -374,7 +374,7 @@ export default function Index() {
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <Badge className="bg-[#F06A2A]/15 text-[#F06A2A] border border-[#F06A2A]/30 text-xs px-2.5 py-0.5 font-semibold">
+                    <Badge className="bg-primary/15 text-primary border border-primary/30 text-xs px-2.5 py-0.5 font-semibold">
                       Próximo: Treino {nextSeries}
                     </Badge>
                     <ChevronRight className="w-5 h-5 text-[#8A8F98] group-hover:text-white group-hover:translate-x-1 transition-all" />
@@ -400,7 +400,7 @@ export default function Index() {
             <select
               value={selectedStudentForSheet}
               onChange={(e) => setSelectedStudentForSheet(e.target.value)}
-              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#F06A2A]"
+              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {students.map((st) => (
                 <option key={st.id} value={st.id}>
@@ -422,7 +422,7 @@ export default function Index() {
             <Button
               type="button"
               onClick={handleStartNewSheet}
-              className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white"
+              className="bg-primary hover:opacity-90 text-primary-foreground"
             >
               Avançar para Montagem
             </Button>

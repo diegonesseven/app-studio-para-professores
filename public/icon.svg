@@ -1,39 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <!-- Gradiente oficial da marca: Azul-Índigo para Verde-Menta/Teal -->
-    <linearGradient id="brandGradient" x1="100%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#4B4FA0" />
-      <stop offset="55%" stop-color="#5575B5" />
-      <stop offset="100%" stop-color="#7EC8B6" />
+    <!-- Gradiente oficial roxo vibrante Studio Bru -->
+    <linearGradient id="purpleBrandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#A78BFA" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#6D28D9" />
     </linearGradient>
-    <linearGradient id="indigoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#5C60B4" />
-      <stop offset="100%" stop-color="#3F4390" />
+    <linearGradient id="purpleAccentGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7C3AED" />
+      <stop offset="100%" stop-color="#C4B5FD" />
     </linearGradient>
-    <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#93D8C8" />
-      <stop offset="100%" stop-color="#6DBCA9" />
-    </linearGradient>
-    <filter id="softShadow" x="-10%" y="-10%" width="125%" height="125%">
-      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#4B4FA0" flood-opacity="0.18" />
+    <filter id="purpleGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="16" flood-color="#7C3AED" flood-opacity="0.35" />
     </filter>
   </defs>
 
-  <!-- Fundo Limpo e Elegante com cantos arredondados -->
-  <rect width="512" height="512" rx="112" fill="#FFFFFF" />
-  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#E6EAF0" stroke-width="2" />
+  <!-- Fundo escuro com cantos arredondados para apps modernos -->
+  <rect width="512" height="512" rx="112" fill="#0F0E17" />
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#2E284A" stroke-width="2" />
 
-  <!-- Monograma estilizado B em folha / laço com curvatura fluida orgânica -->
-  <g filter="url(#softShadow)" transform="translate(4, -10)">
-    <!-- Haste esquerda e laço inferior em folha menta/teal -->
+  <!-- Monograma estilizado 'B' em curvas fluidas elegantes -->
+  <g filter="url(#purpleGlow)" transform="translate(8, -12)">
+    <!-- Haste esquerda e laço inferior orgânico -->
     <path d="M 170 330 
              C 145 285, 155 210, 190 170 
              C 215 140, 248 130, 260 135 
              C 250 160, 230 200, 205 245 
              C 185 280, 172 315, 170 330 Z" 
-          fill="url(#tealGrad)" />
+          fill="url(#purpleAccentGrad)" />
 
-    <!-- Traço principal caligráfico / laços do B em azul-índigo gradiente -->
+    <!-- Traço principal fluido dos laços caligráficos do B -->
     <path d="M 180 165
              C 210 130, 260 120, 285 140
              C 310 160, 310 195, 280 220
@@ -49,35 +45,35 @@
              C 275 140, 255 135, 240 145
              C 210 165, 188 200, 172 235
              C 165 210, 170 185, 180 165 Z"
-          fill="url(#brandGradient)" />
+          fill="url(#purpleBrandGrad)" />
 
-    <!-- Folha fluida inferior (acabamento da ponta do monograma) -->
+    <!-- Folha fluida inferior (ponta inferior do monograma) -->
     <path d="M 170 330
              C 165 350, 180 375, 200 375
              C 180 365, 172 345, 170 330 Z"
-          fill="url(#tealGrad)" />
+          fill="url(#purpleAccentGrad)" />
   </g>
 
-  <!-- Tipografia Oficial STUDIO BRU OLIVEIRA -->
+  <!-- Tipografia Studio Bru Oliveira -->
   <text x="256" y="420"
         text-anchor="middle"
         font-family="system-ui, -apple-system, 'Inter', sans-serif"
         font-size="22"
         font-weight="800"
         letter-spacing="9"
-        fill="#4B4FA0">STUDIO</text>
-  <text x="256" y="450"
+        fill="#DDD6FE">STUDIO</text>
+  <text x="256" y="452"
         text-anchor="middle"
         font-family="Georgia, 'Times New Roman', serif"
-        font-size="27"
+        font-size="28"
         font-weight="700"
         letter-spacing="1"
-        fill="#373B7E">Bru Oliveira</text>
-  <text x="256" y="475"
+        fill="#FFFFFF">Bru Oliveira</text>
+  <text x="256" y="478"
         text-anchor="middle"
         font-family="system-ui, -apple-system, 'Inter', sans-serif"
         font-size="12"
         font-weight="600"
         letter-spacing="3"
-        fill="#7EC8B6">PERSONAL &amp; PILATES</text>
+        fill="#A78BFA">PERSONAL &amp; PILATES</text>
 </svg>

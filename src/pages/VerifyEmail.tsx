@@ -37,7 +37,7 @@ export default function VerifyEmail() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8 relative">
       <div className="w-full max-w-md bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up text-center">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#F06A2A] to-[#FF8A4C] flex items-center justify-center shadow-lg shadow-[#F06A2A]/25 mx-auto mb-4">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto mb-4">
           <Dumbbell className="w-7 h-7 text-white stroke-[2.5]" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Verificação de E-mail</h1>
@@ -45,7 +45,7 @@ export default function VerifyEmail() {
 
         {status === 'loading' && (
           <div className="py-8 flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 text-[#F06A2A] animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
             <p className="text-sm text-[#8A8F98]">Validando sua conta...</p>
           </div>
         )}
@@ -62,7 +62,7 @@ export default function VerifyEmail() {
             <div className="pt-2">
               <Button
                 onClick={() => navigate('/login')}
-                className="w-full bg-[#F06A2A] hover:bg-[#D95C1C] text-white"
+                className="w-full bg-primary hover:opacity-90 text-primary-foreground"
               >
                 Ir para o Login
               </Button>

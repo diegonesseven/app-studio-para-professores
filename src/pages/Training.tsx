@@ -786,7 +786,7 @@ export default function Training() {
                     onClick={() => handleAddStudentToSession(st)}
                     className="border-[#2E2E2E] bg-[#141414] hover:bg-[#2A2A2A] text-white text-xs h-9 px-3"
                   >
-                    <Plus className="w-3.5 h-3.5 mr-1 text-[#F06A2A]" /> {st.name}
+                    <Plus className="w-3.5 h-3.5 mr-1 text-primary" /> {st.name}
                   </Button>
                 ))}
               </div>
@@ -983,7 +983,7 @@ export default function Training() {
             <Button
               type="button"
               onClick={handleConfirmAdvanceSeries}
-              className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-semibold"
+              className="bg-primary hover:opacity-90 text-primary-foreground font-semibold"
             >
               Sim, avançar para Série {advanceDialog?.nextSeries}
             </Button>
@@ -999,8 +999,7 @@ export default function Training() {
         <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-[#F06A2A]" /> Marcar toda a ficha como
-              concluída?
+              <CheckCircle2 className="w-5 h-5 text-primary" /> Marcar toda a ficha como concluída?
             </DialogTitle>
             <DialogDescription className="text-[#8A8F98] text-sm">
               Confirmar a conclusão de toda a ficha para o aluno{' '}

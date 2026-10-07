@@ -95,7 +95,7 @@ export default function ExerciseList() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Dumbbell className="w-7 h-7 text-[#F06A2A]" /> Acervo de Exercícios
+            <Dumbbell className="w-7 h-7 text-primary" /> Acervo de Exercícios
           </h1>
           <p className="text-sm text-[#8A8F98] mt-1">
             Biblioteca completa de movimentos com vídeos demonstrativos para as aulas
@@ -104,7 +104,7 @@ export default function ExerciseList() {
 
         {isAdmin && (
           <Link to="/acervo/novo">
-            <Button className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-medium h-11 px-5 shadow-md flex items-center gap-2">
+            <Button className="bg-primary hover:opacity-90 text-primary-foreground font-medium h-11 px-5 shadow-md flex items-center gap-2">
               <Plus className="w-4 h-4" /> Novo Exercício
             </Button>
           </Link>
@@ -118,7 +118,7 @@ export default function ExerciseList() {
             placeholder="Pesquisar exercício por nome..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-[#F06A2A]"
+            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-primary"
           />
           <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
         </div>
@@ -127,7 +127,7 @@ export default function ExerciseList() {
           <select
             value={selectedMuscle}
             onChange={(e) => setSelectedMuscle(e.target.value)}
-            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-[#F06A2A]"
+            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">Todos os Agrupamentos</option>
             {MUSCLE_GROUPS.map((mg) => (
@@ -143,7 +143,7 @@ export default function ExerciseList() {
       {/* Lista de Exercícios */}
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#F06A2A]" />
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando acervo de exercícios...</p>
         </div>
       ) : exercises.length === 0 ? (
@@ -158,7 +158,7 @@ export default function ExerciseList() {
           </p>
           {isAdmin && (
             <Link to="/acervo/novo">
-              <Button className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white">
+              <Button className="bg-primary hover:opacity-90 text-primary-foreground">
                 <Plus className="w-4 h-4 mr-1.5" /> Adicionar Primeiro Exercício
               </Button>
             </Link>
@@ -170,7 +170,7 @@ export default function ExerciseList() {
             return (
               <div
                 key={exercise.id}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-[#F06A2A]/40 rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl group flex flex-col"
+                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/40 rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl group flex flex-col"
               >
                 {/* Thumbnail / Video trigger */}
                 <div
@@ -199,8 +199,8 @@ export default function ExerciseList() {
 
                   {/* Botão Play flutuante */}
                   <div className="absolute inset-0 bg-black/40 group-hover/thumb:bg-black/20 flex items-center justify-center transition-colors">
-                    <div className="w-12 h-12 rounded-full bg-[#F06A2A] text-white flex items-center justify-center shadow-lg group-hover/thumb:scale-110 transition-transform">
-                      <Play className="w-5 h-5 fill-white ml-0.5" />
+                    <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg group-hover/thumb:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-current ml-0.5" />
                     </div>
                   </div>
 
@@ -220,7 +220,7 @@ export default function ExerciseList() {
                           youtubeUrl: exercise.youtube_url,
                         })
                       }
-                      className="text-base font-bold text-white hover:text-[#F06A2A] cursor-pointer transition-colors line-clamp-1"
+                      className="text-base font-bold text-white hover:text-primary cursor-pointer transition-colors line-clamp-1"
                       title={exercise.name}
                     >
                       {exercise.name}
@@ -236,9 +236,9 @@ export default function ExerciseList() {
                           youtubeUrl: exercise.youtube_url,
                         })
                       }
-                      className="text-xs text-[#F06A2A] hover:underline flex items-center gap-1 font-medium py-1"
+                      className="text-xs text-primary hover:underline flex items-center gap-1 font-medium py-1"
                     >
-                      <Play className="w-3.5 h-3.5 fill-[#F06A2A]" /> Ver vídeo
+                      <Play className="w-3.5 h-3.5 fill-current" /> Ver vídeo
                     </button>
 
                     {isAdmin && (

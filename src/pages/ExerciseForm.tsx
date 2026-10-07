@@ -160,7 +160,7 @@ export default function ExerciseForm() {
 
       <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-xl">
         <div className="flex items-center gap-3 pb-6 mb-6 border-b border-[#2E2E2E]">
-          <div className="w-12 h-12 rounded-xl bg-[#F06A2A]/15 border border-[#F06A2A]/30 text-[#F06A2A] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center">
             <Dumbbell className="w-6 h-6" />
           </div>
           <div>
@@ -186,7 +186,7 @@ export default function ExerciseForm() {
               placeholder="Ex: Agachamento Búlgaro, Supino Inclinado com Halteres"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-[#F06A2A]"
+              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
             />
           </div>
 
@@ -199,7 +199,7 @@ export default function ExerciseForm() {
               id="muscle"
               value={muscleGroup}
               onChange={(e) => setMuscleGroup(e.target.value as MuscleGroup)}
-              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#F06A2A]"
+              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {MUSCLE_GROUPS.map((mg) => (
                 <option key={mg} value={mg}>
@@ -220,7 +220,7 @@ export default function ExerciseForm() {
                 placeholder="Ex: https://www.youtube.com/watch?v=... ou https://youtu.be/..."
                 value={youtubeUrl}
                 onChange={(e) => setYoutubeUrl(e.target.value)}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-[#F06A2A]"
+                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-primary"
               />
               <Video className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
             </div>
@@ -268,7 +268,7 @@ export default function ExerciseForm() {
             <Button
               type="submit"
               disabled={saving}
-              className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-medium h-11 px-6 shadow-md"
+              className="bg-primary hover:opacity-90 text-primary-foreground font-medium h-11 px-6 shadow-md"
             >
               <Save className="w-4 h-4 mr-2" />
               {saving ? 'Salvando...' : isEditing ? 'Salvar Alterações' : 'Cadastrar Exercício'}

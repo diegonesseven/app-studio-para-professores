@@ -7,47 +7,47 @@
 
 @layer base {
   :root {
-    /* Tema oficial Studio Bru Oliveira: Azul-Índigo (#4B4FA0) e Verde-Menta/Teal (#7EC8B6) */
-    --background: 228 35% 8%; /* #0E111D */
+    /* Tema oficial Studio Bru Oliveira: Roxo Predominante (#8B5CF6) e fundos escuros */
+    --background: 247 24% 7%; /* #0F0E17 */
     --foreground: 0 0% 100%; /* #FFFFFF */
 
-    --card: 229 32% 14%; /* #181C2E */
+    --card: 246 26% 13%; /* #1A1829 */
     --card-foreground: 0 0% 100%;
 
-    --popover: 229 32% 14%; /* #181C2E */
+    --popover: 246 26% 13%; /* #1A1829 */
     --popover-foreground: 0 0% 100%;
 
-    --primary: 237 36% 46%; /* #4B4FA0 Azul-Índigo Oficial */
+    --primary: 258 90% 66%; /* #8B5CF6 Roxo Oficial */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 166 42% 64%; /* #7EC8B6 Verde-Menta / Teal Oficial */
-    --secondary-foreground: 228 35% 8%;
+    --secondary: 263 70% 50%; /* #7C3AED Roxo Vibrante */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 228 25% 18%;
-    --muted-foreground: 224 16% 68%; /* #9CA5B8 */
+    --muted: 246 20% 18%;
+    --muted-foreground: 250 16% 70%; /* #A6A4BF */
 
-    --accent: 166 42% 64%; /* Verde-Menta Destaque */
-    --accent-foreground: 228 35% 8%;
+    --accent: 258 90% 66%; /* Roxo Destaque */
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 358 75% 59%; /* #E5484D */
     --destructive-foreground: 0 0% 100%;
 
     --success: 166 50% 50%; /* #41B397 */
 
-    --border: 228 20% 20%; /* #252B3E */
-    --input: 228 20% 20%;
-    --ring: 237 36% 46%; /* #4B4FA0 */
+    --border: 246 18% 22%; /* #28243D */
+    --input: 246 18% 22%;
+    --ring: 258 90% 66%; /* #8B5CF6 */
 
     --radius: 0.625rem;
 
-    --sidebar-background: 229 38% 10%; /* #101424 */
+    --sidebar-background: 247 28% 9%; /* #12101D */
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 237 36% 46%;
+    --sidebar-primary: 258 90% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 228 25% 18%;
+    --sidebar-accent: 246 20% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 228 20% 18%;
-    --sidebar-ring: 237 36% 46%;
+    --sidebar-border: 246 18% 20%;
+    --sidebar-ring: 258 90% 66%;
   }
 
   * {

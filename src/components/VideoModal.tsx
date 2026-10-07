@@ -35,7 +35,7 @@ export default function VideoModal({
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#2E2E2E] bg-[#171717]">
           <div className="flex flex-col min-w-0 pr-2">
-            <span className="text-xs uppercase tracking-wider text-[#F06A2A] font-semibold">
+            <span className="text-xs uppercase tracking-wider text-primary font-semibold">
               Demonstração do Exercício
             </span>
             <h3 className="text-base sm:text-lg font-bold text-white truncate">{title}</h3>
@@ -81,7 +81,7 @@ export default function VideoModal({
                 href={directUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-[#F06A2A] hover:underline px-2 py-1"
+                className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline px-2 py-1"
               >
                 <ExternalLink className="w-3.5 h-3.5" /> Abrir no YouTube
               </a>
