@@ -26,6 +26,7 @@ import {
 } from '@/types'
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { shareOrExportSheet } from '@/services/trainingSheetPdf'
+import { useTheme } from '@/contexts/ThemeContext'
 import {
   ArrowLeft,
   User,
@@ -48,6 +49,7 @@ import {
 
 export default function StudentForm() {
   const { id } = useParams<{ id: string }>()
+  const { appearance } = useTheme()
   const navigate = useNavigate()
   const isEditing = Boolean(id)
 
@@ -363,6 +365,9 @@ export default function StudentForm() {
                         student: st,
                         sheet,
                         exercisesMap,
+                        studioName: appearance.studio_name,
+                        primaryColor: appearance.primary_color,
+                        logoUrl: appearance.logo_url,
                       })
                       if (res === 'opened') {
                         toast({

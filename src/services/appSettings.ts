@@ -95,7 +95,7 @@ export const appSettingsService = {
         if (removeLogoFile) {
           payload.logo_file = null
           payload.logo_url = ''
-        } else if (settings.logo_url !== undefined) {
+        } else if (settings.logo_url !== undefined && !settings.logo_url.startsWith('blob:')) {
           payload.logo_url = settings.logo_url
         }
 

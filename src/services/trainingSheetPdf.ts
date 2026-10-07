@@ -9,6 +9,7 @@ export interface SheetExportData {
   studioName?: string
   primaryColor?: string
   secondaryColor?: string
+  logoUrl?: string
 }
 
 function escapeHtml(str: string | null | undefined): string {
@@ -34,7 +35,16 @@ function getInitials(name: string): string {
  * Constrói o HTML completo e autocontido da ficha do aluno formatado para A4/impressão e PDF.
  */
 export function generateTrainingSheetHtml(data: SheetExportData): string {
-  const { student, sheet, exercisesMap, studioName = 'Studio Bru Oliveira' } = data
+  const {
+    student,
+    sheet,
+    exercisesMap,
+    studioName = 'Studio Bru Oliveira',
+    primaryColor = '#8B5CF6',
+    logoUrl,
+  } = data
+
+  const effectiveLogo = logoUrl || STUDIO_LOGO_SRC
 
   const dateGenerated = new Date().toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -151,7 +161,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 3px solid #4B4FA0;
+      border-bottom: 3px solid ${primaryColor};
       padding-bottom: 14px;
       margin-bottom: 16px;
       gap: 16px;
@@ -171,7 +181,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     .brand-title {
       font-size: 18pt;
       font-weight: 900;
-      color: #4B4FA0;
+      color: ${primaryColor};
       letter-spacing: -0.5px;
     }
     .brand-sub {
@@ -194,7 +204,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     .student-banner {
       background: linear-gradient(135deg, #f3f5fd 0%, #eefbf7 100%);
       border: 1px solid #d8ddf3;
-      border-left: 6px solid #4B4FA0;
+      border-left: 6px solid ${primaryColor};
       border-radius: 10px;
       padding: 12px 16px;
       margin-bottom: 16px;
@@ -229,9 +239,9 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
       color: #334155;
     }
     .tag-highlight {
-      background: #4B4FA0;
+      background: ${primaryColor};
       color: #ffffff;
-      border-color: #4B4FA0;
+      border-color: ${primaryColor};
     }
     .tag-teal {
       background: #e6f7f3;
@@ -263,7 +273,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
       color: #334155;
     }
     .sheet-notes-box strong {
-      color: #4B4FA0;
+      color: ${primaryColor};
     }
 
     /* SERIES CARDS */
@@ -277,7 +287,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     .series-header {
-      background: #4B4FA0;
+      background: ${primaryColor};
       color: #ffffff;
       padding: 8px 14px;
       display: flex;
@@ -330,7 +340,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     .col-idx {
       width: 32px;
       font-weight: 800;
-      color: #4B4FA0;
+      color: ${primaryColor};
       font-size: 9pt;
       text-align: center;
     }
@@ -369,7 +379,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     }
     .highlight-load {
       font-weight: 800;
-      color: #4B4FA0;
+      color: ${primaryColor};
     }
     .empty-cell {
       text-align: center;
@@ -390,7 +400,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
       color: #64748b;
     }
     .footer-left strong {
-      color: #4B4FA0;
+      color: ${primaryColor};
     }
 
     /* NO PRINT BAR */
@@ -466,7 +476,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     <!-- CABEÇALHO -->
     <header class="header">
       <div class="brand">
-        <img src="${STUDIO_LOGO_SRC}" alt="${escapeHtml(studioName)}" class="logo-img" />
+        <img src="${effectiveLogo}" alt="${escapeHtml(studioName)}" class="logo-img" />
         <div>
           <h1 class="brand-title">${escapeHtml(studioName)}</h1>
           <div class="brand-sub">Ficha Oficial de Treino Personalizado</div>

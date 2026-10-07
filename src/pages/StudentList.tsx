@@ -22,6 +22,7 @@ import {
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { exercisesService } from '@/services/exercises'
 import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -38,6 +39,7 @@ import { toast } from '@/hooks/use-toast'
 
 export default function StudentList() {
   const navigate = useNavigate()
+  const { appearance } = useTheme()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -117,6 +119,9 @@ export default function StudentList() {
         student,
         sheet,
         exercisesMap: map,
+        studioName: appearance.studio_name,
+        primaryColor: appearance.primary_color,
+        logoUrl: appearance.logo_url,
       })
 
       if (res === 'opened') {

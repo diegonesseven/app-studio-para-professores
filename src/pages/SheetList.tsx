@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { exercisesService } from '@/services/exercises'
 import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -34,6 +35,7 @@ import { toast } from '@/hooks/use-toast'
 
 export default function SheetList() {
   const navigate = useNavigate()
+  const { appearance } = useTheme()
   const [sheets, setSheets] = useState<TrainingSheet[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [exercisesMap, setExercisesMap] = useState<Record<string, any>>({})
@@ -99,6 +101,9 @@ export default function SheetList() {
         student,
         sheet,
         exercisesMap,
+        studioName: appearance.studio_name,
+        primaryColor: appearance.primary_color,
+        logoUrl: appearance.logo_url,
       })
       if (res === 'opened') {
         toast({
@@ -111,6 +116,9 @@ export default function SheetList() {
         student,
         sheet,
         exercisesMap,
+        studioName: appearance.studio_name,
+        primaryColor: appearance.primary_color,
+        logoUrl: appearance.logo_url,
       })
     }
   }

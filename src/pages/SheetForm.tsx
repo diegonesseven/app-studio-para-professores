@@ -33,11 +33,8 @@ import {
   Printer,
   Download,
 } from 'lucide-react'
-import {
-  openSheetPrintWindow,
-  shareOrExportSheet,
-  downloadSheetAsHtmlFile,
-} from '@/services/trainingSheetPdf'
+import { shareOrExportSheet } from '@/services/trainingSheetPdf'
+import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -46,6 +43,7 @@ import { toast } from '@/hooks/use-toast'
 
 export default function SheetForm() {
   const { id } = useParams<{ id: string }>()
+  const { appearance } = useTheme()
   const [searchParams] = useSearchParams()
   const queryStudentId = searchParams.get('student') || ''
 
@@ -333,6 +331,9 @@ export default function SheetForm() {
                   student,
                   sheet: sheetObj,
                   exercisesMap,
+                  studioName: appearance.studio_name,
+                  primaryColor: appearance.primary_color,
+                  logoUrl: appearance.logo_url,
                 })
                 if (res === 'opened') {
                   toast({

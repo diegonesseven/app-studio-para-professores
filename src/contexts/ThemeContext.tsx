@@ -17,7 +17,7 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 /**
- * Converte hex (ex: #F06A2A) em HSL (h s% l%) para alimentar as variáveis Tailwind Shadcn.
+ * Converte hex (ex: #8B5CF6) em HSL (h s% l%) para alimentar as variáveis Tailwind Shadcn.
  */
 function hexToHsl(hex: string): { h: number; s: number; l: number; string: string } | null {
   let c = hex.replace('#', '').trim()

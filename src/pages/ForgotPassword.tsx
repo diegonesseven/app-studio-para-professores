@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import pb from '@/lib/pocketbase/client'
-import { ArrowLeft, CheckCircle2, Dumbbell, Mail } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, KeyRound, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,8 +29,8 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8 relative">
-      <div className="w-full max-w-md bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative">
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mb-4">
             <KeyRound className="w-7 h-7 text-white stroke-[2.5]" />

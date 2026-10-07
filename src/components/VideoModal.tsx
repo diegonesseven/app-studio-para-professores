@@ -31,9 +31,9 @@ export default function VideoModal({
       />
 
       {/* Modal Dialog */}
-      <div className="relative w-full max-w-2xl bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] animate-fade-in-up">
+      <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] animate-fade-in-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#2E2E2E] bg-[#171717]">
+        <div className="flex items-center justify-between px-4 py-3.5 border-b border-border bg-card/60">
           <div className="flex flex-col min-w-0 pr-2">
             <span className="text-xs uppercase tracking-wider text-primary font-semibold">
               Demonstração do Exercício
@@ -72,7 +72,7 @@ export default function VideoModal({
         </div>
 
         {/* Footer com fallback / link externo */}
-        <div className="p-3 bg-[#171717] border-t border-[#2E2E2E] flex items-center justify-between">
+        <div className="p-3 bg-card/60 border-t border-border flex items-center justify-between">
           <span className="text-xs text-[#8A8F98]">Studio Bru Oliveira • Ficha de Execução</span>
 
           <div className="flex items-center gap-2">
@@ -90,7 +90,7 @@ export default function VideoModal({
               size="sm"
               variant="outline"
               onClick={onClose}
-              className="border-[#2E2E2E] bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white text-xs h-8"
+              className="border-border bg-card hover:bg-muted text-white text-xs h-8"
             >
               Fechar
             </Button>

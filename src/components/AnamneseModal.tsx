@@ -50,9 +50,9 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-2xl bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] animate-fade-in-up">
+      <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] animate-fade-in-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#2E2E2E] bg-[#171717]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card/60">
           <div className="flex items-center gap-3 min-w-0 pr-2">
             <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0">
               <HeartPulse className="w-5 h-5" />
@@ -60,7 +60,8 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             <div>
               <span className="text-[11px] uppercase tracking-wider text-primary font-semibold">
                 Saúde & Anamnese
-              </span>              <h3 className="text-lg font-bold text-white truncate">{student.name}</h3>
+              </span>{' '}
+              <h3 className="text-lg font-bold text-white truncate">{student.name}</h3>
             </div>
           </div>
 
@@ -111,13 +112,15 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[#8A8F98] uppercase tracking-wider">
                 <Target className="w-3.5 h-3.5 text-primary" /> Objetivos do Aluno
-              </h4>
+              </div>
               <div className="flex flex-wrap gap-1.5">
                 {student.goals.map((g) => (
                   <Badge
                     key={g}
                     className="bg-primary/20 text-primary border border-primary/40 text-xs px-2.5 py-0.5 font-medium"
-                  >                    {g}
+                  >
+                    {' '}
+                    {g}
                   </Badge>
                 ))}
               </div>
@@ -197,7 +200,7 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-[#171717] border-t border-[#2E2E2E] flex justify-end">
+        <div className="p-4 bg-card/60 border-t border-border flex justify-end">
           <Button
             onClick={onClose}
             className="bg-primary hover:opacity-90 text-primary-foreground text-xs h-9 px-4"

@@ -66,9 +66,9 @@ export default function Layout() {
     .join('')
 
   return (
-    <div className="flex h-screen bg-[#121212] text-white overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden">
       {/* SIDEBAR TABLET/DESKTOP (>= 1024px) */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#171717] border-r border-[#2A2A2A] z-20 shrink-0">
+      <aside className="hidden lg:flex flex-col w-64 bg-card/60 backdrop-blur-md border-r border-border z-20 shrink-0">
         {/* Header / Brand */}
         <div className="p-4 border-b border-[#2A2A2A] flex items-center gap-3">
           <div className="h-11 w-11 rounded-xl bg-white border border-white/20 flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-sm">
@@ -174,7 +174,7 @@ export default function Layout() {
       {/* TOPBAR MOBILE (< 1024px) */}
       <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
         <InstallPromptBanner />
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#171717] border-b border-[#2A2A2A] z-20 shrink-0">
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-card/80 backdrop-blur-md border-b border-border z-20 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="h-9 w-9 rounded-lg bg-white border border-white/20 flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-sm">
               <img
@@ -290,7 +290,7 @@ export default function Layout() {
 
         {/* CONTEÚDO PRINCIPAL (scroll independente) */}
         <main
-          className={`flex-1 bg-[#121212] ${
+          className={`flex-1 bg-background ${
             location.pathname.startsWith('/treino')
               ? 'p-2 sm:p-2.5 lg:p-3 flex flex-col overflow-hidden'
               : 'p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden'

@@ -312,7 +312,7 @@ export default function Index() {
             </span>
             <div className="text-3xl font-extrabold text-white mt-1">{totalExercises}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-purple-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center">
             <Dumbbell className="w-5 h-5" />
           </div>
         </div>

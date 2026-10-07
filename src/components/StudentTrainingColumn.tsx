@@ -193,9 +193,9 @@ export default function StudentTrainingColumn({
     .join('')
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl shadow-xl overflow-hidden">
+    <div className="flex flex-col h-full min-h-0 bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
       {/* HEADER DO ALUNO - otimizado verticalmente */}
-      <div className="p-3 sm:p-3.5 bg-[#171717] border-b border-[#2E2E2E] shrink-0">
+      <div className="p-3 sm:p-3.5 bg-card/60 border-b border-border shrink-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#2A2A2A] border-2 border-primary/40 text-primary font-black text-sm flex items-center justify-center shrink-0">
@@ -675,7 +675,7 @@ export default function StudentTrainingColumn({
       </div>
 
       {/* FOOTER DA COLUNA: Conclusão da Série e Ficha (mais compacto) */}
-      <div className="p-2.5 sm:p-3 bg-[#171717] border-t border-[#2E2E2E] space-y-1.5 shrink-0">
+      <div className="p-2.5 sm:p-3 bg-card/60 border-t border-border space-y-1.5 shrink-0">
         <Button
           onClick={onCompleteSeries}
           disabled={!sheet || currentExercises.length === 0}

@@ -35,8 +35,8 @@ export default function VerifyEmail() {
   }, [token])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8 relative">
-      <div className="w-full max-w-md bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up text-center">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative">
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up text-center">
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto mb-4">
           <Dumbbell className="w-7 h-7 text-white stroke-[2.5]" />
         </div>

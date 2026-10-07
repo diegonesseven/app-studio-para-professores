@@ -6,6 +6,7 @@ import { exercisesService } from '@/services/exercises'
 import { workoutProgressService } from '@/services/workoutProgress'
 import { useRealtime } from '@/hooks/use-realtime'
 import { useAuth } from '@/contexts/AuthContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import type {
   Student,
   TrainingSheet,
@@ -48,6 +49,7 @@ export default function Training() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { isProfessor, isAdmin } = useAuth()
+  const { appearance } = useTheme()
   const canEditTraining = isProfessor || isAdmin
 
   // Alunos selecionados na sessão (IDs)
@@ -524,6 +526,9 @@ export default function Training() {
         student,
         sheet,
         exercisesMap,
+        studioName: appearance.studio_name,
+        primaryColor: appearance.primary_color,
+        logoUrl: appearance.logo_url,
       })
       if (result === 'opened') {
         toast({
@@ -536,6 +541,9 @@ export default function Training() {
         student,
         sheet,
         exercisesMap,
+        studioName: appearance.studio_name,
+        primaryColor: appearance.primary_color,
+        logoUrl: appearance.logo_url,
       })
     }
   }
@@ -666,7 +674,7 @@ export default function Training() {
   return (
     <div className="flex flex-col flex-1 min-h-0 max-w-full space-y-2.5 sm:space-y-3 animate-fade-in h-full">
       {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS */}
-      <div className="bg-[#171717] border border-[#2A2A2A] rounded-2xl p-2.5 sm:p-3 shadow-md shrink-0">
+      <div className="bg-card/60 border border-border rounded-2xl p-2.5 sm:p-3 shadow-md shrink-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Alunos Selecionados (Chips) */}
           <div className="flex items-center gap-2 flex-wrap">
@@ -758,8 +766,8 @@ export default function Training() {
       ) : selectedStudents.length === 0 ? (
         /* Empty State com busca em destaque */
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#1E1E1E] border border-[#2E2E2E] rounded-3xl p-8 sm:p-12 text-center shadow-2xl space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-orange-400 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto">
+          <div className="w-full max-w-lg bg-card border border-border rounded-3xl p-8 sm:p-12 text-center shadow-2xl space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto">
               <PlaySquare className="w-8 h-8 text-white stroke-[2.5]" />
             </div>
 
@@ -959,7 +967,7 @@ export default function Training() {
         open={Boolean(advanceDialog)}
         onOpenChange={(open) => !open && setAdvanceDialog(null)}
       >
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-white sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
@@ -996,7 +1004,7 @@ export default function Training() {
         open={Boolean(sheetCompleteConfirm)}
         onOpenChange={(open) => !open && setSheetCompleteConfirm(null)}
       >
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-white sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-primary" /> Marcar toda a ficha como concluída?
