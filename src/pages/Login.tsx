@@ -112,12 +112,12 @@ export default function Login() {
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
               className={`bg-[#121212] ${
-                emailError ? 'border-red-500 focus-visible:ring-red-500' : 'border-[#2E2E2E] focus-visible:ring-primary'
+                emailError
+                  ? 'border-red-500 focus-visible:ring-red-500'
+                  : 'border-[#2E2E2E] focus-visible:ring-primary'
               } text-white placeholder:text-[#8A8F98] h-12`}
             />
-            {emailError && (
-              <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>
-            )}
+            {emailError && <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>}
           </div>
 
           <div className="space-y-1.5">

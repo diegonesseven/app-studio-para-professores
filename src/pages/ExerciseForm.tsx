@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { exercisesService, extractYoutubeId, getYoutubeThumbnail } from '@/services/exercises'
 import { useAuth } from '@/contexts/AuthContext'
 import { MUSCLE_GROUPS, type MuscleGroup } from '@/types'
+import { sanitizeText, sanitizeUrl } from '@/lib/validation'
 import { ArrowLeft, Dumbbell, Play, Save, Trash2, AlertCircle, Video } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -71,7 +72,8 @@ export default function ExerciseForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim()) {
+    const cleanName = sanitizeText(name)
+    if (!cleanName) {
       toast({
         title: 'Nome obrigatório',
         description: 'Por favor, informe o nome do exercício.',
@@ -82,10 +84,11 @@ export default function ExerciseForm() {
 
     setSaving(true)
     try {
+      const cleanUrl = sanitizeUrl(youtubeUrl)
       if (isEditing && id) {
         await exercisesService.update(id, {
-          name: name.trim(),
-          youtube_url: youtubeUrl.trim(),
+          name: cleanName,
+          youtube_url: cleanUrl,
           muscle_group: muscleGroup,
         })
         toast({
@@ -94,8 +97,8 @@ export default function ExerciseForm() {
         })
       } else {
         await exercisesService.create({
-          name: name.trim(),
-          youtube_url: youtubeUrl.trim(),
+          name: cleanName,
+          youtube_url: cleanUrl,
           muscle_group: muscleGroup,
         })
         toast({

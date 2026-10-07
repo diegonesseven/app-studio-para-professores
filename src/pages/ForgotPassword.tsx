@@ -91,14 +91,14 @@ export default function ForgotPassword() {
                     }
                   }}
                   className={`bg-[#121212] ${
-                    emailError ? 'border-red-500 focus-visible:ring-red-500' : 'border-[#2E2E2E] focus-visible:ring-primary'
+                    emailError
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : 'border-[#2E2E2E] focus-visible:ring-primary'
                   } text-white placeholder:text-[#8A8F98] h-12 pr-10`}
                 />
                 <Mail className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
               </div>
-              {emailError && (
-                <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>
-              )}
+              {emailError && <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>}
             </div>
 
             <Button

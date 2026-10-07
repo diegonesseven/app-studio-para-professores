@@ -1,6 +1,7 @@
 import type { Student, TrainingSheet, Exercise, ExerciseBlock, SeriesKey } from '@/types'
 import { SERIES_KEYS } from '@/types'
 import { STUDIO_LOGO_SRC } from '@/assets/logo'
+import { escapeHtml } from '@/lib/validation'
 
 export interface SheetExportData {
   student: Student
@@ -10,16 +11,6 @@ export interface SheetExportData {
   primaryColor?: string
   secondaryColor?: string
   logoUrl?: string
-}
-
-function escapeHtml(str: string | null | undefined): string {
-  if (!str) return ''
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
 }
 
 function getInitials(name: string): string {

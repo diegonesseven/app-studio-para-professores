@@ -1,5 +1,6 @@
 import pb from '@/lib/pocketbase/client'
 import type { User, UserRole } from '@/types'
+import { sanitizeText } from '@/lib/validation'
 
 export interface CreateTeacherDTO {
   name: string
@@ -89,7 +90,7 @@ export const teachersService = {
    */
   async create(data: CreateTeacherDTO): Promise<User> {
     const payload = {
-      name: data.name.trim(),
+      name: sanitizeText(data.name),
       email: data.email.trim().toLowerCase(),
       password: data.password,
       passwordConfirm: data.passwordConfirm,
@@ -104,7 +105,7 @@ export const teachersService = {
    */
   async update(id: string, data: UpdateTeacherDTO): Promise<User> {
     const payload: Record<string, unknown> = {}
-    if (data.name !== undefined) payload.name = data.name.trim()
+    if (data.name !== undefined) payload.name = sanitizeText(data.name)
     if (data.email !== undefined) payload.email = data.email.trim().toLowerCase()
     if (data.role !== undefined) payload.role = data.role
     if (data.password) {

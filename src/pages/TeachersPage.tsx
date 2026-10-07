@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { teachersService, parseTeacherErrorMessage } from '@/services/teachers'
 import { useAuth } from '@/contexts/AuthContext'
 import type { User, UserRole } from '@/types'
+import { validateEmail, sanitizeText } from '@/lib/validation'
 import {
   GraduationCap,
   Plus,
@@ -108,13 +109,14 @@ export default function TeachersPage() {
     e.preventDefault()
     setFormError(null)
 
-    if (!formName.trim()) {
+    const cleanName = sanitizeText(formName)
+    if (!cleanName) {
       setFormError('Por favor, informe o nome completo do professor.')
       return
     }
 
-    if (!formEmail.trim() || !formEmail.includes('@')) {
-      setFormError('Informe um e-mail válido.')
+    if (!validateEmail(formEmail, true)) {
+      setFormError('Informe um e-mail válido (ex: professor@studiobru.com.br).')
       return
     }
 
@@ -144,27 +146,27 @@ export default function TeachersPage() {
       setSubmitting(true)
       if (editingTeacher) {
         await teachersService.update(editingTeacher.id, {
-          name: formName,
-          email: formEmail,
+          name: cleanName,
+          email: formEmail.trim(),
           role: formRole,
           password: formPassword || undefined,
           passwordConfirm: formPasswordConfirm || undefined,
         })
         toast({
           title: 'Professor atualizado',
-          description: `Os dados de ${formName} foram atualizados com sucesso.`,
+          description: `Os dados de ${cleanName} foram atualizados com sucesso.`,
         })
       } else {
         await teachersService.create({
-          name: formName,
-          email: formEmail,
+          name: cleanName,
+          email: formEmail.trim(),
           password: formPassword,
           passwordConfirm: formPasswordConfirm,
           role: formRole,
         })
         toast({
           title: 'Professor cadastrado com sucesso! 🎉',
-          description: `Login criado para ${formName}. O professor já pode entrar no app.`,
+          description: `Login criado para ${cleanName}. O professor já pode entrar no app.`,
         })
       }
       setModalOpen(false)

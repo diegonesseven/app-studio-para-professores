@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { studentsService } from '@/services/students'
 import { exercisesService } from '@/services/exercises'
+import { sanitizeText } from '@/lib/validation'
 import type {
   TrainingSheet,
   Student,
@@ -243,11 +244,24 @@ export default function SheetForm() {
 
     setSaving(true)
     try {
+      // Sanitizar dados das séries contra injeção maliciosa de scripts
+      const cleanedSeriesData: SeriesData = {}
+      SERIES_KEYS.forEach((key) => {
+        const blocks = seriesData[key] || []
+        cleanedSeriesData[key] = blocks.map((b) => ({
+          ...b,
+          reps: sanitizeText(b.reps),
+          time: sanitizeText(b.time),
+          load: sanitizeText(b.load),
+          notes: sanitizeText(b.notes),
+        }))
+      })
+
       const payload = {
         student: student.id,
-        title: title.trim() || `Ficha de Treino - ${student.name}`,
-        notes: notes.trim(),
-        series_data: seriesData,
+        title: sanitizeText(title) || `Ficha de Treino - ${student.name}`,
+        notes: sanitizeText(notes),
+        series_data: cleanedSeriesData,
       }
 
       if (isEditing && id) {

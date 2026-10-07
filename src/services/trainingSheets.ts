@@ -1,5 +1,6 @@
 import pb from '@/lib/pocketbase/client'
 import type { TrainingSheet, SeriesData } from '@/types'
+import { sanitizeText } from '@/lib/validation'
 
 export const trainingSheetsService = {
   async getAll(): Promise<TrainingSheet[]> {
@@ -34,7 +35,12 @@ export const trainingSheetsService = {
     notes?: string
     series_data?: SeriesData
   }): Promise<TrainingSheet> {
-    return pb.collection('training_sheets').create<TrainingSheet>(data)
+    const payload = {
+      ...data,
+      title: data.title ? sanitizeText(data.title) : undefined,
+      notes: data.notes ? sanitizeText(data.notes) : undefined,
+    }
+    return pb.collection('training_sheets').create<TrainingSheet>(payload)
   },
 
   async update(
@@ -45,7 +51,12 @@ export const trainingSheetsService = {
       series_data?: SeriesData
     }>,
   ): Promise<TrainingSheet> {
-    return pb.collection('training_sheets').update<TrainingSheet>(id, data)
+    const payload = {
+      ...data,
+      title: data.title !== undefined ? sanitizeText(data.title) : undefined,
+      notes: data.notes !== undefined ? sanitizeText(data.notes) : undefined,
+    }
+    return pb.collection('training_sheets').update<TrainingSheet>(id, payload)
   },
 
   async duplicate(id: string, targetStudentId?: string): Promise<TrainingSheet> {

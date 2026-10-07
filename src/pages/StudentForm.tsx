@@ -24,6 +24,7 @@ import {
   type Exercise,
   type Student,
 } from '@/types'
+import { maskPhone, validatePhone, sanitizeText } from '@/lib/validation'
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { shareOrExportSheet } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -57,6 +58,7 @@ export default function StudentForm() {
   const [name, setName] = useState('')
   const [birthdate, setBirthdate] = useState('')
   const [phone, setPhone] = useState('')
+  const [phoneError, setPhoneError] = useState<string | null>(null)
   const [generalObservations, setGeneralObservations] = useState('')
 
   // Anamnese (opcional)
@@ -89,7 +91,7 @@ export default function StudentForm() {
         .then(([st, history, exList]) => {
           setName(st.name)
           setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
-          setPhone(st.phone || '')
+          setPhone(st.phone ? maskPhone(st.phone) : '')
           setGeneralObservations(st.general_observations || '')
 
           setHealthHistory(st.health_history || '')
@@ -134,9 +136,22 @@ export default function StudentForm() {
     setGoals((prev) => (prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]))
   }
 
+  const handlePhoneChange = (val: string) => {
+    const masked = maskPhone(val)
+    setPhone(masked)
+    if (phoneError) {
+      if (validatePhone(masked, false)) {
+        setPhoneError(null)
+      }
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name.trim()) {
+    setPhoneError(null)
+
+    const sanitizedName = sanitizeText(name)
+    if (!sanitizedName) {
       toast({
         title: 'Nome obrigatório',
         description: 'Informe o nome completo do aluno.',
@@ -145,20 +160,30 @@ export default function StudentForm() {
       return
     }
 
+    if (phone.trim() && !validatePhone(phone, false)) {
+      setPhoneError('Telefone inválido. Utilize o formato (00) 00000-0000.')
+      toast({
+        title: 'Telefone inválido',
+        description: 'Verifique o número informado.',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setSaving(true)
     try {
       const payload = {
-        name: name.trim(),
+        name: sanitizedName,
         birthdate: birthdate ? new Date(birthdate).toISOString() : undefined,
-        phone: phone.trim() || undefined,
-        general_observations: generalObservations.trim() || undefined,
-        health_history: healthHistory.trim() || undefined,
-        injuries: injuries.trim() || undefined,
-        surgeries: surgeries.trim() || undefined,
-        restrictions: restrictions.trim() || undefined,
+        phone: phone.trim() ? sanitizeText(phone.trim()) : undefined,
+        general_observations: sanitizeText(generalObservations) || undefined,
+        health_history: sanitizeText(healthHistory) || undefined,
+        injuries: sanitizeText(injuries) || undefined,
+        surgeries: sanitizeText(surgeries) || undefined,
+        restrictions: sanitizeText(restrictions) || undefined,
         goals: goals.length ? goals : undefined,
         experience_level: experienceLevel,
-        teacher_observations: teacherObservations.trim() || undefined,
+        teacher_observations: sanitizeText(teacherObservations) || undefined,
       }
 
       let savedId = id
@@ -289,11 +314,16 @@ export default function StudentForm() {
                   id="phone"
                   placeholder="(11) 98765-4321"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  className={`bg-[#121212] ${
+                    phoneError
+                      ? 'border-red-500 focus-visible:ring-red-500'
+                      : 'border-[#2E2E2E] focus-visible:ring-primary'
+                  } text-white placeholder:text-[#8A8F98] h-12 pr-10`}
                 />
                 <Phone className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98] pointer-events-none" />
               </div>
+              {phoneError && <p className="text-xs text-red-400 font-medium mt-1">{phoneError}</p>}
             </div>
           </div>
 

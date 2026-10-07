@@ -96,7 +96,8 @@ export function validateEmail(value: string | null | undefined, required = false
   if (!value || !value.trim()) return !required
   const trimmed = value.trim()
   // Padrão de e-mail seguro
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/
+  const emailRegex =
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/
   if (!emailRegex.test(trimmed)) return false
   if (trimmed.length > 254) return false
   return true
@@ -135,12 +136,7 @@ export function validateDate(value: string | null | undefined, required = false)
 /**
  * Valida número inteiro positivo (ex: séries: 1 a 20).
  */
-export function validatePositiveInt(
-  value: unknown,
-  min = 1,
-  max = 999,
-  required = false,
-): boolean {
+export function validatePositiveInt(value: unknown, min = 1, max = 999, required = false): boolean {
   if (value === undefined || value === null || value === '') return !required
   const num = typeof value === 'number' ? value : Number(String(value).trim())
   if (!Number.isInteger(num)) return false
@@ -161,23 +157,30 @@ export function sanitizeNumericOnly(value: string): string {
  */
 export function sanitizeText(str: string | null | undefined): string {
   if (!str) return ''
-  return String(str)
-    // Remove tags de script e fechamento
-    .replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
-    .replace(/<\s*script[^>]*>/gi, '')
-    .replace(/<\s*\/\s*script\s*>/gi, '')
-    // Remove iframes / embeds / objects
-    .replace(/<\s*iframe[^>]*>[\s\S]*?<\s*\/\s*iframe\s*>/gi, '')
-    .replace(/<\s*iframe[^>]*>/gi, '')
-    .replace(/<\s*embed[^>]*>/gi, '')
-    .replace(/<\s*object[^>]*>[\s\S]*?<\s*\/\s*object\s*>/gi, '')
-    // Remove links com javascript: ou data:
-    .replace(/href\s*=\s*['"]?javascript:[^'"]*['"]?/gi, 'href="#"')
-    // Remove atributos de evento inline on* (ex: onload=, onerror=, onclick=)
-    .replace(/\bon\w+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi, '')
-    // Remove declarações de tags <style> inline para evitar injection de CSS malicioso
-    .replace(/<\s*style[^>]*>[\s\S]*?<\s*\/\s*style\s*>/gi, '')
-    .trim()
+  return (
+    String(str)
+      // Remove tags de script e seu conteúdo
+      .replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, '')
+      .replace(/<\s*script[^>]*>/gi, '')
+      .replace(/<\s*\/\s*script\s*>/gi, '')
+      // Remove iframes / embeds / objects
+      .replace(/<\s*iframe[^>]*>[\s\S]*?<\s*\/\s*iframe\s*>/gi, '')
+      .replace(/<\s*iframe[^>]*>/gi, '')
+      .replace(/<\s*embed[^>]*>/gi, '')
+      .replace(/<\s*object[^>]*>[\s\S]*?<\s*\/\s*object\s*>/gi, '')
+      // Remove tags HTML perigosas para injeção (ex: img, svg, link, form, input, button com handlers)
+      .replace(
+        /<\s*(?:img|svg|body|html|link|meta|style|base|applet|form|button|input)\b[^>]*>/gi,
+        '',
+      )
+      // Remove links perigosos com javascript:, vbscript: ou data:
+      .replace(/(?:href|src|action)\s*=\s*['"]?\s*(?:javascript|data|vbscript):[^'"]*['"]?/gi, '')
+      // Remove atributos de evento inline on* (ex: onload=, onerror=, onclick=, onfocus=)
+      .replace(/\bon\w+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi, '')
+      // Remove tags de estilo para evitar injeção de CSS malicioso
+      .replace(/<\s*style[^>]*>[\s\S]*?<\s*\/\s*style\s*>/gi, '')
+      .trim()
+  )
 }
 
 /**

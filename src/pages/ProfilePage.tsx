@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { profileService, parseProfileErrorMessage } from '@/services/profile'
 import { toast } from '@/hooks/use-toast'
 import pb from '@/lib/pocketbase/client'
+import { validateEmail, sanitizeText } from '@/lib/validation'
 import {
   User as UserIcon,
   Mail,
@@ -80,7 +81,8 @@ export default function ProfilePage() {
     e.preventDefault()
     if (!user) return
 
-    if (!name.trim()) {
+    const cleanName = sanitizeText(name)
+    if (!cleanName) {
       toast({
         title: 'Nome obrigatório',
         description: 'Por favor, informe seu nome completo.',
@@ -93,7 +95,7 @@ export default function ProfilePage() {
       setSavingProfile(true)
       setProfileSuccess(false)
       await profileService.updateProfile(user.id, {
-        name,
+        name: cleanName,
         avatar: avatarFile,
       })
       await refreshUser()
@@ -117,15 +119,14 @@ export default function ProfilePage() {
   // Submissão de Troca de E-mail
   const handleRequestEmailChange = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newEmail.trim() || !newEmail.includes('@')) {
+    if (!validateEmail(newEmail, true)) {
       toast({
         title: 'E-mail inválido',
-        description: 'Informe um endereço de e-mail válido.',
+        description: 'Por favor, informe um endereço de e-mail válido.',
         variant: 'destructive',
       })
       return
     }
-
     if (newEmail.trim().toLowerCase() === user?.email?.toLowerCase()) {
       toast({
         title: 'Mesmo e-mail',
