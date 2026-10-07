@@ -65,6 +65,24 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     min-height: 100vh;
+    /* PWA Fullscreen & Safe Area handling */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Permitir seleção em campos de texto */
+  input,
+  textarea,
+  [contenteditable='true'] {
+    user-select: text;
+    -webkit-user-select: text;
   }
 
   /* Alvo de toque mínimo recomendado de 44px para botões operáveis em tablet/mobile */

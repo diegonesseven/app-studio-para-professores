@@ -101,6 +101,46 @@ function applyThemeToDocument(appearance: AppAppearanceSettings) {
     root.style.setProperty('--accent-foreground', fg)
     root.style.setProperty('--sidebar-primary-foreground', fg)
   }
+
+  // Sincroniza meta tags PWA nativas do navegador
+  try {
+    // 1. theme-color
+    let metaTheme = document.querySelector('meta[name="theme-color"]')
+    if (!metaTheme) {
+      metaTheme = document.createElement('meta')
+      metaTheme.setAttribute('name', 'theme-color')
+      document.head.appendChild(metaTheme)
+    }
+    metaTheme.setAttribute('content', appearance.primary_color || '#F06A2A')
+
+    // 2. Title do documento
+    if (appearance.studio_name) {
+      document.title = appearance.studio_name
+    }
+
+    // 3. Ícone dinâmico do app se customizado pelo admin
+    if (appearance.logo_url) {
+      const appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]')
+      if (appleTouchIcon) {
+        appleTouchIcon.setAttribute('href', appearance.logo_url)
+      }
+      const iconLink = document.querySelector('link[rel="icon"]')
+      if (iconLink) {
+        iconLink.setAttribute('href', appearance.logo_url)
+      }
+    } else {
+      const appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]')
+      if (appleTouchIcon) {
+        appleTouchIcon.setAttribute('href', '/icon.svg')
+      }
+      const iconLink = document.querySelector('link[rel="icon"]')
+      if (iconLink) {
+        iconLink.setAttribute('href', '/icon.svg')
+      }
+    }
+  } catch (_) {
+    // Ignora erros caso o ambiente não seja o DOM
+  }
 }
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

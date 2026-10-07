@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { InstallPromptBanner } from '@/components/InstallPromptBanner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import {
@@ -177,6 +178,7 @@ export default function Layout() {
 
       {/* TOPBAR MOBILE (< 1024px) */}
       <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
+        <InstallPromptBanner />
         <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-[#171717] border-b border-[#2A2A2A] z-20 shrink-0">
           <div className="flex items-center gap-2.5 min-w-0">
             {appearance.logo_url ? (
