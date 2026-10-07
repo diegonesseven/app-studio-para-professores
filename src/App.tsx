@@ -25,14 +25,20 @@ import SheetForm from './pages/SheetForm'
 import Training from './pages/Training'
 import HistoryPage from './pages/HistoryPage'
 import Appearance from './pages/Appearance'
+import TeachersPage from './pages/TeachersPage'
 import NotFound from './pages/NotFound'
 
 /**
- * Guarda de rota autenticada.
- * Redireciona para /login se não houver sessão ativa.
+ * Guarda de rota autenticada com suporte opcional a restrição de role (ex.: admin).
  */
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth()
+function ProtectedRoute({
+  children,
+  adminOnly = false,
+}: {
+  children: React.ReactNode
+  adminOnly?: boolean
+}) {
+  const { user, isAdmin, isLoading } = useAuth()
 
   if (isLoading) {
     return (
@@ -44,6 +50,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return <Navigate to="/login" replace />
+  }
+
+  if (adminOnly && !isAdmin) {
+    return <Navigate to="/" replace />
   }
 
   return <>{children}</>
@@ -95,8 +105,25 @@ const App = () => (
               {/* Histórico de Treinos */}
               <Route path="/historico" element={<HistoryPage />} />
 
+              {/* Gestão de Professores (Exclusivo Admin) */}
+              <Route
+                path="/professores"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <TeachersPage />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Personalização de Aparência e Cores (Admin) */}
-              <Route path="/aparencia" element={<Appearance />} />
+              <Route
+                path="/aparencia"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <Appearance />
+                  </ProtectedRoute>
+                }
+              />
             </Route>
 
             {/* 404 */}

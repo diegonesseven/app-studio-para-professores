@@ -222,45 +222,45 @@ export default function StudentTrainingColumn({
             return (
               <div
                 key={`${block.exercise_id}-${idx}`}
-                className={`p-2.5 sm:p-3 rounded-xl border transition-all ${
+                className={`p-3 sm:p-3.5 rounded-xl border transition-all ${
                   isEditingThis
                     ? 'bg-[#181818] border-primary ring-2 ring-primary/30 shadow-xl'
                     : isDone
-                      ? 'bg-emerald-950/20 border-emerald-600/40 shadow-sm'
-                      : 'bg-[#151515] border-[#2A2A2A] hover:border-[#F06A2A]/50 shadow-sm'
+                      ? 'bg-emerald-950/25 border-emerald-600/50 shadow-sm'
+                      : 'bg-[#151515] border-[#2E2E2E] hover:border-primary/50 shadow-sm'
                 }`}
               >
-                {/* 1. TOPO: Checkmark + NOME DO EXERCÍCIO + Ações (lápis e vídeo) num bloco horizontal enxuto */}
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    {/* Botão de Checkmark da sessão - 40x40px */}
+                {/* 1. TOPO: Checkmark + NOME DO EXERCÍCIO + Ações (lápis e vídeo) num bloco horizontal ampliado */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {/* Botão de Checkmark da sessão - 44x44px (ampliado para toque e visualização rápida à distância) */}
                     <button
                       type="button"
                       onClick={() => onToggleExercise(idx)}
-                      className={`min-w-[40px] min-h-[40px] w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform active:scale-95 ${
+                      className={`min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform active:scale-95 ${
                         isDone
-                          ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30 animate-check-pop ring-2 ring-emerald-500/40'
-                          : 'border-2 border-[#3E3E3E] bg-[#1F1F1F] text-transparent hover:border-primary hover:text-primary/40'
+                          ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/35 animate-check-pop ring-2 ring-emerald-500/50'
+                          : 'border-2 border-[#454545] bg-[#1F1F1F] text-transparent hover:border-primary hover:text-primary/40'
                       }`}
                       aria-label={isDone ? 'Desmarcar exercício' : 'Marcar como concluído'}
                     >
-                      <Check className="w-5 h-5 stroke-[3]" />
+                      <Check className="w-6 h-6 stroke-[3.5]" />
                     </button>
 
-                    {/* Nome do exercício com badge número e grupo muscular na mesma linha ou compacto */}
+                    {/* Nome do exercício com badge número e grupo muscular ampliado */}
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 leading-none mb-0.5">
-                        <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#252525] text-primary shrink-0 border border-primary/20">
+                      <div className="flex items-center gap-1.5 leading-none mb-1">
+                        <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#252525] text-primary shrink-0 border border-primary/25">
                           #{idx + 1}
                         </span>
-                        <span className="text-[11px] text-[#9CA3AF] font-semibold uppercase tracking-wider truncate">
+                        <span className="text-xs text-[#9CA3AF] font-bold uppercase tracking-wider truncate">
                           {muscle}
                         </span>
                       </div>
 
                       <h3
                         onClick={() => ex && onOpenVideo(ex)}
-                        className={`text-sm sm:text-base font-black leading-tight truncate transition-colors cursor-pointer ${
+                        className={`text-base sm:text-lg font-black leading-snug truncate transition-colors cursor-pointer ${
                           isDone ? 'line-through text-[#8A8F98]' : 'text-white hover:text-primary'
                         }`}
                         title={name}
@@ -271,16 +271,16 @@ export default function StudentTrainingColumn({
                   </div>
 
                   {/* Ações do Card: Editar Inline (professor/admin) e Vídeo */}
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     {canEdit && !isEditingThis && (
                       <button
                         type="button"
                         onClick={() => handleStartEdit(idx, block)}
-                        className="h-8 w-8 sm:h-9 sm:w-9 p-1 rounded-lg text-[#8A8F98] hover:text-primary hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-all flex items-center justify-center active:scale-95"
+                        className="h-9 w-9 sm:h-10 sm:w-10 p-1.5 rounded-xl text-[#8A8F98] hover:text-primary hover:bg-[#252525] border border-transparent hover:border-[#383838] transition-all flex items-center justify-center active:scale-95"
                         title="Editar parâmetros deste exercício"
                         aria-label={`Editar ${name}`}
                       >
-                        <Pencil className="w-3.5 h-3.5" />
+                        <Pencil className="w-4 h-4" />
                       </button>
                     )}
 
@@ -288,11 +288,11 @@ export default function StudentTrainingColumn({
                       <button
                         type="button"
                         onClick={() => onOpenVideo(ex)}
-                        className="h-8 w-8 sm:h-9 sm:w-9 p-1 rounded-lg bg-primary/15 text-primary hover:bg-primary/25 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/30"
+                        className="h-9 w-9 sm:h-10 sm:w-10 p-1.5 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/30 shadow-sm"
                         title="Ver demonstração em vídeo"
                         aria-label={`Ver vídeo de ${name}`}
                       >
-                        <Play className="w-3.5 h-3.5 fill-current shrink-0" />
+                        <Play className="w-4 h-4 fill-current shrink-0" />
                       </button>
                     )}
                   </div>
@@ -300,18 +300,18 @@ export default function StudentTrainingColumn({
 
                 {/* 2. FORMULÁRIO DE EDIÇÃO INLINE (quando aberto) */}
                 {isEditingThis && editDraft ? (
-                  <div className="mt-2.5 pt-2.5 border-t border-[#2C2C2C] space-y-2 bg-[#141414] p-2.5 rounded-lg border border-primary/40 animate-fade-in">
+                  <div className="mt-3 pt-3 border-t border-[#2C2C2C] space-y-2.5 bg-[#141414] p-3 rounded-xl border border-primary/40 animate-fade-in">
                     <div className="flex items-center justify-between pb-0.5">
-                      <span className="text-[11px] font-black uppercase tracking-wider text-primary flex items-center gap-1">
-                        <Pencil className="w-3 h-3" /> Edição rápida
+                      <span className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1">
+                        <Pencil className="w-3.5 h-3.5" /> Edição rápida
                       </span>
-                      <span className="text-[10px] text-[#8A8F98]">Salva na ficha</span>
+                      <span className="text-[11px] text-[#8A8F98]">Salva na ficha</span>
                     </div>
 
                     {/* Grid com Séries, Reps, Carga, Descanso */}
-                    <div className="grid grid-cols-4 gap-1.5">
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                    <div className="grid grid-cols-4 gap-2">
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
                           Séries
                         </label>
                         <Input
@@ -325,12 +325,12 @@ export default function StudentTrainingColumn({
                               sets: parseInt(e.target.value) || 1,
                             })
                           }
-                          className="h-9 bg-[#1E1E1E] border-[#383838] text-white font-bold text-center text-xs focus-visible:ring-primary px-1"
+                          className="h-10 bg-[#1E1E1E] border-[#383838] text-white font-black text-center text-sm focus-visible:ring-primary px-1"
                         />
                       </div>
 
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
                           Reps
                         </label>
                         <Input
@@ -343,12 +343,12 @@ export default function StudentTrainingColumn({
                               reps: e.target.value,
                             })
                           }
-                          className="h-9 bg-[#1E1E1E] border-[#383838] text-white font-bold text-center text-xs focus-visible:ring-primary px-1"
+                          className="h-10 bg-[#1E1E1E] border-[#383838] text-white font-black text-center text-sm focus-visible:ring-primary px-1"
                         />
                       </div>
 
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
                           Carga
                         </label>
                         <Input
@@ -361,12 +361,12 @@ export default function StudentTrainingColumn({
                               load: e.target.value,
                             })
                           }
-                          className="h-9 bg-[#1E1E1E] border-[#383838] text-primary font-black text-center text-xs focus-visible:ring-primary px-1"
+                          className="h-10 bg-[#1E1E1E] border-[#383838] text-primary font-black text-center text-sm focus-visible:ring-primary px-1"
                         />
                       </div>
 
-                      <div className="space-y-0.5">
-                        <label className="text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
                           Descanso
                         </label>
                         <Input
@@ -379,14 +379,14 @@ export default function StudentTrainingColumn({
                               time: e.target.value,
                             })
                           }
-                          className="h-9 bg-[#1E1E1E] border-[#383838] text-white font-bold text-center text-xs focus-visible:ring-primary px-1"
+                          className="h-10 bg-[#1E1E1E] border-[#383838] text-white font-black text-center text-sm focus-visible:ring-primary px-1"
                         />
                       </div>
                     </div>
 
                     {/* Observações */}
-                    <div className="space-y-0.5">
-                      <label className="text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
                         Observações
                       </label>
                       <Input
@@ -399,19 +399,19 @@ export default function StudentTrainingColumn({
                             notes: e.target.value,
                           })
                         }
-                        className="h-9 bg-[#1E1E1E] border-[#383838] text-white text-xs focus-visible:ring-primary"
+                        className="h-10 bg-[#1E1E1E] border-[#383838] text-white text-xs sm:text-sm focus-visible:ring-primary"
                       />
                     </div>
 
                     {/* Botões Salvar / Cancelar */}
-                    <div className="flex items-center justify-end gap-1.5 pt-0.5">
+                    <div className="flex items-center justify-end gap-2 pt-1">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={handleCancelEdit}
                         disabled={savingEdit}
-                        className="h-8 px-2.5 border-[#333333] bg-[#1E1E1E] hover:bg-[#282828] text-white text-[11px] font-bold"
+                        className="h-9 px-3 border-[#333333] bg-[#1E1E1E] hover:bg-[#282828] text-white text-xs font-bold"
                       >
                         <X className="w-3.5 h-3.5 mr-1" /> Cancelar
                       </Button>
@@ -420,7 +420,7 @@ export default function StudentTrainingColumn({
                         size="sm"
                         onClick={() => handleSaveEdit(idx)}
                         disabled={savingEdit}
-                        className="h-8 px-3.5 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-[11px] shadow-sm shadow-primary/30"
+                        className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs shadow-sm shadow-primary/30"
                       >
                         {savingEdit ? (
                           <>
@@ -435,45 +435,45 @@ export default function StudentTrainingColumn({
                     </div>
                   </div>
                 ) : (
-                  /* Modo de Visualização: 4 colunas horizontais compactas em uma linha única */
-                  <div className="mt-2 pt-2 border-t border-[#242424]">
-                    <div className="grid grid-cols-4 gap-1.5 text-center">
+                  /* Modo de Visualização: 4 colunas horizontais ampliadas em uma linha única para alta legibilidade */
+                  <div className="mt-2.5 pt-2.5 border-t border-[#262626]">
+                    <div className="grid grid-cols-4 gap-2 text-center">
                       {/* Séries */}
-                      <div className="bg-[#1A1A1A] border border-[#262626] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
                           Séries
                         </span>
-                        <span className="text-sm sm:text-base font-black text-white leading-tight">
+                        <span className="text-base sm:text-lg font-black text-white leading-tight">
                           {block.sets}x
                         </span>
                       </div>
 
                       {/* Repetições */}
-                      <div className="bg-[#1A1A1A] border border-[#262626] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
                           Reps
                         </span>
-                        <span className="text-sm sm:text-base font-black text-white leading-tight truncate max-w-full px-0.5">
+                        <span className="text-base sm:text-lg font-black text-white leading-tight truncate max-w-full px-0.5">
                           {block.reps || '10'}
                         </span>
                       </div>
 
                       {/* Carga */}
-                      <div className="bg-[#1A1A1A] border border-[#262626] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
                           Carga
                         </span>
-                        <span className="text-sm sm:text-base font-black text-primary leading-tight truncate max-w-full px-0.5">
+                        <span className="text-base sm:text-lg font-black text-primary leading-tight truncate max-w-full px-0.5">
                           {block.load || '—'}
                         </span>
                       </div>
 
                       {/* Descanso */}
-                      <div className="bg-[#1A1A1A] border border-[#262626] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
                           Pausa
                         </span>
-                        <span className="text-sm sm:text-base font-black text-white leading-tight truncate max-w-full px-0.5">
+                        <span className="text-base sm:text-lg font-black text-white leading-tight truncate max-w-full px-0.5">
                           {block.time || '60s'}
                         </span>
                       </div>
@@ -484,7 +484,7 @@ export default function StudentTrainingColumn({
                       <button
                         type="button"
                         onClick={() => toggleNote(idx)}
-                        className="mt-1.5 w-full text-left text-[11px] text-[#D1D5DB] bg-[#181818] px-2 py-1 rounded-md border border-[#262626] hover:border-[#383838] transition-colors flex items-start gap-1"
+                        className="mt-2 w-full text-left text-xs sm:text-[13px] text-[#D1D5DB] bg-[#181818] px-2.5 py-1.5 rounded-lg border border-[#282828] hover:border-[#3A3A3A] transition-colors flex items-start gap-1.5"
                         title={block.notes}
                       >
                         <strong className="text-primary font-bold shrink-0">Obs:</strong>
