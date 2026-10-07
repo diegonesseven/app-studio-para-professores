@@ -26,6 +26,7 @@ import Training from './pages/Training'
 import HistoryPage from './pages/HistoryPage'
 import Appearance from './pages/Appearance'
 import TeachersPage from './pages/TeachersPage'
+import ProfilePage from './pages/ProfilePage'
 import NotFound from './pages/NotFound'
 
 /**
@@ -121,6 +122,16 @@ const App = () => (
                 element={
                   <ProtectedRoute adminOnly>
                     <Appearance />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Meu Perfil (Qualquer usuário autenticado: admin ou professor) */}
+              <Route
+                path="/perfil"
+                element={
+                  <ProtectedRoute>
+                    <ProfilePage />
                   </ProtectedRoute>
                 }
               />

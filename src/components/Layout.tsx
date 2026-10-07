@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   UserCheck,
   GraduationCap,
+  User as UserIcon,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -51,6 +52,7 @@ export default function Layout() {
           { name: 'Aparência & Logo', path: '/aparencia', icon: Palette, adminOnly: true },
         ]
       : []),
+    { name: 'Meu Perfil', path: '/perfil', icon: UserIcon },
   ]
 
   const handleLogout = () => {
@@ -140,28 +142,35 @@ export default function Layout() {
         {/* Footer / User info */}
         <div className="p-3 border-t border-[#2A2A2A] bg-[#141414]">
           <div className="flex items-center gap-3 p-2 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A]">
-            <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-xs font-bold text-secondary shrink-0">
-              {userInitials || 'P'}
-            </div>
-            <div className="flex flex-col min-w-0 flex-1">
-              <span className="text-xs font-semibold text-white truncate">
-                {user?.name || user?.email || 'Professor'}
-              </span>
-              <span className="text-[10px] text-[#8A8F98] flex items-center gap-1">
-                {role === 'admin' ? (
-                  <>
-                    <ShieldCheck className="w-3 h-3 text-secondary" /> Administrador
-                  </>
-                ) : (
-                  <>
-                    <UserCheck className="w-3 h-3 text-emerald-400" /> Professor
-                  </>
-                )}
-              </span>
-            </div>
+            <button
+              type="button"
+              onClick={() => navigate('/perfil')}
+              className="flex items-center gap-3 min-w-0 flex-1 text-left rounded-lg p-1 -m-1 hover:bg-[#2A2A2A] transition-colors group"
+              title="Acessar Meu Perfil"
+            >
+              <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-xs font-bold text-secondary shrink-0 group-hover:border-primary">
+                {userInitials || 'P'}
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-xs font-semibold text-white truncate group-hover:text-primary transition-colors">
+                  {user?.name || user?.email || 'Professor'}
+                </span>
+                <span className="text-[10px] text-[#8A8F98] flex items-center gap-1">
+                  {role === 'admin' ? (
+                    <>
+                      <ShieldCheck className="w-3 h-3 text-secondary" /> Administrador
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className="w-3 h-3 text-emerald-400" /> Professor
+                    </>
+                  )}
+                </span>
+              </div>
+            </button>
             <button
               onClick={() => setLogoutDialogOpen(true)}
-              className="p-1.5 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
+              className="p-1.5 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors shrink-0"
               title="Sair"
               aria-label="Sair da conta"
             >
@@ -232,18 +241,28 @@ export default function Layout() {
                 </button>
               </div>
 
-              <div className="py-4 border-b border-[#2A2A2A] flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-sm font-bold text-secondary">
-                  {userInitials || 'P'}
-                </div>
-                <div className="flex flex-col min-w-0">
-                  <span className="text-sm font-semibold truncate">
-                    {user?.name || user?.email || 'Professor'}
-                  </span>
-                  <span className="text-xs text-[#8A8F98]">
-                    {role === 'admin' ? 'Administrador' : 'Professor'}
-                  </span>
-                </div>
+              <div className="py-4 border-b border-[#2A2A2A]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMobileMenuOpen(false)
+                    navigate('/perfil')
+                  }}
+                  className="w-full flex items-center gap-3 p-2 -m-2 rounded-xl hover:bg-[#222222] text-left transition-colors"
+                  title="Abrir Meu Perfil"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-sm font-bold text-secondary shrink-0">
+                    {userInitials || 'P'}
+                  </div>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="text-sm font-semibold truncate text-white">
+                      {user?.name || user?.email || 'Professor'}
+                    </span>
+                    <span className="text-xs text-[#8A8F98] flex items-center gap-1">
+                      {role === 'admin' ? 'Administrador' : 'Professor'} • Ver perfil
+                    </span>
+                  </div>
+                </button>
               </div>
 
               <nav className="flex-1 py-4 space-y-1.5 overflow-y-auto">

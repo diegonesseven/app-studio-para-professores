@@ -19,9 +19,10 @@ export interface UpdateTeacherDTO {
 
 export function parseTeacherErrorMessage(err: unknown): string {
   if (err && typeof err === 'object' && 'response' in err) {
-    const response = (err as { response?: { data?: Record<string, { message?: string }> } })
-      .response
-    if (response?.data) {
+    const response = (
+      err as { response?: { message?: string; data?: Record<string, { message?: string }> } }
+    ).response
+    if (response?.data && Object.keys(response.data).length > 0) {
       if (response.data.email?.message) {
         const msg = response.data.email.message.toLowerCase()
         if (msg.includes('unique') || msg.includes('exists') || msg.includes('já')) {
@@ -38,6 +39,14 @@ export function parseTeacherErrorMessage(err: unknown): string {
       if (response.data.name?.message) {
         return `Nome: ${response.data.name.message}`
       }
+      // Retornar a primeira mensagem de erro de campo encontrada
+      const firstField = Object.values(response.data)[0]
+      if (firstField?.message) {
+        return firstField.message
+      }
+    }
+    if (response?.message) {
+      return response.message
     }
   }
   if (err instanceof Error) {
@@ -76,7 +85,7 @@ export const teachersService = {
   },
 
   /**
-   * Cadastra um novo professor com senha e email já verificado
+   * Cadastra um novo professor com senha definida pelo admin
    */
   async create(data: CreateTeacherDTO): Promise<User> {
     const payload = {
@@ -86,7 +95,6 @@ export const teachersService = {
       passwordConfirm: data.passwordConfirm,
       role: data.role || 'professor',
       emailVisibility: false,
-      verified: true,
     }
     return pb.collection('users').create<User>(payload)
   },
