@@ -61,6 +61,7 @@ export type GoalOption = (typeof GOAL_OPTIONS)[number]
 export interface Student {
   id: string
   name: string
+  cpf?: string
   birthdate?: string
   phone?: string
   general_observations?: string

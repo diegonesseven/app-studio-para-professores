@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import pb from '@/lib/pocketbase/client'
+import { validateEmail } from '@/lib/validation'
 import { ArrowLeft, CheckCircle2, KeyRound, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,11 +12,19 @@ export default function ForgotPassword() {
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
     setError(null)
+    setEmailError(null)
+
+    if (!validateEmail(email, true)) {
+      setEmailError('E-mail inválido. Por favor, verifique o formato digitado.')
+      return
+    }
+
+    setIsLoading(true)
 
     try {
       await pb.collection('users').requestPasswordReset(email.trim())
@@ -75,11 +84,21 @@ export default function ForgotPassword() {
                   required
                   placeholder="professor@studiobru.com.br"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-primary"
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    if (emailError && validateEmail(e.target.value, true)) {
+                      setEmailError(null)
+                    }
+                  }}
+                  className={`bg-[#121212] ${
+                    emailError ? 'border-red-500 focus-visible:ring-red-500' : 'border-[#2E2E2E] focus-visible:ring-primary'
+                  } text-white placeholder:text-[#8A8F98] h-12 pr-10`}
                 />
                 <Mail className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
               </div>
+              {emailError && (
+                <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>
+              )}
             </div>
 
             <Button

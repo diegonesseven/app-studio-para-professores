@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { STUDIO_LOGO_SRC } from '@/assets/logo'
 import { extractFieldErrors } from '@/lib/pocketbase/errors'
+import { validateEmail } from '@/lib/validation'
 import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,9 +20,27 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [emailError, setEmailError] = useState<string | null>(null)
+
+  const handleEmailChange = (val: string) => {
+    setEmail(val)
+    if (emailError) {
+      if (validateEmail(val, true)) {
+        setEmailError(null)
+      }
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setEmailError(null)
+
+    if (!validateEmail(email, true)) {
+      setEmailError('E-mail inválido. Digite um formato como seu.email@exemplo.com')
+      return
+    }
+
     setIsLoading(true)
 
     try {
@@ -91,9 +110,14 @@ export default function Login() {
               required
               placeholder="seu.email@studiobru.com.br"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
+              onChange={(e) => handleEmailChange(e.target.value)}
+              className={`bg-[#121212] ${
+                emailError ? 'border-red-500 focus-visible:ring-red-500' : 'border-[#2E2E2E] focus-visible:ring-primary'
+              } text-white placeholder:text-[#8A8F98] h-12`}
             />
+            {emailError && (
+              <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>
+            )}
           </div>
 
           <div className="space-y-1.5">
