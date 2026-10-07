@@ -412,9 +412,9 @@ export default function Training() {
   })
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 max-w-full space-y-3 sm:space-y-4 animate-fade-in pb-2">
+    <div className="flex flex-col flex-1 min-h-0 max-w-full space-y-2.5 sm:space-y-3 animate-fade-in h-full">
       {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS */}
-      <div className="bg-[#171717] border border-[#2A2A2A] rounded-2xl p-3 sm:p-4 shadow-md shrink-0">
+      <div className="bg-[#171717] border border-[#2A2A2A] rounded-2xl p-2.5 sm:p-3 shadow-md shrink-0">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Alunos Selecionados (Chips) */}
           <div className="flex items-center gap-2 flex-wrap">
@@ -545,14 +545,14 @@ export default function Training() {
         /* RENDERIZAÇÃO RESPONSIVA */
         <div className="flex-1 flex flex-col min-h-0">
           {/* LAYOUT DESKTOP / TABLET (>= 1024px) — 3 COLUNAS LADO A LADO */}
-          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-[500px]">
+          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1 min-h-0">
             {selectedStudents.map((st) => {
               const sheet = sheetsMap[st.id] || null
               const activeSeries = activeSeriesMap[st.id] || 'A'
               const completedExercises = completedMap[st.id] || {}
 
               return (
-                <div key={st.id} className="h-full min-h-[500px] flex flex-col">
+                <div key={st.id} className="h-full min-h-0 flex flex-col">
                   <StudentTrainingColumn
                     student={st}
                     sheet={sheet}
@@ -594,7 +594,7 @@ export default function Training() {
             {Array.from({ length: 3 - selectedStudents.length }).map((_, i) => (
               <div
                 key={`empty-col-${i}`}
-                className="hidden lg:flex flex-col items-center justify-center border-2 border-dashed border-[#2A2A2A] rounded-2xl p-6 text-center text-[#8A8F98] h-full min-h-[500px]"
+                className="hidden lg:flex flex-col items-center justify-center border-2 border-dashed border-[#2A2A2A] rounded-2xl p-6 text-center text-[#8A8F98] h-full min-h-0"
               >
                 <Users className="w-8 h-8 opacity-30 mb-2" />
                 <p className="text-sm font-semibold text-white mb-1">
@@ -608,41 +608,43 @@ export default function Training() {
           </div>
 
           {/* LAYOUT MOBILE & TABLET PORTRAIT (< 1024px) — ABAS E CARROSSEL */}
-          <div className="lg:hidden flex flex-col flex-1 min-h-[480px]">
+          <div className="lg:hidden flex flex-col flex-1 min-h-0">
             {/* Tabs dos Alunos no topo */}
-            <div className="flex items-center gap-2 pb-2.5 shrink-0 overflow-x-auto">
-              {selectedStudents.map((st, idx) => {
-                const isActive = mobileActiveIndex === idx
-                const initials = st.name
-                  .split(' ')
-                  .filter(Boolean)
-                  .slice(0, 2)
-                  .map((n) => n[0].toUpperCase())
-                  .join('')
+            {selectedStudents.length > 1 && (
+              <div className="flex items-center gap-2 pb-2 shrink-0 overflow-x-auto">
+                {selectedStudents.map((st, idx) => {
+                  const isActive = mobileActiveIndex === idx
+                  const initials = st.name
+                    .split(' ')
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((n) => n[0].toUpperCase())
+                    .join('')
 
-                return (
-                  <button
-                    key={st.id}
-                    type="button"
-                    onClick={() => setMobileActiveIndex(idx)}
-                    className={`flex-1 min-w-[120px] min-h-[48px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-black transition-all border ${
-                      isActive
-                        ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25'
-                        : 'bg-[#1E1E1E] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
-                    }`}
-                  >
-                    <span className="w-6 h-6 rounded-full bg-black/25 flex items-center justify-center text-xs font-bold">
-                      {initials}
-                    </span>
-                    <span className="truncate">{st.name.split(' ')[0]}</span>
-                  </button>
-                )
-              })}
-            </div>
+                  return (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() => setMobileActiveIndex(idx)}
+                      className={`flex-1 min-w-[110px] min-h-[40px] flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all border ${
+                        isActive
+                          ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25'
+                          : 'bg-[#1E1E1E] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
+                      }`}
+                    >
+                      <span className="w-5 h-5 rounded-full bg-black/25 flex items-center justify-center text-[10px] font-bold">
+                        {initials}
+                      </span>
+                      <span className="truncate">{st.name.split(' ')[0]}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
 
             {/* Coluna do Aluno Ativo no Mobile */}
             {selectedStudents[mobileActiveIndex] && (
-              <div className="flex-1 min-h-[440px] flex flex-col">
+              <div className="flex-1 min-h-0 flex flex-col">
                 <StudentTrainingColumn
                   student={selectedStudents[mobileActiveIndex]}
                   sheet={sheetsMap[selectedStudents[mobileActiveIndex].id] || null}

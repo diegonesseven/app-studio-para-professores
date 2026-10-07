@@ -294,16 +294,16 @@ export default function Layout() {
 
         {/* CONTEÚDO PRINCIPAL (scroll independente) */}
         <main
-          className={`flex-1 overflow-y-auto overflow-x-hidden bg-[#121212] ${
+          className={`flex-1 bg-[#121212] ${
             location.pathname.startsWith('/treino')
-              ? 'p-2 sm:p-4 lg:p-6 flex flex-col'
-              : 'p-4 sm:p-6 lg:p-8'
+              ? 'p-2 sm:p-3 lg:p-4 flex flex-col overflow-hidden'
+              : 'p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden'
           }`}
         >
           <div
             className={`mx-auto w-full ${
               location.pathname.startsWith('/treino')
-                ? 'max-w-[1600px] flex-1 flex flex-col min-h-0'
+                ? 'max-w-[1600px] flex-1 flex flex-col min-h-0 h-full overflow-hidden'
                 : 'max-w-7xl'
             }`}
           >
