@@ -189,12 +189,28 @@ export default function ProfilePage() {
     try {
       setChangingPassword(true)
       setPasswordSuccess(false)
-      await profileService.changePassword(user.id, {
-        oldPassword,
-        password,
-        passwordConfirm,
-      })
-      await refreshUser()
+      const currentEmail = user.email
+      await profileService.changePassword(
+        user.id,
+        {
+          oldPassword,
+          password,
+          passwordConfirm,
+        },
+        currentEmail,
+      )
+
+      // Atualizar a sessão com a nova senha para manter a sessão ativa sem logout acidental
+      if (currentEmail) {
+        try {
+          await pb.collection('users').authWithPassword(currentEmail, password)
+        } catch (_) {
+          await refreshUser()
+        }
+      } else {
+        await refreshUser()
+      }
+
       setOldPassword('')
       setPassword('')
       setPasswordConfirm('')
