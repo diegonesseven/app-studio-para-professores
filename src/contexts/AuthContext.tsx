@@ -64,11 +64,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const login = async (email: string, pass: string) => {
+    // Limpa qualquer estado residual do realtime para evitar conflito de autorização pós-login
+    try {
+      pb.realtime.unsubscribe()
+    } catch {
+      /* intentionally ignored */
+    }
     await pb.collection('users').authWithPassword(email, pass)
     syncUserFromStore()
   }
 
   const logout = () => {
+    try {
+      pb.realtime.unsubscribe()
+    } catch {
+      /* intentionally ignored */
+    }
     pb.authStore.clear()
     setUser(null)
   }

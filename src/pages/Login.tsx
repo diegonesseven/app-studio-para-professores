@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { extractFieldErrors } from '@/lib/pocketbase/errors'
 import { Eye, EyeOff, Dumbbell, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,13 +27,24 @@ export default function Login() {
       await login(email.trim(), password)
       navigate('/')
     } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : 'Credenciais inválidas. Verifique seu e-mail e senha.'
-      setError(
-        msg.includes('Failed to authenticate') || msg.includes('400')
-          ? 'E-mail ou senha incorretos. Tente novamente.'
-          : msg,
-      )
+      console.error('Erro ao realizar login:', err)
+      const fieldErrors = extractFieldErrors(err)
+      const fieldErrorMsgs = Object.values(fieldErrors)
+      const rawMsg = err instanceof Error ? err.message : ''
+
+      if (fieldErrorMsgs.length > 0) {
+        setError(fieldErrorMsgs.join(' '))
+      } else if (
+        rawMsg.toLowerCase().includes('failed to authenticate') ||
+        rawMsg.toLowerCase().includes('something went wrong') ||
+        rawMsg.includes('400')
+      ) {
+        setError('E-mail ou senha incorretos. Verifique suas credenciais e tente novamente.')
+      } else if (rawMsg) {
+        setError(rawMsg)
+      } else {
+        setError('Não foi possível entrar. Verifique seu e-mail e senha ou tente novamente.')
+      }
     } finally {
       setIsLoading(false)
     }
