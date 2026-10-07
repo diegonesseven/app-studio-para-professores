@@ -1,18 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import type { Student, SeriesKey, TrainingSheet, Exercise, ExerciseBlock } from '@/types'
 import { SERIES_KEYS } from '@/types'
 import {
   HeartPulse,
   Edit2,
+  Pencil,
   Play,
   Check,
   CheckCircle2,
-  Calendar,
   AlertTriangle,
   ClipboardList,
+  Save,
+  X,
+  Loader2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
 
 interface StudentTrainingColumnProps {
   student: Student
@@ -27,6 +30,14 @@ interface StudentTrainingColumnProps {
   onCompleteSeries: () => void
   onCompleteSheet: () => void
   exercisesMap: Record<string, Exercise>
+  onUpdateExerciseBlock?: (
+    studentId: string,
+    sheetId: string,
+    seriesKey: SeriesKey,
+    exerciseIndex: number,
+    updatedBlock: ExerciseBlock,
+  ) => Promise<boolean>
+  canEdit?: boolean
 }
 
 export default function StudentTrainingColumn({
@@ -42,11 +53,42 @@ export default function StudentTrainingColumn({
   onCompleteSeries,
   onCompleteSheet,
   exercisesMap,
+  onUpdateExerciseBlock,
+  canEdit = true,
 }: StudentTrainingColumnProps) {
   const currentExercises: ExerciseBlock[] = sheet?.series_data?.[activeSeries] || []
   const totalCount = currentExercises.length
   const completedCount = currentExercises.filter((_, idx) => completedExercises[idx]).length
   const isSeriesAllDone = totalCount > 0 && completedCount === totalCount
+
+  // Estado da edição inline por exercício (índice do exercício sendo editado)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [editDraft, setEditDraft] = useState<ExerciseBlock | null>(null)
+  const [savingEdit, setSavingEdit] = useState(false)
+
+  const handleStartEdit = (idx: number, block: ExerciseBlock) => {
+    setEditingIndex(idx)
+    setEditDraft({ ...block })
+  }
+
+  const handleCancelEdit = () => {
+    setEditingIndex(null)
+    setEditDraft(null)
+  }
+
+  const handleSaveEdit = async (idx: number) => {
+    if (!editDraft || !sheet || !onUpdateExerciseBlock) return
+    setSavingEdit(true)
+    try {
+      const ok = await onUpdateExerciseBlock(student.id, sheet.id, activeSeries, idx, editDraft)
+      if (ok) {
+        setEditingIndex(null)
+        setEditDraft(null)
+      }
+    } finally {
+      setSavingEdit(false)
+    }
+  }
 
   const initials = student.name
     .split(' ')
@@ -164,19 +206,22 @@ export default function StudentTrainingColumn({
             const name = ex?.name || 'Exercício'
             const muscle = ex?.muscle_group || 'Geral'
             const isDone = Boolean(completedExercises[idx])
+            const isEditingThis = editingIndex === idx
 
             return (
               <div
                 key={`${block.exercise_id}-${idx}`}
-                className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
-                  isDone
-                    ? 'bg-emerald-950/25 border-emerald-600/50 shadow-sm'
-                    : 'bg-[#151515] border-[#2C2C2C] hover:border-[#F06A2A]/50 shadow-md'
+                className={`p-4 sm:p-5 rounded-2xl border transition-all ${
+                  isEditingThis
+                    ? 'bg-[#181818] border-primary ring-2 ring-primary/30 shadow-xl'
+                    : isDone
+                      ? 'bg-emerald-950/20 border-emerald-600/40 shadow-sm'
+                      : 'bg-[#151515] border-[#2A2A2A] hover:border-[#F06A2A]/50 shadow-md'
                 }`}
               >
-                {/* Linha superior: Checkmark grande, Nome e Botão de Vídeo */}
+                {/* 1. TOPO: Checkmark + NOME DO EXERCÍCIO (grande, legível à distância, quebra fluida) + Ações */}
                 <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="flex items-start gap-3.5 min-w-0 flex-1">
                     {/* Botão de Checkmark da sessão - alvo generoso de 48px */}
                     <button
                       type="button"
@@ -191,22 +236,21 @@ export default function StudentTrainingColumn({
                       <Check className="w-6 h-6 stroke-[3]" />
                     </button>
 
-                    {/* Nome do exercício com quebra fluida, fonte nítida 17-18px e sem colapso */}
-                    <div
-                      onClick={() => ex && onOpenVideo(ex)}
-                      className="min-w-0 flex-1 cursor-pointer group/name py-0.5"
-                    >
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#252525] text-primary shrink-0 border border-primary/20">
+                    {/* Nome do exercício no topo - tipografia ampliada, clara e com respiro */}
+                    <div className="min-w-0 flex-1 py-0.5">
+                      <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                        <span className="text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-[#252525] text-primary shrink-0 border border-primary/25">
                           #{idx + 1}
                         </span>
-                        <span className="text-xs text-[#9CA3AF] font-semibold">{muscle}</span>
+                        <span className="text-xs text-[#9CA3AF] font-bold uppercase tracking-wide">
+                          {muscle}
+                        </span>
                       </div>
+
                       <h3
-                        className={`text-base sm:text-lg font-black leading-snug transition-colors break-words ${
-                          isDone
-                            ? 'line-through text-[#8A8F98]'
-                            : 'text-white group-hover/name:text-primary'
+                        onClick={() => ex && onOpenVideo(ex)}
+                        className={`text-lg sm:text-xl font-black leading-snug transition-colors break-words cursor-pointer ${
+                          isDone ? 'line-through text-[#8A8F98]' : 'text-white hover:text-primary'
                         }`}
                         title={name}
                       >
@@ -215,64 +259,216 @@ export default function StudentTrainingColumn({
                     </div>
                   </div>
 
-                  {/* Botão de vídeo bem visível e com alvo de toque adequado */}
-                  {ex && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenVideo(ex)}
-                      className="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 active:scale-95 transition-all shrink-0 flex items-center justify-center gap-1.5 font-bold border border-primary/30 mt-0.5"
-                      title="Ver demonstração em vídeo"
-                      aria-label={`Ver vídeo de ${name}`}
-                    >
-                      <Play className="w-4 h-4 fill-current shrink-0" />
-                      <span className="text-xs hidden sm:inline">Vídeo</span>
-                    </button>
-                  )}
-                </div>
+                  {/* Ações do Card: Editar Inline (professor/admin) e Vídeo */}
+                  <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+                    {canEdit && !isEditingThis && (
+                      <button
+                        type="button"
+                        onClick={() => handleStartEdit(idx, block)}
+                        className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl text-[#8A8F98] hover:text-primary hover:bg-[#252525] border border-transparent hover:border-[#333333] transition-all flex items-center justify-center active:scale-95"
+                        title="Editar parâmetros deste exercício"
+                        aria-label={`Editar ${name}`}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                    )}
 
-                {/* Parâmetros em caixas confortáveis: rótulos claros (11-12px) e valores grandes (16-18px), sem quebra indesejada */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mt-3.5 pt-3 border-t border-[#262626] text-center">
-                  <div className="bg-[#1C1C1C] border border-[#2D2D2D] rounded-xl py-2 px-2 flex flex-col justify-center min-h-[56px]">
-                    <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-0.5">
-                      Séries
-                    </span>
-                    <span className="text-base sm:text-lg font-black text-white leading-none">
-                      {block.sets}x
-                    </span>
-                  </div>
-
-                  <div className="bg-[#1C1C1C] border border-[#2D2D2D] rounded-xl py-2 px-2 flex flex-col justify-center min-h-[56px]">
-                    <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-0.5">
-                      Reps
-                    </span>
-                    <span className="text-base sm:text-lg font-black text-white leading-none break-words">
-                      {block.reps || '10'}
-                    </span>
-                  </div>
-
-                  <div className="bg-[#1C1C1C] border border-[#2D2D2D] rounded-xl py-2 px-2 flex flex-col justify-center min-h-[56px]">
-                    <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-0.5">
-                      Carga
-                    </span>
-                    <span className="text-base sm:text-lg font-black text-primary leading-none break-words">
-                      {block.load || '—'}
-                    </span>
-                  </div>
-
-                  <div className="bg-[#1C1C1C] border border-[#2D2D2D] rounded-xl py-2 px-2 flex flex-col justify-center min-h-[56px]">
-                    <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-0.5">
-                      Descanso
-                    </span>
-                    <span className="text-base sm:text-lg font-black text-white leading-none break-words">
-                      {block.time || '60s'}
-                    </span>
+                    {ex && (
+                      <button
+                        type="button"
+                        onClick={() => onOpenVideo(ex)}
+                        className="min-h-[44px] min-w-[44px] px-3 py-2 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 active:scale-95 transition-all flex items-center justify-center gap-1.5 font-bold border border-primary/30"
+                        title="Ver demonstração em vídeo"
+                        aria-label={`Ver vídeo de ${name}`}
+                      >
+                        <Play className="w-4 h-4 fill-current shrink-0" />
+                        <span className="text-xs hidden sm:inline">Vídeo</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {block.notes && (
-                  <p className="mt-3 text-xs sm:text-sm text-[#D1D5DB] bg-[#1A1A1A] px-3 py-2 rounded-xl border border-[#2C2C2C] leading-relaxed">
-                    <strong className="text-primary font-bold">Obs:</strong> {block.notes}
-                  </p>
+                {/* 2. LOGO ABAIXO DO NOME: Se estiver em edição inline, exibe formulário touch-friendly */}
+                {isEditingThis && editDraft ? (
+                  <div className="mt-4 pt-4 border-t border-[#2C2C2C] space-y-3.5 bg-[#141414] p-3.5 rounded-xl border border-primary/40 animate-fade-in">
+                    <div className="flex items-center justify-between pb-1">
+                      <span className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1.5">
+                        <Pencil className="w-3.5 h-3.5" /> Edição rápida do exercício
+                      </span>
+                      <span className="text-[11px] text-[#8A8F98]">Salva na ficha do aluno</span>
+                    </div>
+
+                    {/* Grid com Séries, Reps, Carga, Descanso - inputs confortáveis min-h 44px */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
+                          Séries
+                        </label>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={30}
+                          value={editDraft.sets}
+                          onChange={(e) =>
+                            setEditDraft({
+                              ...editDraft,
+                              sets: parseInt(e.target.value) || 1,
+                            })
+                          }
+                          className="h-11 min-h-[44px] bg-[#1E1E1E] border-[#383838] text-white font-bold text-center text-sm focus-visible:ring-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
+                          Repetições
+                        </label>
+                        <Input
+                          type="text"
+                          value={editDraft.reps}
+                          placeholder="Ex: 10 a 12"
+                          onChange={(e) =>
+                            setEditDraft({
+                              ...editDraft,
+                              reps: e.target.value,
+                            })
+                          }
+                          className="h-11 min-h-[44px] bg-[#1E1E1E] border-[#383838] text-white font-bold text-center text-sm focus-visible:ring-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
+                          Carga
+                        </label>
+                        <Input
+                          type="text"
+                          value={editDraft.load}
+                          placeholder="Ex: 25kg"
+                          onChange={(e) =>
+                            setEditDraft({
+                              ...editDraft,
+                              load: e.target.value,
+                            })
+                          }
+                          className="h-11 min-h-[44px] bg-[#1E1E1E] border-[#383838] text-primary font-black text-center text-sm focus-visible:ring-primary"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
+                          Descanso
+                        </label>
+                        <Input
+                          type="text"
+                          value={editDraft.time}
+                          placeholder="Ex: 60s"
+                          onChange={(e) =>
+                            setEditDraft({
+                              ...editDraft,
+                              time: e.target.value,
+                            })
+                          }
+                          className="h-11 min-h-[44px] bg-[#1E1E1E] border-[#383838] text-white font-bold text-center text-sm focus-visible:ring-primary"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Observações */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
+                        Observações do Exercício
+                      </label>
+                      <Input
+                        type="text"
+                        value={editDraft.notes}
+                        placeholder="Ex: Ajustar banco no 3º furo, cadência 3-0-1"
+                        onChange={(e) =>
+                          setEditDraft({
+                            ...editDraft,
+                            notes: e.target.value,
+                          })
+                        }
+                        className="h-11 min-h-[44px] bg-[#1E1E1E] border-[#383838] text-white text-sm focus-visible:ring-primary"
+                      />
+                    </div>
+
+                    {/* Botões Salvar / Cancelar */}
+                    <div className="flex items-center justify-end gap-2 pt-1">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCancelEdit}
+                        disabled={savingEdit}
+                        className="min-h-[44px] h-11 px-4 border-[#333333] bg-[#1E1E1E] hover:bg-[#282828] text-white text-xs font-bold"
+                      >
+                        <X className="w-4 h-4 mr-1.5" /> Cancelar
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => handleSaveEdit(idx)}
+                        disabled={savingEdit}
+                        className="min-h-[44px] h-11 px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs shadow-md shadow-primary/30"
+                      >
+                        {savingEdit ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Salvando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-4 h-4 mr-1.5" /> Salvar Alterações
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Modo de Visualização: Boxes confortáveis, legíveis à distância e com bom respiro */
+                  <>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mt-4 pt-3.5 border-t border-[#262626] text-center">
+                      <div className="bg-[#1B1B1B] border border-[#2B2B2B] rounded-xl py-2.5 px-2 flex flex-col justify-center min-h-[62px]">
+                        <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-1">
+                          Séries
+                        </span>
+                        <span className="text-lg sm:text-xl font-black text-white leading-none">
+                          {block.sets}x
+                        </span>
+                      </div>
+
+                      <div className="bg-[#1B1B1B] border border-[#2B2B2B] rounded-xl py-2.5 px-2 flex flex-col justify-center min-h-[62px]">
+                        <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-1">
+                          Reps
+                        </span>
+                        <span className="text-lg sm:text-xl font-black text-white leading-none break-words">
+                          {block.reps || '10'}
+                        </span>
+                      </div>
+
+                      <div className="bg-[#1B1B1B] border border-[#2B2B2B] rounded-xl py-2.5 px-2 flex flex-col justify-center min-h-[62px]">
+                        <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-1">
+                          Carga
+                        </span>
+                        <span className="text-lg sm:text-xl font-black text-primary leading-none break-words">
+                          {block.load || '—'}
+                        </span>
+                      </div>
+
+                      <div className="bg-[#1B1B1B] border border-[#2B2B2B] rounded-xl py-2.5 px-2 flex flex-col justify-center min-h-[62px]">
+                        <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#9CA3AF] font-bold block mb-1">
+                          Descanso
+                        </span>
+                        <span className="text-lg sm:text-xl font-black text-white leading-none break-words">
+                          {block.time || '60s'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {block.notes && (
+                      <p className="mt-3.5 text-xs sm:text-sm text-[#D1D5DB] bg-[#1A1A1A] px-3.5 py-2.5 rounded-xl border border-[#2C2C2C] leading-relaxed">
+                        <strong className="text-primary font-bold">Obs:</strong> {block.notes}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             )

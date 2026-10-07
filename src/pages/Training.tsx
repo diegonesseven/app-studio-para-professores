@@ -5,7 +5,16 @@ import { trainingSheetsService } from '@/services/trainingSheets'
 import { exercisesService } from '@/services/exercises'
 import { workoutProgressService } from '@/services/workoutProgress'
 import { useRealtime } from '@/hooks/use-realtime'
-import type { Student, TrainingSheet, Exercise, SeriesKey, WorkoutProgress } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
+import type {
+  Student,
+  TrainingSheet,
+  Exercise,
+  SeriesKey,
+  WorkoutProgress,
+  ExerciseBlock,
+  SeriesData,
+} from '@/types'
 import StudentTrainingColumn from '@/components/StudentTrainingColumn'
 import AnamneseModal from '@/components/AnamneseModal'
 import VideoModal from '@/components/VideoModal'
@@ -37,6 +46,8 @@ import { toast } from '@/hooks/use-toast'
 export default function Training() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { isProfessor, isAdmin } = useAuth()
+  const canEditTraining = isProfessor || isAdmin
 
   // Alunos selecionados na sessão (IDs)
   const studentIdsParam = searchParams.get('students') || ''
@@ -237,6 +248,58 @@ export default function Training() {
         [studentId]: studentMap,
       }
     })
+  }
+
+  // Atualização inline de um bloco de exercício da ficha
+  const handleUpdateExerciseBlock = async (
+    studentId: string,
+    sheetId: string,
+    seriesKey: SeriesKey,
+    exerciseIndex: number,
+    updatedBlock: ExerciseBlock,
+  ): Promise<boolean> => {
+    const currentSheet = sheetsMap[studentId]
+    if (!currentSheet) return false
+
+    const currentSeriesList = [...(currentSheet.series_data?.[seriesKey] || [])]
+    if (exerciseIndex < 0 || exerciseIndex >= currentSeriesList.length) return false
+
+    // Monta a nova lista de exercícios preservando id e ordem
+    const updatedList = [...currentSeriesList]
+    updatedList[exerciseIndex] = {
+      ...updatedList[exerciseIndex],
+      ...updatedBlock,
+    }
+
+    const updatedSeriesData: SeriesData = {
+      ...(currentSheet.series_data || {}),
+      [seriesKey]: updatedList,
+    }
+
+    try {
+      const savedSheet = await trainingSheetsService.update(sheetId, {
+        series_data: updatedSeriesData,
+      })
+
+      // Atualiza o estado local imediatamente
+      setSheetsMap((prev) => ({
+        ...prev,
+        [studentId]: savedSheet,
+      }))
+
+      toast({
+        title: 'Exercício atualizado',
+        description: 'Alterações salvas na ficha com sucesso.',
+      })
+      return true
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao salvar exercício',
+        description: err instanceof Error ? err.message : 'Falha ao gravar no backend',
+        variant: 'destructive',
+      })
+      return false
+    }
   }
 
   // Concluir série de um aluno e salvar no backend
@@ -520,6 +583,8 @@ export default function Training() {
                       })
                     }
                     exercisesMap={exercisesMap}
+                    onUpdateExerciseBlock={handleUpdateExerciseBlock}
+                    canEdit={canEditTraining}
                   />
                 </div>
               )
@@ -612,6 +677,8 @@ export default function Training() {
                     }
                   }}
                   exercisesMap={exercisesMap}
+                  onUpdateExerciseBlock={handleUpdateExerciseBlock}
+                  canEdit={canEditTraining}
                 />
               </div>
             )}
