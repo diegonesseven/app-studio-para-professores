@@ -16,7 +16,12 @@ import {
   Loader2,
   Trash2,
   ArrowUpDown,
+  Printer,
+  Share2,
 } from 'lucide-react'
+import { trainingSheetsService } from '@/services/trainingSheets'
+import { exercisesService } from '@/services/exercises'
+import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -46,6 +51,7 @@ export default function StudentList() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleteName, setDeleteName] = useState<string>('')
   const [deleting, setDeleting] = useState(false)
+  const [exportingStudentId, setExportingStudentId] = useState<string | null>(null)
 
   const loadData = async () => {
     try {
@@ -83,6 +89,52 @@ export default function StudentList() {
   useEffect(() => {
     loadData()
   }, [search, sortBy])
+
+  // Exportar/Baixar ficha do aluno diretamente da lista de alunos
+  const handleExportStudentSheet = async (student: Student) => {
+    try {
+      setExportingStudentId(student.id)
+      const [sheet, exList] = await Promise.all([
+        trainingSheetsService.getByStudent(student.id),
+        exercisesService.getAll(),
+      ])
+
+      if (!sheet) {
+        toast({
+          title: 'Aluno sem ficha',
+          description: `Monte uma ficha para ${student.name} antes de exportar.`,
+          variant: 'destructive',
+        })
+        return
+      }
+
+      const map: Record<string, any> = {}
+      exList.forEach((e) => {
+        map[e.id] = e
+      })
+
+      const res = await shareOrExportSheet({
+        student,
+        sheet,
+        exercisesMap: map,
+      })
+
+      if (res === 'opened') {
+        toast({
+          title: 'Ficha Pronta para Exportação / PDF',
+          description: 'A janela foi aberta para salvar como PDF ou imprimir.',
+        })
+      }
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao gerar PDF',
+        description: err instanceof Error ? err.message : 'Falha na exportação',
+        variant: 'destructive',
+      })
+    } finally {
+      setExportingStudentId(null)
+    }
+  }
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -257,14 +309,31 @@ export default function StudentList() {
                 {/* Ações inferiores */}
                 <div className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1">
+                    {/* Exportar PDF rápido do aluno */}
+                    <button
+                      type="button"
+                      disabled={exportingStudentId === student.id}
+                      onClick={() => handleExportStudentSheet(student)}
+                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors"
+                      title="Exportar / Compartilhar Ficha (PDF/Impressão)"
+                      aria-label={`Exportar ficha de ${student.name}`}
+                    >
+                      {exportingStudentId === student.id ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-secondary" />
+                      ) : (
+                        <Share2 className="w-4 h-4" />
+                      )}
+                    </button>
+
                     <button
                       onClick={() => setSelectedStudentForAnamnese(student)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-[#F06A2A] hover:bg-[#2A2A2A] transition-colors"
+                      className="p-2 rounded-lg text-[#8A8F98] hover:text-primary hover:bg-[#2A2A2A] transition-colors"
                       title="Ver Anamnese"
                       aria-label={`Ver anamnese de ${student.name}`}
                     >
                       <HeartPulse className="w-4 h-4" />
                     </button>
+
                     <Link to={`/alunos/${student.id}/editar`}>
                       <button
                         className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
@@ -274,6 +343,7 @@ export default function StudentList() {
                         <Edit2 className="w-4 h-4" />
                       </button>
                     </Link>
+
                     <button
                       onClick={() => {
                         setDeleteId(student.id)
@@ -290,9 +360,9 @@ export default function StudentList() {
                   {/* Iniciar Treino */}
                   <Button
                     onClick={() => navigate(`/treino?students=${student.id}`)}
-                    className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                    className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
                   >
-                    <PlaySquare className="w-3.5 h-3.5" /> Abrir Treino
+                    <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Abrir Treino
                   </Button>
                 </div>
               </div>

@@ -13,7 +13,15 @@ import {
   Save,
   X,
   Loader2,
+  ArrowRightLeft,
+  Plus,
+  Trash2,
+  Share2,
+  Printer,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react'
+import ExercisePickerModal from '@/components/ExercisePickerModal'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -37,6 +45,19 @@ interface StudentTrainingColumnProps {
     exerciseIndex: number,
     updatedBlock: ExerciseBlock,
   ) => Promise<boolean>
+  onAddExerciseToSeries?: (
+    studentId: string,
+    sheetId: string,
+    seriesKey: SeriesKey,
+    exercise: Exercise,
+  ) => Promise<boolean>
+  onRemoveExerciseFromSeries?: (
+    studentId: string,
+    sheetId: string,
+    seriesKey: SeriesKey,
+    exerciseIndex: number,
+  ) => Promise<boolean>
+  onExportPdf?: (student: Student, sheet: TrainingSheet) => void
   canEdit?: boolean
 }
 
@@ -54,6 +75,9 @@ export default function StudentTrainingColumn({
   onCompleteSheet,
   exercisesMap,
   onUpdateExerciseBlock,
+  onAddExerciseToSeries,
+  onRemoveExerciseFromSeries,
+  onExportPdf,
   canEdit = true,
 }: StudentTrainingColumnProps) {
   const currentExercises: ExerciseBlock[] = sheet?.series_data?.[activeSeries] || []
@@ -65,6 +89,12 @@ export default function StudentTrainingColumn({
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editDraft, setEditDraft] = useState<ExerciseBlock | null>(null)
   const [savingEdit, setSavingEdit] = useState(false)
+  // Modal de troca / substituição de exercício em si
+  const [replaceModalIdx, setReplaceModalIdx] = useState<number | null>(null)
+  // Modal de adição rápida de novo exercício na série atual
+  const [addExerciseModalOpen, setAddExerciseModalOpen] = useState(false)
+  // Controle de exclusão rápida
+  const [deletingIdx, setDeletingIdx] = useState<number | null>(null)
   // Controle de notas expandidas por exercício
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({})
 
@@ -96,6 +126,62 @@ export default function StudentTrainingColumn({
       }
     } finally {
       setSavingEdit(false)
+    }
+  }
+
+  // Substituição direta do exercício (ex: Leg press -> Extensora) mantendo posição e parâmetros
+  const handleReplaceExercise = async (targetIdx: number, newExercise: Exercise) => {
+    if (!sheet || !onUpdateExerciseBlock) return
+    const currentBlock = currentExercises[targetIdx]
+    if (!currentBlock) return
+
+    const updatedBlock: ExerciseBlock = {
+      ...currentBlock,
+      exercise_id: newExercise.id,
+      // Se estiver editando este card no momento, atualiza também o draft ativo
+      exercise: newExercise,
+    }
+
+    if (editingIndex === targetIdx && editDraft) {
+      setEditDraft({
+        ...editDraft,
+        exercise_id: newExercise.id,
+      })
+    }
+
+    setSavingEdit(true)
+    try {
+      await onUpdateExerciseBlock(student.id, sheet.id, activeSeries, targetIdx, updatedBlock)
+    } finally {
+      setSavingEdit(false)
+      setReplaceModalIdx(null)
+    }
+  }
+
+  // Remoção de um exercício diretamente na tela de treino
+  const handleRemoveExercise = async (idx: number) => {
+    if (!sheet || !onRemoveExerciseFromSeries) return
+    setDeletingIdx(idx)
+    try {
+      await onRemoveExerciseFromSeries(student.id, sheet.id, activeSeries, idx)
+      if (editingIndex === idx) {
+        setEditingIndex(null)
+        setEditDraft(null)
+      }
+    } finally {
+      setDeletingIdx(null)
+    }
+  }
+
+  // Adição de novo exercício na série atual diretamente na tela de treino
+  const handleAddExerciseToCurrentSeries = async (newExercise: Exercise) => {
+    if (!sheet || !onAddExerciseToSeries) return
+    setSavingEdit(true)
+    try {
+      await onAddExerciseToSeries(student.id, sheet.id, activeSeries, newExercise)
+    } finally {
+      setSavingEdit(false)
+      setAddExerciseModalOpen(false)
     }
   }
 
@@ -133,30 +219,43 @@ export default function StudentTrainingColumn({
           </div>
 
           <div className="flex items-center gap-1 shrink-0">
-            {/* Botão rápido Anamnese com min 44px */}
+            {/* Exportar/Baixar/Compartilhar Ficha em PDF */}
+            {sheet && onExportPdf && (
+              <button
+                type="button"
+                onClick={() => onExportPdf(student, sheet)}
+                className="min-h-[38px] min-w-[38px] p-2 rounded-lg text-[#9CA5B8] hover:text-secondary hover:bg-[#252B3E] transition-all flex items-center justify-center"
+                title="Exportar / Compartilhar Ficha (PDF/Impressão)"
+                aria-label={`Exportar ficha de ${student.name}`}
+              >
+                <Share2 className="w-4 h-4" />
+              </button>
+            )}
+
+            {/* Botão rápido Anamnese com min 38px */}
             <button
               type="button"
               onClick={onOpenAnamnese}
-              className={`min-h-[40px] min-w-[40px] p-2 rounded-lg transition-all flex items-center justify-center ${
+              className={`min-h-[38px] min-w-[38px] p-2 rounded-lg transition-all flex items-center justify-center ${
                 student.restrictions
                   ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40'
-                  : 'text-[#8A8F98] hover:text-primary hover:bg-[#2A2A2A]'
+                  : 'text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E]'
               }`}
               title="Consultar Anamnese / Restrições"
               aria-label={`Anamnese de ${student.name}`}
             >
-              <HeartPulse className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <HeartPulse className="w-4 h-4" />
             </button>
 
-            {/* Editar cadastro do aluno com min 44px */}
+            {/* Editar cadastro do aluno */}
             <button
               type="button"
               onClick={onEditStudent}
-              className="min-h-[40px] min-w-[40px] p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-all flex items-center justify-center"
+              className="min-h-[38px] min-w-[38px] p-2 rounded-lg text-[#9CA5B8] hover:text-white hover:bg-[#252B3E] transition-all flex items-center justify-center"
               title="Editar Aluno"
               aria-label={`Editar ${student.name}`}
             >
-              <Edit2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+              <Edit2 className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -169,29 +268,45 @@ export default function StudentTrainingColumn({
           </div>
         )}
 
-        {/* Seletor de Séries A, B, C, D, E */}
+        {/* Seletor de Séries A, B, C, D, E + Atalho de Adicionar Exercício na série */}
         <div className="flex items-center gap-1 sm:gap-1.5 mt-2.5 pt-2 border-t border-[#252525]">
-          {SERIES_KEYS.map((key) => {
-            const hasItems = (sheet?.series_data?.[key]?.length || 0) > 0
-            const isCurrent = activeSeries === key
+          <div className="flex-1 flex items-center gap-1">
+            {SERIES_KEYS.map((key) => {
+              const hasItems = (sheet?.series_data?.[key]?.length || 0) > 0
+              const isCurrent = activeSeries === key
 
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => onSelectSeries(key)}
-                className={`flex-1 min-h-[36px] py-1 px-1 rounded-lg text-xs font-black transition-all relative ${
-                  isCurrent
-                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25 ring-1 ring-primary/40'
-                    : hasItems
-                      ? 'bg-[#252525] text-white hover:bg-[#303030]'
-                      : 'bg-[#141414] text-[#8A8F98] hover:text-white opacity-60'
-                }`}
-              >
-                <span>Série {key}</span>
-              </button>
-            )
-          })}
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => onSelectSeries(key)}
+                  className={`flex-1 min-h-[36px] py-1 px-1 rounded-lg text-xs font-black transition-all relative ${
+                    isCurrent
+                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25 ring-1 ring-primary/40'
+                      : hasItems
+                        ? 'bg-[#252B3E] text-white hover:bg-[#30374e]'
+                        : 'bg-[#121522] text-[#9CA5B8] hover:text-white opacity-60'
+                  }`}
+                >
+                  <span>Série {key}</span>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Botão rápido para adicionar exercício na série ativa sem sair da aula */}
+          {canEdit && sheet && onAddExerciseToSeries && (
+            <button
+              type="button"
+              onClick={() => setAddExerciseModalOpen(true)}
+              className="min-h-[36px] px-2 rounded-lg bg-primary/20 text-secondary hover:bg-primary/30 border border-primary/40 text-xs font-bold transition-all flex items-center gap-1 shrink-0"
+              title={`Adicionar exercício à Série ${activeSeries}`}
+              aria-label={`Adicionar exercício à Série ${activeSeries}`}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">+ Exercício</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -283,14 +398,27 @@ export default function StudentTrainingColumn({
                     </div>
                   </div>
 
-                  {/* Ações do Card: Editar Inline (professor/admin) e Vídeo */}
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  {/* Ações do Card: Trocar Exercício, Editar Parâmetros, Excluir e Vídeo */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {/* Botão Trocar Exercício em si (Atende requisito 3: ex. Leg Press -> Extensora) */}
+                    {canEdit && !isEditingThis && (
+                      <button
+                        type="button"
+                        onClick={() => setReplaceModalIdx(idx)}
+                        className="h-9 w-9 sm:h-9.5 sm:w-9.5 p-1.5 rounded-xl text-[#9CA5B8] hover:text-secondary hover:bg-secondary/15 border border-transparent hover:border-secondary/40 transition-all flex items-center justify-center active:scale-95"
+                        title="Trocar este exercício por outro do acervo"
+                        aria-label={`Trocar ${name} por outro exercício`}
+                      >
+                        <ArrowRightLeft className="w-4 h-4" />
+                      </button>
+                    )}
+
                     {canEdit && !isEditingThis && (
                       <button
                         type="button"
                         onClick={() => handleStartEdit(idx, block)}
-                        className="h-9 w-9 sm:h-10 sm:w-10 p-1.5 rounded-xl text-[#8A8F98] hover:text-primary hover:bg-[#252525] border border-transparent hover:border-[#383838] transition-all flex items-center justify-center active:scale-95"
-                        title="Editar parâmetros deste exercício"
+                        className="h-9 w-9 sm:h-9.5 sm:w-9.5 p-1.5 rounded-xl text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E] border border-transparent hover:border-[#383838] transition-all flex items-center justify-center active:scale-95"
+                        title="Editar parâmetros (séries, reps, carga, descanso, obs)"
                         aria-label={`Editar ${name}`}
                       >
                         <Pencil className="w-4 h-4" />
@@ -301,7 +429,7 @@ export default function StudentTrainingColumn({
                       <button
                         type="button"
                         onClick={() => onOpenVideo(ex)}
-                        className="h-9 w-9 sm:h-10 sm:w-10 p-1.5 rounded-xl bg-primary/15 text-primary hover:bg-primary/25 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/30 shadow-sm"
+                        className="h-9 w-9 sm:h-9.5 sm:w-9.5 p-1.5 rounded-xl bg-primary/20 text-secondary hover:bg-primary/30 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/40 shadow-sm"
                         title="Ver demonstração em vídeo"
                         aria-label={`Ver vídeo de ${name}`}
                       >
@@ -315,10 +443,38 @@ export default function StudentTrainingColumn({
                 {isEditingThis && editDraft ? (
                   <div className="mt-3 pt-3 border-t border-[#2C2C2C] space-y-2.5 bg-[#141414] p-3 rounded-xl border border-primary/40 animate-fade-in">
                     <div className="flex items-center justify-between pb-0.5">
-                      <span className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1">
-                        <Pencil className="w-3.5 h-3.5" /> Edição rápida
-                      </span>
-                      <span className="text-[11px] text-[#8A8F98]">Salva na ficha</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1">
+                          <Pencil className="w-3.5 h-3.5" /> Edição rápida
+                        </span>
+                        {/* Botão para trocar o exercício dentro do modo de edição */}
+                        <button
+                          type="button"
+                          onClick={() => setReplaceModalIdx(idx)}
+                          className="text-[11px] font-bold text-secondary hover:underline flex items-center gap-1 bg-secondary/15 px-2 py-0.5 rounded border border-secondary/30"
+                        >
+                          <ArrowRightLeft className="w-3 h-3" /> Substituir exercício
+                        </button>
+                      </div>
+
+                      {/* Botão de Excluir Exercício da Série */}
+                      {onRemoveExerciseFromSeries && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExercise(idx)}
+                          disabled={deletingIdx === idx}
+                          className="text-[11px] text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 hover:bg-red-950/30 px-1.5 py-0.5 rounded"
+                          title="Remover exercício da ficha"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Remover
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Exibe o nome do exercício selecionado no draft */}
+                    <div className="bg-[#1C2033] p-2 rounded-lg border border-[#2B324D] flex items-center justify-between text-xs">
+                      <span className="text-[#9CA5B8]">Exercício selecionado:</span>
+                      <strong className="text-white truncate max-w-[180px]">{name}</strong>
                     </div>
 
                     {/* Grid com Séries, Reps, Carga, Descanso */}
@@ -537,15 +693,54 @@ export default function StudentTrainingColumn({
           </span>
         </Button>
 
-        <button
-          type="button"
-          onClick={onCompleteSheet}
-          disabled={!sheet}
-          className="w-full text-center text-[11px] sm:text-xs text-[#8A8F98] hover:text-white py-1 transition-colors font-semibold"
-        >
-          Marcar toda a ficha como concluída
-        </button>
+        <div className="flex items-center justify-between gap-2 pt-0.5">
+          <button
+            type="button"
+            onClick={onCompleteSheet}
+            disabled={!sheet}
+            className="text-left text-[11px] sm:text-xs text-[#8A8F98] hover:text-white py-1 transition-colors font-semibold"
+          >
+            Marcar toda a ficha como concluída
+          </button>
+
+          {sheet && onExportPdf && (
+            <button
+              type="button"
+              onClick={() => onExportPdf(student, sheet)}
+              className="text-[11px] text-secondary hover:underline flex items-center gap-1 font-bold shrink-0"
+            >
+              <Printer className="w-3.5 h-3.5" /> PDF
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Modal para Trocar Exercício da Posição Atual (Requisito 3) */}
+      {replaceModalIdx !== null && (
+        <ExercisePickerModal
+          isOpen={true}
+          onClose={() => setReplaceModalIdx(null)}
+          title={`Substituir Exercício #${replaceModalIdx + 1}`}
+          description={`Troque o exercício atual da Série ${activeSeries} por outro do acervo. A carga e parâmetros serão preservados.`}
+          actionLabel="Substituir"
+          currentExerciseId={currentExercises[replaceModalIdx]?.exercise_id}
+          onSelect={(ex) => handleReplaceExercise(replaceModalIdx, ex)}
+          onPreviewVideo={onOpenVideo}
+        />
+      )}
+
+      {/* Modal para Adicionar Novo Exercício à Série Atual em Tempo Real (Requisito 2) */}
+      {addExerciseModalOpen && (
+        <ExercisePickerModal
+          isOpen={true}
+          onClose={() => setAddExerciseModalOpen(false)}
+          title={`Adicionar Exercício à Série ${activeSeries}`}
+          description={`Selecione um exercício do acervo para adicionar à Série ${activeSeries} de ${student.name}.`}
+          actionLabel="Adicionar"
+          onSelect={handleAddExerciseToCurrentSeries}
+          onPreviewVideo={onOpenVideo}
+        />
+      )}
     </div>
   )
 }

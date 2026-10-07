@@ -28,7 +28,16 @@ import {
   Sparkles,
   Loader2,
   Copy,
+  ArrowRightLeft,
+  Share2,
+  Printer,
+  Download,
 } from 'lucide-react'
+import {
+  openSheetPrintWindow,
+  shareOrExportSheet,
+  downloadSheetAsHtmlFile,
+} from '@/services/trainingSheetPdf'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -65,6 +74,7 @@ export default function SheetForm() {
 
   // Modais
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [replaceIndex, setReplaceIndex] = useState<number | null>(null)
   const [activeVideo, setActiveVideo] = useState<{
     title: string
     youtubeId?: string | null
@@ -149,6 +159,30 @@ export default function SheetForm() {
       title: 'Exercício adicionado',
       description: `${exercise.name} adicionado à Série ${activeTab}.`,
     })
+  }
+
+  // Substituir exercício preservando parâmetros (Requisito 3)
+  const handleReplaceExercise = (exercise: Exercise) => {
+    if (replaceIndex === null) return
+    setSeriesData((prev) => {
+      const list = [...(prev[activeTab] || [])]
+      if (replaceIndex >= 0 && replaceIndex < list.length) {
+        list[replaceIndex] = {
+          ...list[replaceIndex],
+          exercise_id: exercise.id,
+        }
+      }
+      return {
+        ...prev,
+        [activeTab]: list,
+      }
+    })
+
+    toast({
+      title: 'Exercício substituído',
+      description: `Alterado para ${exercise.name} mantendo a posição e parâmetros.`,
+    })
+    setReplaceIndex(null)
   }
 
   // Atualizar campo específico de um bloco
@@ -279,10 +313,46 @@ export default function SheetForm() {
         </div>
 
         <div className="flex items-center gap-2">
+          {student && isEditing && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={async () => {
+                const sheetObj: TrainingSheet = {
+                  id: id || '',
+                  collectionId: '',
+                  collectionName: 'training_sheets',
+                  student: student.id,
+                  title,
+                  notes,
+                  series_data: seriesData,
+                  created: '',
+                  updated: '',
+                }
+                const res = await shareOrExportSheet({
+                  student,
+                  sheet: sheetObj,
+                  exercisesMap,
+                })
+                if (res === 'opened') {
+                  toast({
+                    title: 'Ficha Pronta para Exportação / PDF',
+                    description:
+                      'Janela de impressão aberta. Escolha "Salvar como PDF" para compartilhar.',
+                  })
+                }
+              }}
+              className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-white font-semibold h-11 px-4 shadow-sm flex items-center gap-2"
+              title="Exportar ficha em PDF ou compartilhar via WhatsApp"
+            >
+              <Share2 className="w-4 h-4 text-secondary" /> Exportar / PDF
+            </Button>
+          )}
+
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-bold h-11 px-6 shadow-md"
+            className="bg-primary hover:opacity-90 text-primary-foreground font-bold h-11 px-6 shadow-md"
           >
             <Save className="w-4 h-4 mr-2" />
             {saving ? 'Salvando...' : 'Salvar Ficha'}
@@ -412,7 +482,7 @@ export default function SheetForm() {
                             <ChevronDown className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <span className="w-6 text-center text-xs font-bold text-[#F06A2A]">
+                        <span className="w-6 text-center text-xs font-bold text-secondary">
                           #{index + 1}
                         </span>
                       </div>
@@ -427,7 +497,7 @@ export default function SheetForm() {
                                 youtubeUrl: ytUrl,
                               })
                             }
-                            className="text-base font-bold text-white hover:text-[#F06A2A] cursor-pointer transition-colors truncate"
+                            className="text-base font-bold text-white hover:text-secondary cursor-pointer transition-colors truncate"
                           >
                             {exName}
                           </h4>
@@ -441,7 +511,7 @@ export default function SheetForm() {
                                   youtubeUrl: ytUrl,
                                 })
                               }
-                              className="p-1 rounded bg-[#F06A2A]/20 text-[#F06A2A] hover:bg-[#F06A2A]/30 transition-colors"
+                              className="p-1 rounded bg-primary/20 text-secondary hover:bg-primary/30 transition-colors"
                               title="Assistir demonstração"
                             >
                               <Play className="w-3 h-3 fill-current" />
@@ -454,14 +524,26 @@ export default function SheetForm() {
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveBlock(index)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
-                      title="Remover exercício da série"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {/* Botão de Trocar Exercício em si (Requisito 3) */}
+                      <button
+                        type="button"
+                        onClick={() => setReplaceIndex(index)}
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-secondary hover:bg-secondary/15 border border-secondary/30 transition-colors flex items-center gap-1"
+                        title="Trocar este exercício por outro do acervo"
+                      >
+                        <ArrowRightLeft className="w-3.5 h-3.5" /> Trocar Exercício
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveBlock(index)}
+                        className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
+                        title="Remover exercício da série"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Parâmetros em Linha Compacta (Séries, Reps, Tempo, Carga, Obs) */}
@@ -539,11 +621,14 @@ export default function SheetForm() {
         )}
       </div>
 
-      {/* Modal de Escolha de Exercício */}
+      {/* Modal de Escolha de Exercício (Adicionar Novo) */}
       <ExercisePickerModal
         isOpen={pickerOpen}
         onClose={() => setPickerOpen(false)}
         onSelect={handleAddExercise}
+        title={`Adicionar Exercício à Série ${activeTab}`}
+        description="Selecione um exercício do acervo para incluir nesta série"
+        actionLabel="Adicionar"
         onPreviewVideo={(ex) =>
           setActiveVideo({
             title: ex.name,
@@ -552,6 +637,26 @@ export default function SheetForm() {
           })
         }
       />
+
+      {/* Modal de Troca de Exercício Existente (Requisito 3) */}
+      {replaceIndex !== null && (
+        <ExercisePickerModal
+          isOpen={true}
+          onClose={() => setReplaceIndex(null)}
+          title={`Substituir Exercício #${replaceIndex + 1}`}
+          description={`Escolha o novo exercício para substituir na Série ${activeTab}. Os valores de séries, repetições, carga e tempo serão mantidos.`}
+          actionLabel="Substituir"
+          currentExerciseId={currentBlocks[replaceIndex]?.exercise_id}
+          onSelect={handleReplaceExercise}
+          onPreviewVideo={(ex) =>
+            setActiveVideo({
+              title: ex.name,
+              youtubeId: ex.youtube_id,
+              youtubeUrl: ex.youtube_url,
+            })
+          }
+        />
+      )}
 
       {/* Modal de Vídeo */}
       <VideoModal

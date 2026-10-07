@@ -15,7 +15,11 @@ import {
   User,
   Loader2,
   AlertCircle,
+  Share2,
+  Printer,
 } from 'lucide-react'
+import { exercisesService } from '@/services/exercises'
+import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -32,6 +36,7 @@ export default function SheetList() {
   const navigate = useNavigate()
   const [sheets, setSheets] = useState<TrainingSheet[]>([])
   const [students, setStudents] = useState<Student[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
 
@@ -49,12 +54,19 @@ export default function SheetList() {
   const loadData = async () => {
     try {
       setLoading(true)
-      const [sheetsData, studentsData] = await Promise.all([
+      const [sheetsData, studentsData, exercisesData] = await Promise.all([
         trainingSheetsService.getAll(),
         studentsService.getAll(),
+        exercisesService.getAll(),
       ])
       setSheets(sheetsData)
       setStudents(studentsData)
+
+      const map: Record<string, any> = {}
+      exercisesData.forEach((e) => {
+        map[e.id] = e
+      })
+      setExercisesMap(map)
     } catch (err: unknown) {
       toast({
         title: 'Erro ao carregar fichas',
@@ -69,6 +81,39 @@ export default function SheetList() {
   useEffect(() => {
     loadData()
   }, [])
+
+  // Exportação/Compartilhamento em PDF de uma ficha da lista
+  const handleExportSheet = async (sheet: TrainingSheet) => {
+    const student = sheet.expand?.student || students.find((s) => s.id === sheet.student)
+    if (!student) {
+      toast({
+        title: 'Aluno não encontrado',
+        description: 'Não foi possível localizar os dados do aluno para o PDF.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      const res = await shareOrExportSheet({
+        student,
+        sheet,
+        exercisesMap,
+      })
+      if (res === 'opened') {
+        toast({
+          title: 'Ficha Pronta para Exportação / PDF',
+          description: 'A janela de impressão foi aberta. Escolha "Salvar como PDF" ou imprima.',
+        })
+      }
+    } catch {
+      openSheetPrintWindow({
+        student,
+        sheet,
+        exercisesMap,
+      })
+    }
+  }
 
   const handleDuplicate = async (sheetId: string) => {
     try {
@@ -151,7 +196,7 @@ export default function SheetList() {
             setSelectedStudentForNew(students[0]?.id || '')
             setCreateModalOpen(true)
           }}
-          className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-medium h-11 px-5 shadow-md flex items-center gap-2"
+          className="bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11 px-5 shadow-md flex items-center gap-2"
         >
           <Plus className="w-4 h-4" /> Nova Ficha
         </Button>
@@ -163,24 +208,24 @@ export default function SheetList() {
           placeholder="Pesquisar ficha por aluno ou título..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-[#F06A2A]"
+          className="bg-[#181C2E] border-[#252B3E] text-white placeholder:text-[#9CA5B8] h-12 pl-11 pr-4 focus-visible:ring-primary"
         />
-        <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+        <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9CA5B8]" />
       </div>
 
       {/* Lista */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#F06A2A]" />
+        <div className="py-20 flex flex-col items-center justify-center text-[#9CA5B8] gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando fichas do Studio Bru Oliveira...</p>
         </div>
       ) : filteredSheets.length === 0 ? (
-        <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-10 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#2A2A2A] flex items-center justify-center text-[#8A8F98] mb-4">
+        <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl p-10 text-center flex flex-col items-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#121522] flex items-center justify-center text-[#9CA5B8] mb-4">
             <ClipboardList className="w-8 h-8" />
           </div>
           <h3 className="text-lg font-bold text-white mb-1">Nenhuma ficha encontrada</h3>
-          <p className="text-sm text-[#8A8F98] max-w-sm mb-6">
+          <p className="text-sm text-[#9CA5B8] max-w-sm mb-6">
             Crie a primeira ficha estruturada para seus alunos ou duplique uma ficha existente como
             base.
           </p>
@@ -189,7 +234,7 @@ export default function SheetList() {
               setSelectedStudentForNew(students[0]?.id || '')
               setCreateModalOpen(true)
             }}
-            className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white"
+            className="bg-primary hover:opacity-90 text-primary-foreground"
           >
             <Plus className="w-4 h-4 mr-1.5" /> Criar Primeira Ficha
           </Button>
@@ -206,19 +251,19 @@ export default function SheetList() {
             return (
               <div
                 key={sheet.id}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-[#F06A2A]/40 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group"
+                className="bg-[#181C2E] border border-[#252B3E] hover:border-primary/50 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="text-xs uppercase tracking-wider text-[#F06A2A] font-semibold flex items-center gap-1.5">
+                    <span className="text-xs uppercase tracking-wider text-secondary font-bold flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5" /> {studentName}
                     </span>
-                    <span className="text-[11px] text-[#8A8F98] flex items-center gap-1">
+                    <span className="text-[11px] text-[#9CA5B8] flex items-center gap-1">
                       <Calendar className="w-3 h-3" /> {updatedDate}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold text-white group-hover:text-[#F06A2A] transition-colors mb-2 line-clamp-1">
+                  <h3 className="text-base font-bold text-white group-hover:text-secondary transition-colors mb-2 line-clamp-1">
                     {sheet.title || 'Ficha de Treino Personalizada'}
                   </h3>
 
@@ -247,6 +292,16 @@ export default function SheetList() {
                 {/* Ações */}
                 <div className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleExportSheet(sheet)}
+                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors"
+                      title="Exportar / Compartilhar Ficha (PDF/Impressão)"
+                      aria-label={`Exportar ficha de ${studentName}`}
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </button>
+
                     <Link to={`/fichas/${sheet.id}/editar`}>
                       <button
                         className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
@@ -260,7 +315,7 @@ export default function SheetList() {
                     <button
                       onClick={() => handleDuplicate(sheet.id)}
                       disabled={duplicatingId === sheet.id}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-[#F06A2A] hover:bg-[#2A2A2A] transition-colors"
+                      className="p-2 rounded-lg text-[#8A8F98] hover:text-primary hover:bg-[#2A2A2A] transition-colors"
                       title="Duplicar ficha como base"
                       aria-label={`Duplicar ficha de ${studentName}`}
                     >
@@ -279,9 +334,9 @@ export default function SheetList() {
 
                   <Button
                     onClick={() => navigate(`/treino?students=${sheet.student}`)}
-                    className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                    className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
                   >
-                    <PlaySquare className="w-3.5 h-3.5" /> Treinar Agora
+                    <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Treinar Agora
                   </Button>
                 </div>
               </div>
@@ -305,7 +360,7 @@ export default function SheetList() {
             <select
               value={selectedStudentForNew}
               onChange={(e) => setSelectedStudentForNew(e.target.value)}
-              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#F06A2A]"
+              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {students.map((st) => (
                 <option key={st.id} value={st.id}>
@@ -327,7 +382,7 @@ export default function SheetList() {
             <Button
               type="button"
               onClick={handleStartNewSheet}
-              className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white"
+              className="bg-primary hover:opacity-90 text-primary-foreground font-bold"
             >
               Continuar para Montagem
             </Button>

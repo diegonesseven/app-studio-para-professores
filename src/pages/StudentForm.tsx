@@ -22,7 +22,10 @@ import {
   GOAL_OPTIONS,
   type WorkoutProgress,
   type Exercise,
+  type Student,
 } from '@/types'
+import { trainingSheetsService } from '@/services/trainingSheets'
+import { shareOrExportSheet } from '@/services/trainingSheetPdf'
 import {
   ArrowLeft,
   User,
@@ -40,6 +43,7 @@ import {
   Dumbbell,
   CheckCircle2,
   Eye,
+  Share2,
 } from 'lucide-react'
 
 export default function StudentForm() {
@@ -328,15 +332,68 @@ export default function StudentForm() {
                 </div>
               </div>
 
-              <Link to={`/treino?students=${id}`}>
+              <div className="flex items-center gap-2">
                 <Button
                   type="button"
+                  variant="outline"
                   size="sm"
-                  className="bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs h-9 px-3.5"
+                  onClick={async () => {
+                    try {
+                      const sheet = await trainingSheetsService.getByStudent(id)
+                      if (!sheet) {
+                        toast({
+                          title: 'Sem ficha cadastrada',
+                          description: 'Monte a ficha deste aluno antes de exportar.',
+                          variant: 'destructive',
+                        })
+                        return
+                      }
+                      const st: Student = {
+                        id,
+                        name,
+                        phone,
+                        birthdate,
+                        experience_level: experienceLevel,
+                        restrictions,
+                        goals,
+                        created: '',
+                        updated: '',
+                      }
+                      const res = await shareOrExportSheet({
+                        student: st,
+                        sheet,
+                        exercisesMap,
+                      })
+                      if (res === 'opened') {
+                        toast({
+                          title: 'Ficha Pronta para Exportação / PDF',
+                          description: 'Janela aberta para impressão e salvamento como PDF.',
+                        })
+                      }
+                    } catch {
+                      toast({
+                        title: 'Erro ao gerar PDF',
+                        description: 'Falha ao processar os dados da ficha.',
+                        variant: 'destructive',
+                      })
+                    }
+                  }}
+                  className="border-secondary/40 bg-secondary/15 hover:bg-secondary/25 text-white font-bold text-xs h-9 px-3 flex items-center gap-1.5"
+                  title="Exportar / Compartilhar ficha deste aluno em PDF"
                 >
-                  Abrir Treino Deste Aluno
+                  <Share2 className="w-3.5 h-3.5 text-secondary" /> Exportar Ficha (PDF)
                 </Button>
-              </Link>
+
+                <Link to={`/treino?students=${id}`}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs h-9 px-3.5"
+                  >
+                    Abrir Treino Deste Aluno
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             {studentHistory.length === 0 ? (

@@ -18,6 +18,7 @@ import type {
 import StudentTrainingColumn from '@/components/StudentTrainingColumn'
 import AnamneseModal from '@/components/AnamneseModal'
 import VideoModal from '@/components/VideoModal'
+import { openSheetPrintWindow, shareOrExportSheet } from '@/services/trainingSheetPdf'
 import {
   Search,
   X,
@@ -394,8 +395,8 @@ export default function Training() {
       }))
 
       toast({
-        title: 'Exercício atualizado',
-        description: 'Alterações salvas na ficha com sucesso.',
+        title: 'Treino atualizado em tempo real',
+        description: 'Alterações salvas na ficha do aluno.',
       })
       return true
     } catch (err: unknown) {
@@ -405,6 +406,137 @@ export default function Training() {
         variant: 'destructive',
       })
       return false
+    }
+  }
+
+  // Adicionar exercício diretamente na tela de treino
+  const handleAddExerciseToSeries = async (
+    studentId: string,
+    sheetId: string,
+    seriesKey: SeriesKey,
+    exercise: Exercise,
+  ): Promise<boolean> => {
+    const currentSheet = sheetsMap[studentId]
+    if (!currentSheet) return false
+
+    const currentSeriesList = [...(currentSheet.series_data?.[seriesKey] || [])]
+    const newBlock: ExerciseBlock = {
+      exercise_id: exercise.id,
+      sets: 3,
+      reps: '10 a 12',
+      time: '60s',
+      load: 'Carga inicial',
+      notes: '',
+      order: currentSeriesList.length + 1,
+    }
+
+    const updatedSeriesData: SeriesData = {
+      ...(currentSheet.series_data || {}),
+      [seriesKey]: [...currentSeriesList, newBlock],
+    }
+
+    try {
+      const savedSheet = await trainingSheetsService.update(sheetId, {
+        series_data: updatedSeriesData,
+      })
+
+      setSheetsMap((prev) => ({
+        ...prev,
+        [studentId]: savedSheet,
+      }))
+
+      toast({
+        title: 'Exercício adicionado',
+        description: `${exercise.name} inserido na Série ${seriesKey}.`,
+      })
+      return true
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao adicionar exercício',
+        description: err instanceof Error ? err.message : 'Falha ao salvar no backend',
+        variant: 'destructive',
+      })
+      return false
+    }
+  }
+
+  // Remover exercício diretamente na tela de treino
+  const handleRemoveExerciseFromSeries = async (
+    studentId: string,
+    sheetId: string,
+    seriesKey: SeriesKey,
+    exerciseIndex: number,
+  ): Promise<boolean> => {
+    const currentSheet = sheetsMap[studentId]
+    if (!currentSheet) return false
+
+    const currentSeriesList = [...(currentSheet.series_data?.[seriesKey] || [])]
+    if (exerciseIndex < 0 || exerciseIndex >= currentSeriesList.length) return false
+
+    const updatedList = currentSeriesList
+      .filter((_, idx) => idx !== exerciseIndex)
+      .map((block, idx) => ({ ...block, order: idx + 1 }))
+
+    const updatedSeriesData: SeriesData = {
+      ...(currentSheet.series_data || {}),
+      [seriesKey]: updatedList,
+    }
+
+    try {
+      const savedSheet = await trainingSheetsService.update(sheetId, {
+        series_data: updatedSeriesData,
+      })
+
+      setSheetsMap((prev) => ({
+        ...prev,
+        [studentId]: savedSheet,
+      }))
+
+      // Ajusta os completedMap eliminando o índice removido
+      setCompletedMap((prev) => {
+        const studentChecks = { ...(prev[studentId] || {}) }
+        delete studentChecks[exerciseIndex]
+        return {
+          ...prev,
+          [studentId]: studentChecks,
+        }
+      })
+
+      toast({
+        title: 'Exercício removido',
+        description: `Exercício removido da Série ${seriesKey}.`,
+      })
+      return true
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao remover exercício',
+        description: err instanceof Error ? err.message : 'Falha no backend',
+        variant: 'destructive',
+      })
+      return false
+    }
+  }
+
+  // Exportar/Compartilhar Ficha do Aluno em PDF
+  const handleExportPdf = async (student: Student, sheet: TrainingSheet) => {
+    try {
+      const result = await shareOrExportSheet({
+        student,
+        sheet,
+        exercisesMap,
+      })
+      if (result === 'opened') {
+        toast({
+          title: 'Ficha Pronta para Exportação / PDF',
+          description: 'A janela de impressão foi aberta. Selecione "Salvar como PDF" ou imprima.',
+        })
+      }
+    } catch {
+      openSheetPrintWindow({
+        student,
+        sheet,
+        exercisesMap,
+      })
     }
   }
 
@@ -699,6 +831,9 @@ export default function Training() {
                     }
                     exercisesMap={exercisesMap}
                     onUpdateExerciseBlock={handleUpdateExerciseBlock}
+                    onAddExerciseToSeries={handleAddExerciseToSeries}
+                    onRemoveExerciseFromSeries={handleRemoveExerciseFromSeries}
+                    onExportPdf={handleExportPdf}
                     canEdit={canEditTraining}
                   />
                 </div>
@@ -792,6 +927,9 @@ export default function Training() {
                   }}
                   exercisesMap={exercisesMap}
                   onUpdateExerciseBlock={handleUpdateExerciseBlock}
+                  onAddExerciseToSeries={handleAddExerciseToSeries}
+                  onRemoveExerciseFromSeries={handleRemoveExerciseFromSeries}
+                  onExportPdf={handleExportPdf}
                   canEdit={canEditTraining}
                 />
               </div>
