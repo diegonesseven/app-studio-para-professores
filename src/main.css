@@ -1,0 +1,169 @@
+/* Global styles - Theme Studio Bru Oliveira, font Inter, utilities e animations */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Tema escuro padrão Studio Bru Oliveira */
+    /* Fundo charcoal #121212, superfícies #1E1E1E, primário laranja #F06A2A */
+    --background: 0 0% 7%; /* #121212 */
+    --foreground: 0 0% 100%; /* #FFFFFF */
+
+    --card: 0 0% 12%; /* #1E1E1E */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 12%; /* #1E1E1E */
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 20 88% 55%; /* #F06A2A */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 16%; /* #2A2A2A */
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 16%;
+    --muted-foreground: 220 7% 57%; /* #8A8F98 */
+
+    --accent: 20 88% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 358 75% 59%; /* #E5484D */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 56% 41%; /* #2EA55B */
+
+    --border: 0 0% 18%; /* #2E2E2E */
+    --input: 0 0% 18%;
+    --ring: 20 88% 55%;
+
+    --radius: 0.625rem;
+
+    --sidebar-background: 0 0% 9%; /* #171717 */
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 20 88% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 20 88% 55%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      sans-serif;
+    background-color: #121212;
+    color: #ffffff;
+    min-height: 100vh;
+  }
+
+  /* Alvo de toque mínimo recomendado de 44px para botões operáveis em tablet/mobile */
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
+  /* Scrollbar customizada escura */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #121212;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a2a;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #f06a2a;
+  }
+
+  /* NEVER REMOVE THIS */
+  section[aria-label='Notifications alt+T'] {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+@layer utilities {
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes fade-in-up {
+    from {
+      transform: translateY(8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @keyframes check-pop {
+    0% {
+      transform: scale(0.9);
+    }
+    50% {
+      transform: scale(1.15);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-accordion-down {
+    animation: accordion-down 0.2s ease-out;
+  }
+  .animate-accordion-up {
+    animation: accordion-up 0.2s ease-out;
+  }
+  .animate-fade-in {
+    animation: fade-in 0.2s ease-out;
+  }
+  .animate-fade-in-up {
+    animation: fade-in-up 0.25s ease-out;
+  }
+  .animate-check-pop {
+    animation: check-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+}

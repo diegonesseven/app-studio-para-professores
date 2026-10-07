@@ -1,0 +1,713 @@
+import { useEffect, useState, useMemo } from 'react'
+import { useSearchParams, useNavigate } from 'react-router-dom'
+import { studentsService } from '@/services/students'
+import { trainingSheetsService } from '@/services/trainingSheets'
+import { exercisesService } from '@/services/exercises'
+import { workoutProgressService } from '@/services/workoutProgress'
+import { useRealtime } from '@/hooks/use-realtime'
+import type { Student, TrainingSheet, Exercise, SeriesKey, WorkoutProgress } from '@/types'
+import StudentTrainingColumn from '@/components/StudentTrainingColumn'
+import AnamneseModal from '@/components/AnamneseModal'
+import VideoModal from '@/components/VideoModal'
+import {
+  Search,
+  X,
+  PlaySquare,
+  Users,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { toast } from '@/hooks/use-toast'
+
+export default function Training() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
+
+  // Alunos selecionados na sessão (IDs)
+  const studentIdsParam = searchParams.get('students') || ''
+  const selectedStudentIds = useMemo(() => {
+    return studentIdsParam
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  }, [studentIdsParam])
+
+  // Lista de todos os alunos para busca e seleção rápida
+  const [allStudents, setAllStudents] = useState<Student[]>([])
+  const [studentSearch, setStudentSearch] = useState('')
+  const [searchDropdownOpen, setSearchDropdownOpen] = useState(false)
+
+  // Dados carregados dos alunos selecionados
+  const [selectedStudents, setSelectedStudents] = useState<Student[]>([])
+  const [sheetsMap, setSheetsMap] = useState<Record<string, TrainingSheet | null>>({})
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+
+  // Série ativa por aluno: { [studentId]: 'A' | 'B' | ... }
+  const [activeSeriesMap, setActiveSeriesMap] = useState<Record<string, SeriesKey>>({})
+
+  // Exercícios marcados como feitos na sessão: { [studentId]: { [exerciseIndex]: true } }
+  const [completedMap, setCompletedMap] = useState<Record<string, Record<number, boolean>>>({})
+
+  // Mobile carrossel tab ativa (índice 0, 1 ou 2)
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(0)
+
+  // Modais
+  const [anamneseStudent, setAnamneseStudent] = useState<Student | null>(null)
+  const [activeVideo, setActiveVideo] = useState<{
+    title: string
+    youtubeId?: string | null
+    youtubeUrl?: string | null
+  } | null>(null)
+
+  // Dialog de avanço de série
+  const [advanceDialog, setAdvanceDialog] = useState<{
+    student: Student
+    completedSeries: SeriesKey
+    nextSeries: SeriesKey
+  } | null>(null)
+
+  // Dialog de conclusão de ficha completa
+  const [sheetCompleteConfirm, setSheetCompleteConfirm] = useState<{
+    student: Student
+    sheet: TrainingSheet
+  } | null>(null)
+
+  const [loading, setLoading] = useState(true)
+
+  // Realtime updates para workout_progress e training_sheets
+  useRealtime<WorkoutProgress>('workout_progress', (e) => {
+    // Quando outro dispositivo marcar progresso, sincroniza feedback leve
+    if (e.action === 'create' && e.record) {
+      // Se for um dos alunos da sessão, podemos reconsultar
+      const rec = e.record
+      if (selectedStudentIds.includes(rec.student)) {
+        toast({
+          title: 'Progresso sincronizado',
+          description: `Série ${rec.series_completed} registrada em tempo real.`,
+        })
+      }
+    }
+  })
+
+  useRealtime<TrainingSheet>('training_sheets', (e) => {
+    if (e.record && selectedStudentIds.includes(e.record.student)) {
+      setSheetsMap((prev) => ({
+        ...prev,
+        [e.record.student]: e.record,
+      }))
+    }
+  })
+
+  // 1. Carregar alunos gerais e mapa de exercícios
+  useEffect(() => {
+    async function loadInitial() {
+      try {
+        const [stList, exList] = await Promise.all([
+          studentsService.getAll(),
+          exercisesService.getAll(),
+        ])
+        setAllStudents(stList)
+
+        const exMap: Record<string, Exercise> = {}
+        exList.forEach((e) => {
+          exMap[e.id] = e
+        })
+        setExercisesMap(exMap)
+      } catch (err: unknown) {
+        console.error(err)
+      }
+    }
+    loadInitial()
+  }, [])
+
+  // 2. Carregar dados dos alunos selecionados quando a URL mudar
+  useEffect(() => {
+    async function loadSelectedSession() {
+      if (selectedStudentIds.length === 0) {
+        setSelectedStudents([])
+        setSheetsMap({})
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      try {
+        const studentsData = await Promise.all(
+          selectedStudentIds.map((id) => studentsService.getById(id)),
+        )
+        setSelectedStudents(studentsData)
+
+        // Carregar fichas e histórico recente de cada aluno para determinar onde começar
+        const newSheetsMap: Record<string, TrainingSheet | null> = {}
+        const newSeriesMap: Record<string, SeriesKey> = { ...activeSeriesMap }
+
+        await Promise.all(
+          studentsData.map(async (st) => {
+            const sheet = await trainingSheetsService.getByStudent(st.id)
+            newSheetsMap[st.id] = sheet
+
+            // Se o aluno ainda não tem série selecionada no estado, consulta o último progresso
+            if (!newSeriesMap[st.id]) {
+              const latest = await workoutProgressService.getLatestByStudent(st.id)
+              if (latest) {
+                const keys: SeriesKey[] = ['A', 'B', 'C', 'D', 'E']
+                const idx = keys.indexOf(latest.series_completed)
+                const nextKey = keys[(idx + 1) % keys.length]
+                newSeriesMap[st.id] = nextKey
+              } else {
+                newSeriesMap[st.id] = 'A'
+              }
+            }
+          }),
+        )
+
+        setSheetsMap(newSheetsMap)
+        setActiveSeriesMap(newSeriesMap)
+      } catch (err: unknown) {
+        toast({
+          title: 'Erro ao carregar sessão',
+          description: err instanceof Error ? err.message : 'Falha na conexão',
+          variant: 'destructive',
+        })
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadSelectedSession()
+  }, [studentIdsParam])
+
+  // Adicionar aluno à sessão (Máximo 3)
+  const handleAddStudentToSession = (student: Student) => {
+    if (selectedStudentIds.includes(student.id)) {
+      setStudentSearch('')
+      setSearchDropdownOpen(false)
+      return
+    }
+
+    if (selectedStudentIds.length >= 3) {
+      toast({
+        title: 'Limite atingido',
+        description: 'Máximo de 3 alunos por sessão para garantir a melhor atenção.',
+        variant: 'destructive',
+      })
+      setStudentSearch('')
+      setSearchDropdownOpen(false)
+      return
+    }
+
+    const nextIds = [...selectedStudentIds, student.id]
+    setSearchParams({ students: nextIds.join(',') })
+    setStudentSearch('')
+    setSearchDropdownOpen(false)
+  }
+
+  // Remover aluno da sessão
+  const handleRemoveStudentFromSession = (studentId: string) => {
+    const nextIds = selectedStudentIds.filter((id) => id !== studentId)
+    if (nextIds.length) {
+      setSearchParams({ students: nextIds.join(',') })
+    } else {
+      setSearchParams({})
+    }
+  }
+
+  // Marcar/Desmarcar exercício do aluno
+  const handleToggleExercise = (studentId: string, idx: number) => {
+    setCompletedMap((prev) => {
+      const studentMap = { ...(prev[studentId] || {}) }
+      studentMap[idx] = !studentMap[idx]
+      return {
+        ...prev,
+        [studentId]: studentMap,
+      }
+    })
+  }
+
+  // Concluir série de um aluno e salvar no backend
+  const handleCompleteSeries = async (student: Student) => {
+    const sheet = sheetsMap[student.id]
+    if (!sheet) return
+
+    const currentSeries = activeSeriesMap[student.id] || 'A'
+    const exercisesInSeries = sheet.series_data?.[currentSeries] || []
+
+    try {
+      await workoutProgressService.recordCompletion({
+        student: student.id,
+        training_sheet: sheet.id,
+        series_completed: currentSeries,
+        exercises_snapshot: exercisesInSeries,
+        notes: `Concluído em aula pelo Studio Bru Oliveira`,
+      })
+
+      // Calcular próxima série
+      const keys: SeriesKey[] = ['A', 'B', 'C', 'D', 'E']
+      const currentIdx = keys.indexOf(currentSeries)
+      const nextKey = keys[(currentIdx + 1) % keys.length]
+
+      // Abrir modal de confirmação "Série X concluída! Marcar a próxima?"
+      setAdvanceDialog({
+        student,
+        completedSeries: currentSeries,
+        nextSeries: nextKey,
+      })
+
+      // Limpar checks da série atual desse aluno
+      setCompletedMap((prev) => ({
+        ...prev,
+        [student.id]: {},
+      }))
+
+      toast({
+        title: `Série ${currentSeries} concluída!`,
+        description: `Progresso salvo para ${student.name}.`,
+      })
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao registrar progresso',
+        description: err instanceof Error ? err.message : 'Falha na gravação',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  // Confirmar avanço para a próxima série
+  const handleConfirmAdvanceSeries = () => {
+    if (!advanceDialog) return
+    const { student, nextSeries } = advanceDialog
+    setActiveSeriesMap((prev) => ({
+      ...prev,
+      [student.id]: nextSeries,
+    }))
+    setAdvanceDialog(null)
+  }
+
+  // Concluir toda a ficha de treino
+  const handleCompleteEntireSheet = async () => {
+    if (!sheetCompleteConfirm) return
+    const { student, sheet } = sheetCompleteConfirm
+
+    try {
+      // Registra a série atual como salva no histórico
+      const currentSeries = activeSeriesMap[student.id] || 'A'
+      await workoutProgressService.recordCompletion({
+        student: student.id,
+        training_sheet: sheet.id,
+        series_completed: currentSeries,
+        exercises_snapshot: sheet.series_data?.[currentSeries] || [],
+        notes: `Ficha inteira concluída na sessão`,
+      })
+
+      // Marcar todos os exercícios como checados visualmente
+      const currentExercises = sheet.series_data?.[currentSeries] || []
+      const allDone: Record<number, boolean> = {}
+      currentExercises.forEach((_, i) => {
+        allDone[i] = true
+      })
+
+      setCompletedMap((prev) => ({
+        ...prev,
+        [student.id]: allDone,
+      }))
+
+      toast({
+        title: 'Ficha Concluída com Sucesso! 🎯',
+        description: `Treino de ${student.name} finalizado e registrado no histórico.`,
+      })
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao concluir ficha',
+        description: err instanceof Error ? err.message : 'Falha ao salvar',
+        variant: 'destructive',
+      })
+    } finally {
+      setSheetCompleteConfirm(null)
+    }
+  }
+
+  // Filtragem de alunos para a barra de pesquisa
+  const filteredSearchStudents = allStudents.filter((st) => {
+    if (!studentSearch.trim()) return false
+    const term = studentSearch.toLowerCase()
+    return st.name.toLowerCase().includes(term)
+  })
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-5rem)] max-w-full space-y-4 animate-fade-in pb-2">
+      {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS */}
+      <div className="bg-[#171717] border border-[#2A2A2A] rounded-2xl p-3 sm:p-4 shadow-md shrink-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Alunos Selecionados (Chips) */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs uppercase tracking-wider text-[#8A8F98] font-bold mr-1 flex items-center gap-1.5">
+              <Users className="w-4 h-4 text-[#F06A2A]" /> Sessão ({selectedStudents.length}/3):
+            </span>
+
+            {selectedStudents.length === 0 ? (
+              <span className="text-xs text-[#8A8F98] italic">
+                Nenhum aluno selecionado. Pesquise abaixo para começar.
+              </span>
+            ) : (
+              selectedStudents.map((st) => (
+                <div
+                  key={st.id}
+                  className="flex items-center gap-2 bg-[#2A2A2A] border border-[#3A3A3A] px-3 py-1.5 rounded-xl text-xs font-semibold text-white animate-fade-in"
+                >
+                  <span className="truncate max-w-[120px] sm:max-w-[160px]">{st.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveStudentFromSession(st.id)}
+                    className="text-[#8A8F98] hover:text-white p-0.5 rounded"
+                    title="Remover da sessão"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Busca e Adição de Alunos */}
+          <div className="relative min-w-[260px] sm:w-80">
+            <div className="relative">
+              <Input
+                placeholder="Pesquisar aluno para a aula..."
+                value={studentSearch}
+                onFocus={() => setSearchDropdownOpen(true)}
+                onChange={(e) => {
+                  setStudentSearch(e.target.value)
+                  setSearchDropdownOpen(true)
+                }}
+                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-10 pl-9 pr-3 text-xs focus-visible:ring-[#F06A2A]"
+              />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+            </div>
+
+            {/* Dropdown de Alunos */}
+            {searchDropdownOpen && filteredSearchStudents.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#1E1E1E] border border-[#2E2E2E] rounded-xl shadow-2xl z-30 max-h-60 overflow-y-auto p-1.5 space-y-1 animate-fade-in">
+                {filteredSearchStudents.map((st) => {
+                  const isAlreadySelected = selectedStudentIds.includes(st.id)
+                  return (
+                    <button
+                      key={st.id}
+                      type="button"
+                      disabled={isAlreadySelected}
+                      onClick={() => handleAddStudentToSession(st)}
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-left text-xs transition-colors ${
+                        isAlreadySelected
+                          ? 'opacity-40 cursor-not-allowed bg-black/20 text-[#8A8F98]'
+                          : 'hover:bg-[#2A2A2A] text-white'
+                      }`}
+                    >
+                      <div className="flex flex-col min-w-0 pr-2">
+                        <span className="font-bold truncate">{st.name}</span>
+                        <span className="text-[10px] text-[#8A8F98]">
+                          {st.phone || 'Sem telefone'}
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-[#F06A2A] shrink-0">
+                        {isAlreadySelected ? 'Na sessão' : '+ Adicionar'}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ÁREA DE TREINO PRINCIPAL */}
+      {loading ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
+          <Loader2 className="w-9 h-9 animate-spin text-[#F06A2A]" />
+          <p className="text-sm">Carregando painel de condução de treinos...</p>
+        </div>
+      ) : selectedStudents.length === 0 ? (
+        /* Empty State com busca em destaque */
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-[#1E1E1E] border border-[#2E2E2E] rounded-3xl p-8 sm:p-12 text-center shadow-2xl space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#F06A2A] to-[#FF8A4C] flex items-center justify-center shadow-lg shadow-[#F06A2A]/25 mx-auto">
+              <PlaySquare className="w-8 h-8 text-white stroke-[2.5]" />
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-xl sm:text-2xl font-bold text-white">
+                Pesquise os alunos para iniciar a sessão
+              </h2>
+              <p className="text-sm text-[#8A8F98] max-w-sm mx-auto">
+                Selecione até 3 alunos simultâneos. As fichas abrirão lado a lado no tablet ou em
+                abas deslizáveis no celular.
+              </p>
+            </div>
+
+            {/* Acesso rápido aos alunos cadastrados */}
+            <div className="pt-2 border-t border-[#2A2A2A]">
+              <p className="text-xs text-[#8A8F98] mb-3 font-medium">
+                Ou selecione rapidamente um aluno:
+              </p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {allStudents.slice(0, 5).map((st) => (
+                  <Button
+                    key={st.id}
+                    variant="outline"
+                    onClick={() => handleAddStudentToSession(st)}
+                    className="border-[#2E2E2E] bg-[#141414] hover:bg-[#2A2A2A] text-white text-xs h-9 px-3"
+                  >
+                    <Plus className="w-3.5 h-3.5 mr-1 text-[#F06A2A]" /> {st.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* RENDERIZAÇÃO RESPONSIVA */
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* LAYOUT DESKTOP / TABLET (>= 1024px) — 3 COLUNAS LADO A LADO */}
+          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-4 h-full min-h-0">
+            {selectedStudents.map((st) => {
+              const sheet = sheetsMap[st.id] || null
+              const activeSeries = activeSeriesMap[st.id] || 'A'
+              const completedExercises = completedMap[st.id] || {}
+
+              return (
+                <div key={st.id} className="h-full min-h-0">
+                  <StudentTrainingColumn
+                    student={st}
+                    sheet={sheet}
+                    activeSeries={activeSeries}
+                    onSelectSeries={(series) =>
+                      setActiveSeriesMap((prev) => ({
+                        ...prev,
+                        [st.id]: series,
+                      }))
+                    }
+                    completedExercises={completedExercises}
+                    onToggleExercise={(idx) => handleToggleExercise(st.id, idx)}
+                    onOpenAnamnese={() => setAnamneseStudent(st)}
+                    onEditStudent={() => navigate(`/alunos/${st.id}/editar`)}
+                    onOpenVideo={(ex) =>
+                      setActiveVideo({
+                        title: ex.name,
+                        youtubeId: ex.youtube_id,
+                        youtubeUrl: ex.youtube_url,
+                      })
+                    }
+                    onCompleteSeries={() => handleCompleteSeries(st)}
+                    onCompleteSheet={() =>
+                      sheet &&
+                      setSheetCompleteConfirm({
+                        student: st,
+                        sheet,
+                      })
+                    }
+                    exercisesMap={exercisesMap}
+                  />
+                </div>
+              )
+            })}
+
+            {/* Espaços vazios até 3 colunas para manter proporção perfeita */}
+            {Array.from({ length: 3 - selectedStudents.length }).map((_, i) => (
+              <div
+                key={`empty-col-${i}`}
+                className="hidden lg:flex flex-col items-center justify-center border-2 border-dashed border-[#2A2A2A] rounded-2xl p-6 text-center text-[#8A8F98] h-full"
+              >
+                <Users className="w-8 h-8 opacity-30 mb-2" />
+                <p className="text-xs font-semibold text-white mb-1">
+                  Espaço livre para mais um aluno
+                </p>
+                <p className="text-[11px] max-w-xs mb-3">
+                  Você pode acompanhar até 3 alunos lado a lado em tempo real.
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* LAYOUT MOBILE (< 1024px) — ABAS E CARROSSEL COM DESLIZE */}
+          <div className="lg:hidden flex flex-col flex-1 min-h-0">
+            {/* Tabs dos Alunos no topo */}
+            <div className="flex items-center gap-1.5 pb-2 shrink-0 overflow-x-auto">
+              {selectedStudents.map((st, idx) => {
+                const isActive = mobileActiveIndex === idx
+                const initials = st.name
+                  .split(' ')
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((n) => n[0].toUpperCase())
+                  .join('')
+
+                return (
+                  <button
+                    key={st.id}
+                    type="button"
+                    onClick={() => setMobileActiveIndex(idx)}
+                    className={`flex-1 min-w-[100px] flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all border ${
+                      isActive
+                        ? 'bg-[#F06A2A] border-[#F06A2A] text-white shadow-md shadow-[#F06A2A]/25'
+                        : 'bg-[#1E1E1E] border-[#2E2E2E] text-[#8A8F98]'
+                    }`}
+                  >
+                    <span className="w-5 h-5 rounded-full bg-black/20 flex items-center justify-center text-[10px]">
+                      {initials}
+                    </span>
+                    <span className="truncate">{st.name.split(' ')[0]}</span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Coluna do Aluno Ativo no Mobile */}
+            {selectedStudents[mobileActiveIndex] && (
+              <div className="flex-1 min-h-0">
+                <StudentTrainingColumn
+                  student={selectedStudents[mobileActiveIndex]}
+                  sheet={sheetsMap[selectedStudents[mobileActiveIndex].id] || null}
+                  activeSeries={activeSeriesMap[selectedStudents[mobileActiveIndex].id] || 'A'}
+                  onSelectSeries={(series) =>
+                    setActiveSeriesMap((prev) => ({
+                      ...prev,
+                      [selectedStudents[mobileActiveIndex].id]: series,
+                    }))
+                  }
+                  completedExercises={completedMap[selectedStudents[mobileActiveIndex].id] || {}}
+                  onToggleExercise={(idx) =>
+                    handleToggleExercise(selectedStudents[mobileActiveIndex].id, idx)
+                  }
+                  onOpenAnamnese={() => setAnamneseStudent(selectedStudents[mobileActiveIndex])}
+                  onEditStudent={() =>
+                    navigate(`/alunos/${selectedStudents[mobileActiveIndex].id}/editar`)
+                  }
+                  onOpenVideo={(ex) =>
+                    setActiveVideo({
+                      title: ex.name,
+                      youtubeId: ex.youtube_id,
+                      youtubeUrl: ex.youtube_url,
+                    })
+                  }
+                  onCompleteSeries={() => handleCompleteSeries(selectedStudents[mobileActiveIndex])}
+                  onCompleteSheet={() => {
+                    const st = selectedStudents[mobileActiveIndex]
+                    const sheet = sheetsMap[st.id]
+                    if (sheet) {
+                      setSheetCompleteConfirm({ student: st, sheet })
+                    }
+                  }}
+                  exercisesMap={exercisesMap}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DE ANAMNESE RÁPIDA (Sem sair da tela de treino) */}
+      <AnamneseModal
+        isOpen={Boolean(anamneseStudent)}
+        onClose={() => setAnamneseStudent(null)}
+        student={anamneseStudent}
+      />
+
+      {/* MODAL DE PLAYER DE VÍDEO DO YOUTUBE */}
+      <VideoModal
+        isOpen={Boolean(activeVideo)}
+        onClose={() => setActiveVideo(null)}
+        title={activeVideo?.title || ''}
+        youtubeId={activeVideo?.youtubeId}
+        youtubeUrl={activeVideo?.youtubeUrl}
+      />
+
+      {/* MODAL DE AVANÇO DE SÉRIE ("Série X concluída! Marcar a próxima?") */}
+      <Dialog
+        open={Boolean(advanceDialog)}
+        onOpenChange={(open) => !open && setAdvanceDialog(null)}
+      >
+        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              Série {advanceDialog?.completedSeries} concluída!
+            </DialogTitle>
+            <DialogDescription className="text-[#8A8F98] text-sm">
+              O treino de <strong className="text-white">{advanceDialog?.student.name}</strong> para
+              a Série {advanceDialog?.completedSeries} foi salvo no histórico com data e horário.
+              Deseja já avançar a ficha para a Série {advanceDialog?.nextSeries}?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex sm:justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setAdvanceDialog(null)}
+              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+            >
+              Agora não
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirmAdvanceSeries}
+              className="bg-[#F06A2A] hover:bg-[#D95C1C] text-white font-semibold"
+            >
+              Sim, avançar para Série {advanceDialog?.nextSeries}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE MARCAR TODA A FICHA COMO CONCLUÍDA */}
+      <Dialog
+        open={Boolean(sheetCompleteConfirm)}
+        onOpenChange={(open) => !open && setSheetCompleteConfirm(null)}
+      >
+        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-[#F06A2A]" /> Marcar toda a ficha como
+              concluída?
+            </DialogTitle>
+            <DialogDescription className="text-[#8A8F98] text-sm">
+              Confirmar a conclusão de toda a ficha para o aluno{' '}
+              <strong className="text-white">{sheetCompleteConfirm?.student.name}</strong>? Isso
+              marcará todos os exercícios e registrará a data e hora no histórico da aula.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex sm:justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSheetCompleteConfirm(null)}
+              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={handleCompleteEntireSheet}
+              className="bg-[#2EA55B] hover:bg-[#289150] text-white font-semibold"
+            >
+              Confirmar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}

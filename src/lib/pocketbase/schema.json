@@ -1,0 +1,363 @@
+{
+  "generatedAt": "2026-10-07T11:30:58.603Z",
+  "collections": [
+    {
+      "name": "users",
+      "type": "auth",
+      "apiRules": {
+        "list": "id = @request.auth.id",
+        "view": "id = @request.auth.id",
+        "create": "",
+        "update": "id = @request.auth.id",
+        "delete": "id = @request.auth.id"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "avatar",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "role",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["admin", "professor"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
+        "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
+      ]
+    },
+    {
+      "name": "students",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "birthdate",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "phone",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "general_observations",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "health_history",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "injuries",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "surgeries",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "restrictions",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "goals",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": [
+            "Reabilitação",
+            "Condicionamento",
+            "Emagrecimento",
+            "Hipertrofia",
+            "Outro"
+          ]
+        },
+        {
+          "name": "experience_level",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["Iniciante", "Intermediário", "Avançado"]
+        },
+        {
+          "name": "teacher_observations",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "criado_por",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "users"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_students_name ON students (name)",
+        "CREATE INDEX idx_students_criado_por ON students (criado_por)"
+      ]
+    },
+    {
+      "name": "exercises",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "youtube_url",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "youtube_id",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "thumbnail_url",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "muscle_group",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": [
+            "Peito",
+            "Costas",
+            "Pernas",
+            "Ombros",
+            "Bíceps",
+            "Tríceps",
+            "Abdômen",
+            "Glúteos",
+            "Cardio",
+            "Alongamento"
+          ]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_exercises_name ON exercises (name)",
+        "CREATE INDEX idx_exercises_muscle_group ON exercises (muscle_group)"
+      ]
+    },
+    {
+      "name": "training_sheets",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "student",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "students"
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "series_data",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_training_sheets_student ON training_sheets (student)"]
+    },
+    {
+      "name": "workout_progress",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "student",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "students"
+        },
+        {
+          "name": "training_sheet",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "training_sheets"
+        },
+        {
+          "name": "series_completed",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["A", "B", "C", "D", "E"]
+        },
+        {
+          "name": "completed_at",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "exercises_snapshot",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "notes",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_workout_progress_student ON workout_progress (student)",
+        "CREATE INDEX idx_workout_progress_completed ON workout_progress (completed_at DESC)"
+      ]
+    }
+  ]
+}
