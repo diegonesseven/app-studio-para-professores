@@ -293,8 +293,20 @@ export default function Layout() {
         )}
 
         {/* CONTEÚDO PRINCIPAL (scroll independente) */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8 bg-[#121212]">
-          <div className="max-w-7xl mx-auto w-full">
+        <main
+          className={`flex-1 overflow-y-auto overflow-x-hidden bg-[#121212] ${
+            location.pathname.startsWith('/treino')
+              ? 'p-2 sm:p-4 lg:p-6 flex flex-col'
+              : 'p-4 sm:p-6 lg:p-8'
+          }`}
+        >
+          <div
+            className={`mx-auto w-full ${
+              location.pathname.startsWith('/treino')
+                ? 'max-w-[1600px] flex-1 flex flex-col min-h-0'
+                : 'max-w-7xl'
+            }`}
+          >
             <Outlet />
           </div>
         </main>
