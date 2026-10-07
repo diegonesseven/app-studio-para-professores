@@ -79,9 +79,29 @@ describe('Teacher lifecycle and teacher profile password update', () => {
       await expect(
         teacherPb3.collection('users').authWithPassword(testTeacherEmail, initialPassword),
       ).rejects.toThrow()
+
+      // 8. Test admin updating admin own password
+      // First with wrong old password
+      try {
+        await adminPb.collection('users').update(adminAuth.record.id, {
+          oldPassword: 'WrongAdminPassword123!',
+          password: 'Bru@Studio2026!',
+          passwordConfirm: 'Bru@Studio2026!',
+        })
+        expect.fail('Should have failed with wrong oldPassword')
+      } catch (err: any) {
+        expect(err.status).toBe(400)
+      }
+
+      // Now test with correct old password (keeping same password Bru@Studio2026!)
+      const adminUpdated = await adminPb.collection('users').update(adminAuth.record.id, {
+        oldPassword: 'Bru@Studio2026!',
+        password: 'Bru@Studio2026!',
+        passwordConfirm: 'Bru@Studio2026!',
+      })
+      expect(adminUpdated.id).toBe(adminAuth.record.id)
     } finally {
-      // 8. Cleanup teacher created during test
+      // 9. Cleanup teacher created during test
       await adminPb.collection('users').delete(createdTeacher.id)
-    }
-  })
+    }  })
 })
