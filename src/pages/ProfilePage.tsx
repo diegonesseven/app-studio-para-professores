@@ -200,7 +200,7 @@ export default function ProfilePage() {
         currentEmail,
       )
 
-      // Atualizar a sessão com a nova senha para manter a sessão ativa sem logout acidental
+      // Atualizar a sessão com a nova senha para manter a sessão ativa sem redirecionamento / logout acidental
       if (currentEmail) {
         try {
           await pb
@@ -208,7 +208,6 @@ export default function ProfilePage() {
             .authWithPassword(currentEmail.trim().toLowerCase(), password.trim())
         } catch (authErr) {
           console.warn('Erro ao reautenticar pós-troca de senha:', authErr)
-          // Se re-auth falhou por qualquer motivo, NÃO chamar refreshUser() pois authRefresh com token expirado desloga
         }
       }
 

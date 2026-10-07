@@ -4,65 +4,124 @@ import { profileService, parseProfileErrorMessage } from '../services/profile'
 
 const PB_URL = 'https://app-studio-para-professores-f5bbc.shrd00.internal.goskip.dev'
 
-describe('Profile Password Change Verification', () => {
-  it('rejects wrong current password with clear Portuguese error', async () => {
-    const adminPb = new PocketBase(PB_URL)
-    adminPb.autoCancellation(false)
+describe('Meu Perfil - Validação Completa de Alteração de Senha', () => {
+  const ADMIN_EMAIL = 'moreiradiego.seven@gmail.com'
+  const ADMIN_ORIGINAL_PASSWORD = 'Bru@Studio2026!'
+  const ADMIN_TEMP_PASSWORD = 'TempAdminPassword2026!'
 
-    const auth = await adminPb
+  it('valida mensagem amigável com senha atual errada e preserva a sessão intacta', async () => {
+    const pbInstance = new PocketBase(PB_URL)
+    pbInstance.autoCancellation(false)
+
+    // 1. Log in as admin
+    const auth = await pbInstance
       .collection('users')
-      .authWithPassword('moreiradiego.seven@gmail.com', 'Bru@Studio2026!')
+      .authWithPassword(ADMIN_EMAIL, ADMIN_ORIGINAL_PASSWORD)
 
-    expect(auth.record.email).toBe('moreiradiego.seven@gmail.com')
+    expect(auth.token).toBeTruthy()
+    expect(auth.record.email).toBe(ADMIN_EMAIL)
+    expect(auth.record.role).toBe('admin')
 
-    const isWrong = await profileService.verifyCurrentPassword(
-      'moreiradiego.seven@gmail.com',
-      'SenhaIncorretaErrada123!',
-    )
-    expect(isWrong).toBe(false)
+    const originalToken = pbInstance.authStore.token
+    expect(pbInstance.authStore.isValid).toBe(true)
+
+    // 2. Tenta trocar com senha errada
+    let caughtError: unknown = null
+    try {
+      await profileService.changePassword(
+        auth.record.id,
+        {
+          oldPassword: 'SenhaCompletamenteIncorreta123!',
+          password: 'NovaSenhaTesteValida2026!',
+          passwordConfirm: 'NovaSenhaTesteValida2026!',
+        },
+        ADMIN_EMAIL,
+      )
+    } catch (err) {
+      caughtError = err
+    }
+
+    expect(caughtError).not.toBeNull()
+    const friendlyMessage = parseProfileErrorMessage(caughtError)
+    expect(friendlyMessage).toBe('Senha atual incorreta. Por favor, verifique a senha digitada.')
+
+    // 3. A sessão do usuário continua 100% válida (nunca redireciona / desloga)
+    expect(pbInstance.authStore.isValid).toBe(true)
+    expect(pbInstance.authStore.token).toBe(originalToken)
+    expect(pbInstance.authStore.record?.email).toBe(ADMIN_EMAIL)
   })
 
-  it('validates password update flow with temporary user and leaves admin intact', async () => {
-    const adminPb = new PocketBase(PB_URL)
-    adminPb.autoCancellation(false)
+  it('executa a troca de senha ponta a ponta para admin, reautentica e restaura Bru@Studio2026!', async () => {
+    const pbInstance = new PocketBase(PB_URL)
+    pbInstance.autoCancellation(false)
 
-    await adminPb
+    // 1. Autentica inicialmente com a senha padrão
+    const initialAuth = await pbInstance
       .collection('users')
-      .authWithPassword('moreiradiego.seven@gmail.com', 'Bru@Studio2026!')
+      .authWithPassword(ADMIN_EMAIL, ADMIN_ORIGINAL_PASSWORD)
 
-    const testEmail = `prof_qa_${Date.now()}@studiobru.com.br`
-    const initialPass = 'InitialPass@2026!'
-    const newPass = 'UpdatedPass@2026!'
-
-    const created = await adminPb.collection('users').create({
-      name: 'Professor QA Teste',
-      email: testEmail,
-      password: initialPass,
-      passwordConfirm: initialPass,
-      role: 'professor',
-      emailVisibility: false,
-    })
+    expect(initialAuth.token).toBeTruthy()
+    const userId = initialAuth.record.id
 
     try {
-      const teacherPb = new PocketBase(PB_URL)
-      teacherPb.autoCancellation(false)
-      await teacherPb.collection('users').authWithPassword(testEmail, initialPass)
+      // 2. Altera a senha para ADMIN_TEMP_PASSWORD
+      const updateResult = await profileService.changePassword(
+        userId,
+        {
+          oldPassword: ADMIN_ORIGINAL_PASSWORD,
+          password: ADMIN_TEMP_PASSWORD,
+          passwordConfirm: ADMIN_TEMP_PASSWORD,
+        },
+        ADMIN_EMAIL,
+      )
+      expect(updateResult.id).toBe(userId)
 
-      // Test successful update
-      const updated = await teacherPb.collection('users').update(created.id, {
-        oldPassword: initialPass,
-        password: newPass,
-        passwordConfirm: newPass,
-      })
-      expect(updated.id).toBe(created.id)
+      // 3. Simula o comportamento do ProfilePage: reautentica no authStore para atualizar token
+      const reauthResult = await pbInstance
+        .collection('users')
+        .authWithPassword(ADMIN_EMAIL, ADMIN_TEMP_PASSWORD)
 
-      // Test new password works
-      const teacherPb2 = new PocketBase(PB_URL)
-      teacherPb2.autoCancellation(false)
-      const reauth = await teacherPb2.collection('users').authWithPassword(testEmail, newPass)
-      expect(reauth.token).toBeTruthy()
+      expect(reauthResult.token).toBeTruthy()
+      expect(pbInstance.authStore.isValid).toBe(true)
+      expect(pbInstance.authStore.record?.email).toBe(ADMIN_EMAIL)
     } finally {
-      await adminPb.collection('users').delete(created.id)
+      // 4. SEMPRE restaura a senha original Bru@Studio2026! para o admin
+      const restoreClient = new PocketBase(PB_URL)
+      restoreClient.autoCancellation(false)
+
+      // Identifica com qual senha o admin está no momento (se temp ou original)
+      let currentPass = ADMIN_TEMP_PASSWORD
+      try {
+        await restoreClient.collection('users').authWithPassword(ADMIN_EMAIL, ADMIN_TEMP_PASSWORD)
+      } catch {
+        currentPass = ADMIN_ORIGINAL_PASSWORD
+        await restoreClient
+          .collection('users')
+          .authWithPassword(ADMIN_EMAIL, ADMIN_ORIGINAL_PASSWORD)
+      }
+
+      if (currentPass !== ADMIN_ORIGINAL_PASSWORD) {
+        await profileService.changePassword(
+          userId,
+          {
+            oldPassword: ADMIN_TEMP_PASSWORD,
+            password: ADMIN_ORIGINAL_PASSWORD,
+            passwordConfirm: ADMIN_ORIGINAL_PASSWORD,
+          },
+          ADMIN_EMAIL,
+        )
+      }
     }
+
+    // 5. Confirmação final definitiva: login com Bru@Studio2026! funciona perfeitamente
+    const finalVerification = new PocketBase(PB_URL)
+    finalVerification.autoCancellation(false)
+    const finalAuth = await finalVerification
+      .collection('users')
+      .authWithPassword(ADMIN_EMAIL, ADMIN_ORIGINAL_PASSWORD)
+
+    expect(finalAuth.token).toBeTruthy()
+    expect(finalAuth.record.email).toBe(ADMIN_EMAIL)
+    expect(finalAuth.record.role).toBe('admin')
   })
 })

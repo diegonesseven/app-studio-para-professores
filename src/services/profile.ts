@@ -32,7 +32,7 @@ export function parseProfileErrorMessage(err: unknown): string {
 
       const oldPasswordMsg = getFieldMsg(response.data.oldPassword)
       if (oldPasswordMsg) {
-        return 'Senha atual incorreta. Verifique a senha informada e tente novamente.'
+        return 'Senha atual incorreta. Por favor, verifique a senha digitada.'
       }
 
       const passwordMsg = getFieldMsg(response.data.password)
@@ -75,13 +75,13 @@ export function parseProfileErrorMessage(err: unknown): string {
     if (response?.message) {
       const lower = response.message.toLowerCase()
       if (lower.includes('old password') || lower.includes('oldpassword')) {
-        return 'Senha atual incorreta. Verifique a senha informada e tente novamente.'
+        return 'Senha atual incorreta. Por favor, verifique a senha digitada.'
       }
       if (lower.includes('failed to update record')) {
-        return 'Falha ao alterar senha. Verifique se sua senha atual está correta.'
+        return 'Falha ao alterar senha. Por favor, verifique a senha digitada.'
       }
       if (lower.includes('fail') && lower.includes('authenticate')) {
-        return 'Senha atual incorreta.'
+        return 'Senha atual incorreta. Por favor, verifique a senha digitada.'
       }
       return response.message
     }
@@ -89,11 +89,15 @@ export function parseProfileErrorMessage(err: unknown): string {
 
   if (err instanceof Error) {
     const lower = err.message.toLowerCase()
-    if (lower.includes('old password') || lower.includes('oldpassword')) {
-      return 'Senha atual incorreta. Verifique a senha informada e tente novamente.'
+    if (
+      lower.includes('old password') ||
+      lower.includes('oldpassword') ||
+      lower.includes('senha atual incorreta')
+    ) {
+      return 'Senha atual incorreta. Por favor, verifique a senha digitada.'
     }
     if (lower.includes('failed to update record')) {
-      return 'Falha ao alterar senha. Verifique se sua senha atual está correta.'
+      return 'Falha ao alterar senha. Por favor, verifique a senha digitada.'
     }
     return err.message
   }
