@@ -87,10 +87,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshUser = async () => {
     if (pb.authStore.isValid) {
       try {
+        // Tenta obter os dados atualizados do usuário atual
+        if (pb.authStore.record?.id) {
+          const fresh = await pb.collection('users').getOne<User>(pb.authStore.record.id)
+          pb.authStore.save(pb.authStore.token, fresh as any)
+          syncUserFromStore()
+          return
+        }
+      } catch {
+        /* se getOne falhar, tenta authRefresh tradicional */
+      }
+
+      try {
         await pb.collection('users').authRefresh()
         syncUserFromStore()
       } catch (_) {
-        logout()
+        // Só desloga se o token estiver definitivamente inválido e não houver record
+        if (!pb.authStore.isValid) {
+          logout()
+        }
       }
     }
   }

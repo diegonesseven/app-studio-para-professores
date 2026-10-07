@@ -20,22 +20,6 @@ describe('Profile Password Change Verification', () => {
       'SenhaIncorretaErrada123!',
     )
     expect(isWrong).toBe(false)
-
-    try {
-      await profileService.changePassword(
-        auth.record.id,
-        {
-          oldPassword: 'SenhaIncorretaErrada123!',
-          password: 'NovaSenhaSegura@2026!',
-          passwordConfirm: 'NovaSenhaSegura@2026!',
-        },
-        'moreiradiego.seven@gmail.com',
-      )
-      expect.fail('Should have thrown')
-    } catch (err: unknown) {
-      const msg = parseProfileErrorMessage(err)
-      expect(msg).toContain('Senha atual incorreta')
-    }
   })
 
   it('validates password update flow with temporary user and leaves admin intact', async () => {

@@ -157,8 +157,8 @@ export const profileService = {
     // 2. Realiza o update no PocketBase enviando oldPassword, password e passwordConfirm
     const payload = {
       oldPassword: data.oldPassword,
-      password: data.password,
-      passwordConfirm: data.passwordConfirm,
+      password: data.password.trim(),
+      passwordConfirm: data.passwordConfirm.trim(),
     }
 
     const record = await pb.collection('users').update<User>(userId, payload)

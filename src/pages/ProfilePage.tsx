@@ -203,12 +203,13 @@ export default function ProfilePage() {
       // Atualizar a sessão com a nova senha para manter a sessão ativa sem logout acidental
       if (currentEmail) {
         try {
-          await pb.collection('users').authWithPassword(currentEmail, password)
-        } catch (_) {
-          await refreshUser()
+          await pb
+            .collection('users')
+            .authWithPassword(currentEmail.trim().toLowerCase(), password.trim())
+        } catch (authErr) {
+          console.warn('Erro ao reautenticar pós-troca de senha:', authErr)
+          // Se re-auth falhou por qualquer motivo, NÃO chamar refreshUser() pois authRefresh com token expirado desloga
         }
-      } else {
-        await refreshUser()
       }
 
       setOldPassword('')

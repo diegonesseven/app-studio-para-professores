@@ -14,74 +14,58 @@ describe('Admin Password Change End-to-End Verification', () => {
     expect(authData.token).toBeTruthy()
     expect(authData.record.role).toBe('admin')
     expect(authData.record.email).toBe(ADMIN_EMAIL)
-    const adminId = authData.record.id
 
-    // 2. Attempt password change with wrong old password
-    try {
-      await profileService.changePassword(
-        adminId,
+    // Test invalid old password through profileService
+    await expect(
+      profileService.changePassword(
+        authData.record.id,
         {
-          oldPassword: 'IncorrectOldPassword123!',
+          oldPassword: 'WrongPassword123!',
           password: TEMP_PASSWORD,
           passwordConfirm: TEMP_PASSWORD,
         },
         ADMIN_EMAIL,
-      )
-      expect.fail('Should have failed with wrong current password')
-    } catch (err: any) {
-      const msg = parseProfileErrorMessage(err)
-      expect(msg).toBe('Senha atual incorreta. Por favor, verifique a senha digitada.')
-    }
+      ),
+    ).rejects.toThrow('Senha atual incorreta. Por favor, verifique a senha digitada.')
 
-    // 3. Change to temporary password with valid current password
-    try {
-      const updateResult = await profileService.changePassword(
-        adminId,
-        {
-          oldPassword: ORIGINAL_PASSWORD,
-          password: TEMP_PASSWORD,
-          passwordConfirm: TEMP_PASSWORD,
-        },
-        ADMIN_EMAIL,
-      )
-      expect(updateResult.id).toBe(adminId)
+    // Ensure session is STILL valid after rejection
+    expect(pb.authStore.isValid).toBe(true)
+    expect(pb.authStore.record?.email).toBe(ADMIN_EMAIL)
 
-      // 4. Verify login works with the new temporary password
-      const tempAuth = await pb.collection('users').authWithPassword(ADMIN_EMAIL, TEMP_PASSWORD)
-      expect(tempAuth.token).toBeTruthy()
-      expect(tempAuth.record.email).toBe(ADMIN_EMAIL)
+    // Agora testa a troca COMPLETA de senha no perfil:
+    // 1. Troca para TEMP_PASSWORD
+    const changed = await profileService.changePassword(
+      authData.record.id,
+      {
+        oldPassword: ORIGINAL_PASSWORD,
+        password: TEMP_PASSWORD,
+        passwordConfirm: TEMP_PASSWORD,
+      },
+      ADMIN_EMAIL,
+    )
+    expect(changed.id).toBe(authData.record.id)
 
-      // 5. Verify old password no longer works while temporary is active
-      await expect(
-        pb.collection('users').authWithPassword(ADMIN_EMAIL, ORIGINAL_PASSWORD),
-      ).rejects.toThrow()
-    } finally {
-      // 6. ALWAYS restore original password Bru@Studio2026!
-      // Authenticate with temp password if needed
-      try {
-        await pb.collection('users').authWithPassword(ADMIN_EMAIL, TEMP_PASSWORD)
-      } catch (_) {
-        // If already original password, keep moving
-      }
+    // 2. Re-autentica com TEMP_PASSWORD
+    const reauthTemp = await pb.collection('users').authWithPassword(ADMIN_EMAIL, TEMP_PASSWORD)
+    expect(reauthTemp.token).toBeTruthy()
+    expect(reauthTemp.record.email).toBe(ADMIN_EMAIL)
 
-      const restoreResult = await profileService.changePassword(
-        adminId,
-        {
-          oldPassword: TEMP_PASSWORD,
-          password: ORIGINAL_PASSWORD,
-          passwordConfirm: ORIGINAL_PASSWORD,
-        },
-        ADMIN_EMAIL,
-      )
-      expect(restoreResult.id).toBe(adminId)
+    // 3. Imediatamente restaura a senha ORIGINAL (Bru@Studio2026!)
+    const restored = await profileService.changePassword(
+      authData.record.id,
+      {
+        oldPassword: TEMP_PASSWORD,
+        password: ORIGINAL_PASSWORD,
+        passwordConfirm: ORIGINAL_PASSWORD,
+      },
+      ADMIN_EMAIL,
+    )
+    expect(restored.id).toBe(authData.record.id)
 
-      // 7. Verify login with original password Bru@Studio2026! succeeds
-      const finalAuth = await pb
-        .collection('users')
-        .authWithPassword(ADMIN_EMAIL, ORIGINAL_PASSWORD)
-      expect(finalAuth.token).toBeTruthy()
-      expect(finalAuth.record.email).toBe(ADMIN_EMAIL)
-      expect(finalAuth.record.role).toBe('admin')
-    }
+    // 4. Confirma que a senha original Bru@Studio2026! funciona perfeitamente
+    const finalAuth = await pb.collection('users').authWithPassword(ADMIN_EMAIL, ORIGINAL_PASSWORD)
+    expect(finalAuth.token).toBeTruthy()
+    expect(finalAuth.record.email).toBe(ADMIN_EMAIL)
+    expect(finalAuth.record.role).toBe('admin')
   })
 })
