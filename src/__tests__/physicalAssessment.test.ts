@@ -10,7 +10,7 @@ import {
   classifyWaistHipRatio,
 } from '../lib/omronClassification'
 import { calculateEvolution, formatMetricValue } from '../lib/assessmentComparison'
-import { extractDateInputVal, parseAndFormatDate } from '../lib/dateUtils'
+import { extractDateInputVal, parseAndFormatDate, safeDateToISO } from '../lib/dateUtils'
 import { drawRoundRect } from '../services/assessmentImageExport'
 
 describe('Date Helpers para Avaliação Física (Prevenção de Invalid Date)', () => {
@@ -27,6 +27,11 @@ describe('Date Helpers para Avaliação Física (Prevenção de Invalid Date)', 
     expect(extractDateInputVal('')).toBe('')
     expect(extractDateInputVal(null)).toBe('')
     expect(extractDateInputVal(undefined)).toBe('')
+  })
+
+  it('safeDateToISO converte YYYY-MM-DD para ISO UTC ao meio-dia', () => {
+    const iso = safeDateToISO('2026-10-08')
+    expect(iso).toContain('2026-10-08T12:00:00')
   })
 
   it('parseAndFormatDate formata para DD/MM/AAAA independente de espaço ou separador', () => {

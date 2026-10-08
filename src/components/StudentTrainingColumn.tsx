@@ -301,13 +301,7 @@ export default function StudentTrainingColumn({
                 <span>
                   Início da ficha:{' '}
                   <strong className="text-white">
-                    {sheet.start_date || sheet.created
-                      ? new Date(sheet.start_date || sheet.created).toLocaleDateString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })
-                      : 'Recente'}
+                    {parseAndFormatDate(sheet.start_date || sheet.created, 'Recente')}
                   </strong>
                 </span>
               </Badge>

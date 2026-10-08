@@ -4,6 +4,7 @@ import { trainingSheetsService } from '@/services/trainingSheets'
 import { studentsService } from '@/services/students'
 import { exercisesService } from '@/services/exercises'
 import { sanitizeText } from '@/lib/validation'
+import { safeDateToISO, parseAndFormatDate } from '@/lib/dateUtils'
 import type {
   TrainingSheet,
   Student,
@@ -316,9 +317,7 @@ export default function SheetForm() {
         }))
       })
 
-      const parsedStartDate = startDate
-        ? new Date(startDate).toISOString()
-        : new Date().toISOString()
+      const parsedStartDate = startDate ? safeDateToISO(startDate) : new Date().toISOString()
 
       const payload = {
         student: student.id,
@@ -426,7 +425,7 @@ export default function SheetForm() {
                   title,
                   notes,
                   series_data: seriesData,
-                  start_date: startDate ? new Date(startDate).toISOString() : sheetCreated,
+                  start_date: startDate ? safeDateToISO(startDate) : sheetCreated,
                   created: sheetCreated,
                   updated: '',
                 }
@@ -475,13 +474,7 @@ export default function SheetForm() {
               <span>
                 Início da ficha:{' '}
                 <strong className="text-primary font-bold">
-                  {startDate
-                    ? new Date(`${startDate}T12:00:00`).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })
-                    : 'Hoje'}
+                  {startDate ? parseAndFormatDate(startDate, 'Hoje') : 'Hoje'}
                 </strong>
               </span>
             </Badge>

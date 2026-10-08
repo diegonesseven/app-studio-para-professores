@@ -38,6 +38,25 @@ export function extractDateInputVal(dateStr?: string | Date | null): string {
  * Converte qualquer representação de data para formato legível pt-BR (DD/MM/AAAA).
  * Retorna fallback (padrão: "—" ou string vazia se especificado) quando a data for nula ou inválida.
  */
+/**
+ * Converte de forma segura uma string de data (ou YYYY-MM-DD) para ISO string sem distorção de fuso horário.
+ */
+export function safeDateToISO(dateInput: string): string {
+  if (!dateInput) return new Date().toISOString()
+  const clean = extractDateInputVal(dateInput)
+  if (clean) {
+    const parts = clean.split('-')
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10)
+      const month = parseInt(parts[1], 10) - 1
+      const day = parseInt(parts[2], 10)
+      return new Date(Date.UTC(year, month, day, 12, 0, 0)).toISOString()
+    }
+  }
+  const d = new Date(dateInput)
+  return !isNaN(d.getTime()) ? d.toISOString() : new Date().toISOString()
+}
+
 export function parseAndFormatDate(dateStr?: string | Date | null, fallback = '—'): string {
   if (!dateStr) return fallback
 

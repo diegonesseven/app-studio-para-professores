@@ -7,6 +7,7 @@ import { workoutProgressService } from '@/services/workoutProgress'
 import { useRealtime } from '@/hooks/use-realtime'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { safeDateToISO } from '@/lib/dateUtils'
 import type {
   Student,
   TrainingSheet,
@@ -772,7 +773,7 @@ export default function Training() {
     setSavingStartDate(true)
     try {
       const updated = await trainingSheetsService.update(editingStartDateSheet.id, {
-        start_date: new Date(newStartDateInput).toISOString(),
+        start_date: safeDateToISO(newStartDateInput),
       })
       setSheetsMap((prev) => ({
         ...prev,
