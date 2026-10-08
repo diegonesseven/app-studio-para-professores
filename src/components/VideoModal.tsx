@@ -74,10 +74,10 @@ export default function VideoModal({
         onClick={onClose}
       />
 
-      {/* Modal Dialog */}
-      <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[90vh] animate-fade-in-up">
+      {/* Modal Dialog - Generoso para tablet (~95vw) e desktop (até 1100px) */}
+      <div className="relative w-[95vw] max-w-[1100px] bg-card border border-border rounded-2xl shadow-2xl overflow-hidden z-10 flex flex-col max-h-[95vh] animate-fade-in-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-border bg-card/60">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-border bg-card/80 shrink-0">
           <div className="flex flex-col min-w-0 pr-2">
             <span className="text-xs uppercase tracking-wider text-primary font-semibold flex items-center gap-1.5">
               Demonstração do Exercício
@@ -87,12 +87,12 @@ export default function VideoModal({
                 </span>
               )}
             </span>
-            <h3 className="text-base sm:text-lg font-bold text-white truncate">{title}</h3>
+            <h3 className="text-base sm:text-xl font-bold text-white truncate">{title}</h3>
           </div>
 
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
+            className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors shrink-0"
             aria-label="Fechar vídeo"
           >
             <X className="w-5 h-5" />
@@ -100,7 +100,7 @@ export default function VideoModal({
         </div>
 
         {/* Video Area */}
-        <div className="w-full bg-black relative aspect-video flex items-center justify-center">
+        <div className="w-full bg-black relative aspect-video flex items-center justify-center overflow-hidden">
           {hasVideo && isVimeo && videoInfo.embedUrl ? (
             <iframe
               src={videoInfo.embedUrl}
@@ -132,25 +132,28 @@ export default function VideoModal({
         </div>
 
         {/* Footer com link externo se houver vídeo */}
-        <div className="p-3 bg-card/60 border-t border-border flex items-center justify-between">
-          <span className="text-xs text-[#8A8F98]">Studio Bru Oliveira • Ficha de Execução</span>
+        <div className="px-4 sm:px-6 py-3 bg-card/80 border-t border-border flex items-center justify-between gap-3 shrink-0">
+          <span className="text-xs text-[#8A8F98] truncate">
+            Studio Bru Oliveira • Ficha de Execução
+          </span>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {hasVideo && videoInfo.originalUrl && (
               <a
                 href={videoInfo.originalUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline px-2 py-1 font-medium"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-primary hover:underline px-2.5 py-1.5 font-semibold bg-primary/10 hover:bg-primary/20 rounded-lg transition-colors"
               >
-                <ExternalLink className="w-3.5 h-3.5" /> Abrir no {platformLabel || 'Player'}
+                <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Abrir no{' '}
+                {platformLabel || 'Player'}
               </a>
             )}
             <Button
               size="sm"
               variant="outline"
               onClick={onClose}
-              className="border-border bg-card hover:bg-muted text-white text-xs h-8"
+              className="border-border bg-card hover:bg-muted text-white text-xs sm:text-sm h-8 sm:h-9 px-4"
             >
               Fechar
             </Button>

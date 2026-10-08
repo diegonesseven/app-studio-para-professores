@@ -123,4 +123,14 @@ describe('Suporte a Vídeos no Acervo: Vimeo, YouTube e Exercício sem Vídeo', 
       expect(getYoutubeThumbnail('')).toBeNull()
     })
   })
+
+  describe('Agrupamentos musculares e classificação', () => {
+    it('deve permitir agrupar e conter os 10 grupos padrão além de suportar "A classificar"', async () => {
+      const { MUSCLE_GROUPS, TARGET_MUSCLE_GROUPS } = await import('../types')
+      expect(MUSCLE_GROUPS).toContain('Peito')
+      expect(MUSCLE_GROUPS).toContain('Costas')
+      expect(MUSCLE_GROUPS).toContain('Pernas')
+      expect(TARGET_MUSCLE_GROUPS.length).toBe(10)
+    })
+  })
 })

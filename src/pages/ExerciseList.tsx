@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { exercisesService, parseVideoUrl } from '@/services/exercises'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Exercise, MuscleGroup } from '@/types'
-import { MUSCLE_GROUPS } from '@/types'
+import { MUSCLE_GROUPS, TARGET_MUSCLE_GROUPS } from '@/types'
 import VideoModal from '@/components/VideoModal'
 import {
   Search,
@@ -16,6 +16,11 @@ import {
   Loader2,
   Filter,
   VideoOff,
+  Tags,
+  Check,
+  ChevronDown,
+  Sparkles,
+  Info,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,6 +41,11 @@ export default function ExerciseList() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedMuscle, setSelectedMuscle] = useState<string>('all')
+
+  // Modo de Classificação Rápida
+  const [classifyMode, setClassifyMode] = useState(false)
+  const [openSelectorId, setOpenSelectorId] = useState<string | null>(null)
+  const [savingId, setSavingId] = useState<string | null>(null)
 
   // Modal de Vídeo
   const [activeVideo, setActiveVideo] = useState<{
@@ -90,6 +100,49 @@ export default function ExerciseList() {
     }
   }
 
+  // Contagem de exercícios pendentes de classificação
+  const pendingCount = useMemo(() => {
+    return exercises.filter((ex) => ex.muscle_group === 'A classificar').length
+  }, [exercises])
+
+  // Função para salvar a classificação rápida diretamente
+  const handleQuickClassify = async (exerciseId: string, newGroup: MuscleGroup) => {
+    const previousGroup = exercises.find((e) => e.id === exerciseId)?.muscle_group
+    if (previousGroup === newGroup) {
+      setOpenSelectorId(null)
+      return
+    }
+
+    // Atualização otimista
+    setExercises((prev) =>
+      prev.map((e) => (e.id === exerciseId ? { ...e, muscle_group: newGroup } : e)),
+    )
+    setOpenSelectorId(null)
+    setSavingId(exerciseId)
+
+    try {
+      await exercisesService.updateMuscleGroup(exerciseId, newGroup)
+      toast({
+        title: 'Classificação salva!',
+        description: `Exercício atualizado para "${newGroup}".`,
+      })
+    } catch (err: unknown) {
+      // Rollback se falhar
+      if (previousGroup) {
+        setExercises((prev) =>
+          prev.map((e) => (e.id === exerciseId ? { ...e, muscle_group: previousGroup } : e)),
+        )
+      }
+      toast({
+        title: 'Erro ao classificar',
+        description: err instanceof Error ? err.message : 'Falha na conexão',
+        variant: 'destructive',
+      })
+    } finally {
+      setSavingId(null)
+    }
+  }
+
   return (
     <div className="space-y-6 animate-fade-in pb-12">
       {/* Top Header */}
@@ -103,14 +156,64 @@ export default function ExerciseList() {
           </p>
         </div>
 
-        {isAdmin && (
-          <Link to="/acervo/novo">
-            <Button className="bg-primary hover:opacity-90 text-primary-foreground font-medium h-11 px-5 shadow-md flex items-center gap-2">
-              <Plus className="w-4 h-4" /> Novo Exercício
-            </Button>
-          </Link>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Botão de Modo Classificar */}
+          <Button
+            type="button"
+            onClick={() => setClassifyMode((prev) => !prev)}
+            variant={classifyMode ? 'default' : 'outline'}
+            className={`h-11 px-4 font-semibold flex items-center gap-2 transition-all ${
+              classifyMode
+                ? 'bg-amber-500 hover:bg-amber-600 text-black shadow-lg shadow-amber-500/20'
+                : 'border-[#2E2E2E] bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white'
+            }`}
+          >
+            <Tags className="w-4 h-4" />
+            <span>{classifyMode ? 'Sair do Modo Classificar' : 'Modo Classificar'}</span>
+            {pendingCount > 0 && (
+              <span
+                className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
+                  classifyMode ? 'bg-black/20 text-black' : 'bg-amber-500/20 text-amber-300'
+                }`}
+              >
+                {pendingCount} pendente{pendingCount > 1 ? 's' : ''}
+              </span>
+            )}
+          </Button>
+
+          {isAdmin && (
+            <Link to="/acervo/novo">
+              <Button className="bg-primary hover:opacity-90 text-primary-foreground font-medium h-11 px-5 shadow-md flex items-center gap-2">
+                <Plus className="w-4 h-4" /> Novo Exercício
+              </Button>
+            </Link>
+          )}
+        </div>
       </div>
+
+      {/* Banner de instrução quando no Modo Classificar */}
+      {classifyMode && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in text-amber-200">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-white">Modo de Classificação Rápida Ativo</p>
+              <p className="text-xs text-amber-200/80">
+                Toque no botão de grupo do exercício para reclassificá-lo diretamente (Peito,
+                Costas, Pernas, etc.). O salvamento é automático na nuvem.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 text-xs font-medium text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
+            <Info className="w-4 h-4" />
+            <span>
+              {pendingCount === 0
+                ? 'Todos os exercícios foram classificados!'
+                : `${pendingCount} exercício(s) ainda &quot;A classificar&quot;`}
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* Filtros e Busca */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -128,9 +231,10 @@ export default function ExerciseList() {
           <select
             value={selectedMuscle}
             onChange={(e) => setSelectedMuscle(e.target.value)}
-            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
           >
             <option value="all">Todos os Agrupamentos</option>
+            <option value="A classificar">⚠️ A classificar (Pendentes)</option>
             {MUSCLE_GROUPS.map((mg) => (
               <option key={mg} value={mg}>
                 {mg}
@@ -229,7 +333,13 @@ export default function ExerciseList() {
                     </div>
                   )}
 
-                  <Badge className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md text-white text-[11px] border border-white/10 font-normal">
+                  <Badge
+                    className={`absolute top-2.5 left-2.5 backdrop-blur-md text-[11px] font-medium border ${
+                      exercise.muscle_group === 'A classificar'
+                        ? 'bg-amber-500/90 text-black border-amber-400 font-bold'
+                        : 'bg-black/75 text-white border-white/10 font-normal'
+                    }`}
+                  >
                     {exercise.muscle_group}
                   </Badge>
 
@@ -269,7 +379,82 @@ export default function ExerciseList() {
                     </h3>
                   </div>
 
-                  <div className="flex items-center justify-between pt-3 mt-2 border-t border-[#2A2A2A]">
+                  {/* Seletor Rápido de Agrupamento (Modo Classificar ou ao clicar no badge) */}
+                  <div className="mt-3 pt-2.5 border-t border-[#2A2A2A] space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-[#8A8F98] flex items-center gap-1">
+                        <Tags className="w-3 h-3" /> Grupo:
+                      </span>
+                      {savingId === exercise.id ? (
+                        <span className="text-[11px] text-amber-400 flex items-center gap-1">
+                          <Loader2 className="w-3 h-3 animate-spin" /> Salvando...
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {/* Botão de disparo do seletor */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setOpenSelectorId((curr) => (curr === exercise.id ? null : exercise.id))
+                        }
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                          exercise.muscle_group === 'A classificar'
+                            ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25 ring-1 ring-amber-500/30'
+                            : 'bg-[#151515] border-[#333] text-white hover:border-primary/50'
+                        }`}
+                      >
+                        <span className="truncate">
+                          {exercise.muscle_group === 'A classificar'
+                            ? '⚠️ A classificar (escolher)'
+                            : exercise.muscle_group}
+                        </span>
+                        <ChevronDown className="w-3.5 h-3.5 text-[#8A8F98] shrink-0 ml-1" />
+                      </button>
+
+                      {/* Dropdown / Grid de seleção rápida */}
+                      {openSelectorId === exercise.id && (
+                        <div className="absolute left-0 right-0 bottom-full mb-1 z-30 bg-[#242424] border border-[#3E3E3E] rounded-xl shadow-2xl p-2 animate-fade-in">
+                          <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[#333] px-1">
+                            <span className="text-[11px] font-semibold text-white">
+                              Classificar como:
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setOpenSelectorId(null)}
+                              className="text-[10px] text-[#8A8F98] hover:text-white"
+                            >
+                              Fechar
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-1 max-h-48 overflow-y-auto">
+                            {TARGET_MUSCLE_GROUPS.map((mg) => {
+                              const isSelected = exercise.muscle_group === mg
+                              return (
+                                <button
+                                  key={mg}
+                                  type="button"
+                                  onClick={() => handleQuickClassify(exercise.id, mg)}
+                                  className={`flex items-center justify-between px-2 py-1.5 rounded text-left text-xs transition-colors ${
+                                    isSelected
+                                      ? 'bg-primary text-white font-bold'
+                                      : 'bg-[#1A1A1A] hover:bg-primary/20 text-[#D1D5DB] hover:text-white'
+                                  }`}
+                                >
+                                  <span className="truncate">{mg}</span>
+                                  {isSelected && <Check className="w-3 h-3 shrink-0 ml-1" />}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Linha de ações inferiores */}
+                  <div className="flex items-center justify-between pt-2.5 mt-2 border-t border-[#2A2A2A]/60">
                     {hasVideo ? (
                       <button
                         onClick={() =>
@@ -286,7 +471,7 @@ export default function ExerciseList() {
                       </button>
                     ) : (
                       <span className="text-[11px] text-[#8A8F98] flex items-center gap-1 py-1">
-                        <VideoOff className="w-3.5 h-3.5 opacity-60" /> Vídeo não cadastrado
+                        <VideoOff className="w-3.5 h-3.5 opacity-60" /> Sem vídeo
                       </span>
                     )}
 

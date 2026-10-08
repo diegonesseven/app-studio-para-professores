@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { exercisesService, parseVideoUrl } from '@/services/exercises'
 import { useAuth } from '@/contexts/AuthContext'
-import { MUSCLE_GROUPS, type MuscleGroup } from '@/types'
+import { MUSCLE_GROUPS, TARGET_MUSCLE_GROUPS, type MuscleGroup } from '@/types'
 import { sanitizeText, sanitizeUrl } from '@/lib/validation'
 import {
   ArrowLeft,
@@ -73,6 +73,7 @@ export default function ExerciseForm() {
           } else {
             setYoutubeUrl('')
           }
+          // Se for 'A classificar', podemos manter no estado se estiver na lista ou selecionar o valor
           setMuscleGroup(ex.muscle_group)
         })
         .catch((err) => {
@@ -231,12 +232,23 @@ export default function ExerciseForm() {
               onChange={(e) => setMuscleGroup(e.target.value as MuscleGroup)}
               className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {MUSCLE_GROUPS.map((mg) => (
+              {muscleGroup === 'A classificar' && (
+                <option value="A classificar" disabled>
+                  ⚠️ A classificar (Selecione o grupo muscular real)
+                </option>
+              )}
+              {TARGET_MUSCLE_GROUPS.map((mg) => (
                 <option key={mg} value={mg}>
                   {mg}
                 </option>
               ))}
             </select>
+            {muscleGroup === 'A classificar' && (
+              <p className="text-xs text-amber-400">
+                Este exercício ainda está como &quot;A classificar&quot;. Escolha um dos grupos
+                acima para classificá-lo.
+              </p>
+            )}
           </div>
 
           {/* URL do Vídeo (YouTube ou Vimeo) - Opcional */}

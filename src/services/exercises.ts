@@ -211,6 +211,13 @@ export const exercisesService = {
     return pb.collection('exercises').update<Exercise>(id, payload)
   },
 
+  /**
+   * Atualização rápida do agrupamento muscular de um exercício
+   */
+  async updateMuscleGroup(id: string, muscle_group: MuscleGroup): Promise<Exercise> {
+    return pb.collection('exercises').update<Exercise>(id, { muscle_group })
+  },
+
   async delete(id: string): Promise<boolean> {
     return pb.collection('exercises').delete(id)
   },

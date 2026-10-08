@@ -21,8 +21,25 @@ export type MuscleGroup =
   | 'Glúteos'
   | 'Cardio'
   | 'Alongamento'
+  | 'A classificar'
 
 export const MUSCLE_GROUPS: MuscleGroup[] = [
+  'Peito',
+  'Costas',
+  'Pernas',
+  'Ombros',
+  'Bíceps',
+  'Tríceps',
+  'Abdômen',
+  'Glúteos',
+  'Cardio',
+  'Alongamento',
+]
+
+/**
+ * Grupos musculares alvo para classificação do exercício
+ */
+export const TARGET_MUSCLE_GROUPS: MuscleGroup[] = [
   'Peito',
   'Costas',
   'Pernas',

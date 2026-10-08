@@ -57,6 +57,7 @@ export default function ExercisePickerModal({
     'Abdômen',
     'Cardio',
     'Alongamento',
+    'A classificar',
   ]
 
   const filteredExercises = exercises.filter((ex) => {
