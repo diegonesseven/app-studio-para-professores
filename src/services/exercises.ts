@@ -9,20 +9,134 @@ import type { Exercise, MuscleGroup } from '@/types'
  * - https://m.youtube.com/watch?v=VIDEO_ID
  * - ou apenas o ID puro (11 caracteres)
  */
-export function extractYoutubeId(urlOrId: string): string | null {
+export type ExerciseVideoPlatform = 'youtube' | 'vimeo' | 'none'
+
+export interface ParsedVideoInfo {
+  platform: ExerciseVideoPlatform
+  id: string | null
+  originalUrl: string
+  embedUrl: string | null
+  thumbnailUrl: string | null
+}
+
+/**
+ * Extrai o ID do vídeo do YouTube a partir de múltiplos formatos:
+ * - https://www.youtube.com/watch?v=VIDEO_ID
+ * - https://youtu.be/VIDEO_ID
+ * - https://www.youtube.com/embed/VIDEO_ID
+ * - https://m.youtube.com/watch?v=VIDEO_ID
+ * - ou apenas o ID puro (11 caracteres alfanuméricos com hífen e sublinhado)
+ */
+export function extractYoutubeId(urlOrId: string | null | undefined): string | null {
   if (!urlOrId) return null
   const trimmed = urlOrId.trim()
+  if (!trimmed) return null
 
-  // Se já for um ID de 11 caracteres alfanuméricos com - e _
-  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
-    return trimmed
+  // Não confundir ID numérico do Vimeo ou links do Vimeo com YouTube
+  if (/^https?:\/\/(?:www\.|player\.)?vimeo\.com\b/i.test(trimmed)) {
+    return null
   }
 
   // Padrão regex para URLs do YouTube
   const regExp =
     /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\s]{11})/i
   const match = trimmed.match(regExp)
-  return match && match[1] ? match[1] : null
+  if (match && match[1]) {
+    return match[1]
+  }
+
+  // Se já for um ID puro de 11 caracteres do YouTube (exceto se for só números de Vimeo)
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed) && !/^\d{11}$/.test(trimmed)) {
+    return trimmed
+  }
+
+  return null
+}
+
+/**
+ * Extrai o ID do vídeo do Vimeo a partir de múltiplos formatos:
+ * - https://vimeo.com/123456789
+ * - https://www.vimeo.com/123456789
+ * - https://player.vimeo.com/video/123456789
+ * - https://vimeo.com/channels/staffpicks/123456789
+ * - ou apenas o ID numérico puro (geralmente entre 6 e 12 dígitos)
+ */
+export function extractVimeoId(urlOrId: string | null | undefined): string | null {
+  if (!urlOrId) return null
+  const trimmed = urlOrId.trim()
+  if (!trimmed) return null
+
+  // Não confundir com YouTube
+  if (/youtu\.be|youtube\.com/i.test(trimmed)) {
+    return null
+  }
+
+  // Se for apenas o ID numérico
+  if (/^\d{6,12}$/.test(trimmed)) {
+    return trimmed
+  }
+
+  // player.vimeo.com/video/{ID}
+  const playerMatch = trimmed.match(/player\.vimeo\.com\/video\/(\d+)/i)
+  if (playerMatch && playerMatch[1]) {
+    return playerMatch[1]
+  }
+
+  // vimeo.com/{ID} ou vimeo.com/.../{ID}
+  const generalMatch = trimmed.match(
+    /vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/[^/]+\/videos\/|album\/(?:\d+\/)?video\/|video\/|)(\d+)/i,
+  )
+  if (generalMatch && generalMatch[1]) {
+    return generalMatch[1]
+  }
+
+  return null
+}
+
+/**
+ * Detecta a plataforma de vídeo e extrai suas informações
+ */
+export function parseVideoUrl(urlOrId: string | null | undefined): ParsedVideoInfo {
+  const empty: ParsedVideoInfo = {
+    platform: 'none',
+    id: null,
+    originalUrl: '',
+    embedUrl: null,
+    thumbnailUrl: null,
+  }
+
+  if (!urlOrId) return empty
+  const trimmed = urlOrId.trim()
+  if (!trimmed) return empty
+
+  // 1. Testa Vimeo primeiro se houver 'vimeo' na URL ou se for numérico
+  const vimeoId = extractVimeoId(trimmed)
+  if (vimeoId) {
+    return {
+      platform: 'vimeo',
+      id: vimeoId,
+      originalUrl: trimmed.startsWith('http') ? trimmed : `https://vimeo.com/${vimeoId}`,
+      embedUrl: `https://player.vimeo.com/video/${vimeoId}?autoplay=0`,
+      thumbnailUrl: null, // Vimeo precisa de requisição oEmbed ou SVG fallback
+    }
+  }
+
+  // 2. Testa YouTube
+  const ytId = extractYoutubeId(trimmed)
+  if (ytId) {
+    return {
+      platform: 'youtube',
+      id: ytId,
+      originalUrl: trimmed.startsWith('http') ? trimmed : `https://www.youtube.com/watch?v=${ytId}`,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`,
+      thumbnailUrl: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+    }
+  }
+
+  return {
+    ...empty,
+    originalUrl: trimmed,
+  }
 }
 
 export function getYoutubeThumbnail(id: string | null | undefined): string | null {
@@ -55,14 +169,17 @@ export const exercisesService = {
     youtube_url?: string
     muscle_group: MuscleGroup
   }): Promise<Exercise> {
-    const youtube_id = data.youtube_url
-      ? extractYoutubeId(data.youtube_url) || undefined
-      : undefined
-    const thumbnail_url = youtube_id ? getYoutubeThumbnail(youtube_id) || undefined : undefined
+    const rawUrl = data.youtube_url?.trim() || ''
+    const parsed = rawUrl ? parseVideoUrl(rawUrl) : null
+
+    // Preservamos o campo youtube_id para YouTube e guardamos o ID do Vimeo se for Vimeo
+    const video_id = parsed?.id || undefined
+    const thumbnail_url = parsed?.thumbnailUrl || undefined
 
     return pb.collection('exercises').create<Exercise>({
       ...data,
-      youtube_id,
+      youtube_url: rawUrl || undefined,
+      youtube_id: video_id,
       thumbnail_url,
     })
   },
@@ -75,13 +192,21 @@ export const exercisesService = {
       muscle_group: MuscleGroup
     }>,
   ): Promise<Exercise> {
-    const youtube_id =
-      data.youtube_url !== undefined ? extractYoutubeId(data.youtube_url || '') || '' : undefined
-    const thumbnail_url = youtube_id ? getYoutubeThumbnail(youtube_id) : undefined
-
     const payload: Record<string, unknown> = { ...data }
-    if (youtube_id !== undefined) payload.youtube_id = youtube_id
-    if (thumbnail_url !== undefined) payload.thumbnail_url = thumbnail_url
+
+    if (data.youtube_url !== undefined) {
+      const rawUrl = data.youtube_url ? data.youtube_url.trim() : ''
+      if (rawUrl) {
+        const parsed = parseVideoUrl(rawUrl)
+        payload.youtube_url = rawUrl
+        payload.youtube_id = parsed.id || ''
+        payload.thumbnail_url = parsed.thumbnailUrl || ''
+      } else {
+        payload.youtube_url = ''
+        payload.youtube_id = ''
+        payload.thumbnail_url = ''
+      }
+    }
 
     return pb.collection('exercises').update<Exercise>(id, payload)
   },

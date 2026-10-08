@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { exercisesService } from '@/services/exercises'
+import { exercisesService, parseVideoUrl } from '@/services/exercises'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Exercise, MuscleGroup } from '@/types'
 import { MUSCLE_GROUPS } from '@/types'
@@ -15,6 +15,7 @@ import {
   AlertCircle,
   Loader2,
   Filter,
+  VideoOff,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -167,6 +168,12 @@ export default function ExerciseList() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {exercises.map((exercise) => {
+            const videoInfo = parseVideoUrl(exercise.youtube_url || exercise.youtube_id || '')
+            const hasVideo = videoInfo.platform !== 'none' || Boolean(exercise.youtube_id)
+            const isVimeo = videoInfo.platform === 'vimeo'
+            const isYouTube = videoInfo.platform === 'youtube'
+            const thumbSrc = exercise.thumbnail_url || videoInfo.thumbnailUrl
+
             return (
               <div
                 key={exercise.id}
@@ -183,30 +190,65 @@ export default function ExerciseList() {
                   }
                   className="relative aspect-video bg-black/60 cursor-pointer overflow-hidden flex items-center justify-center group/thumb"
                 >
-                  {exercise.thumbnail_url ? (
+                  {thumbSrc ? (
                     <img
-                      src={exercise.thumbnail_url}
+                      src={thumbSrc}
                       alt={exercise.name}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover/thumb:scale-105"
                       loading="lazy"
                     />
+                  ) : hasVideo && isVimeo ? (
+                    <div className="w-full h-full bg-gradient-to-br from-[#1a233a] via-[#101426] to-[#0b0e1b] flex flex-col items-center justify-center text-[#8A8F98] p-4 text-center">
+                      <div className="w-10 h-10 rounded-full bg-[#00adef]/20 border border-[#00adef]/40 text-[#00adef] flex items-center justify-center mb-1 shadow-sm">
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                      </div>
+                      <span className="text-xs font-semibold text-white">Vídeo Vimeo</span>
+                      <span className="text-[10px] text-[#8A8F98]">Clique para reproduzir</span>
+                    </div>
                   ) : (
-                    <div className="w-full h-full bg-[#2A2A2A] flex flex-col items-center justify-center text-[#8A8F98]">
-                      <Dumbbell className="w-8 h-8 opacity-40 mb-1" />
-                      <span className="text-[11px] font-medium">Sem prévia</span>
+                    /* Estado sem vídeo cadastrado */
+                    <div className="w-full h-full bg-gradient-to-b from-[#222222] to-[#181818] flex flex-col items-center justify-center text-[#8A8F98] p-4 text-center">
+                      <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[#8A8F98] mb-1.5">
+                        <VideoOff className="w-4 h-4 opacity-70" />
+                      </div>
+                      <span className="text-xs font-medium text-white/90">
+                        Vídeo não cadastrado ainda
+                      </span>
+                      <span className="text-[10px] text-[#8A8F98]/80 mt-0.5">
+                        Toque para ver detalhes
+                      </span>
                     </div>
                   )}
 
-                  {/* Botão Play flutuante */}
-                  <div className="absolute inset-0 bg-black/40 group-hover/thumb:bg-black/20 flex items-center justify-center transition-colors">
-                    <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg group-hover/thumb:scale-110 transition-transform">
-                      <Play className="w-5 h-5 fill-current ml-0.5" />
+                  {/* Botão Play flutuante quando há vídeo */}
+                  {hasVideo && (
+                    <div className="absolute inset-0 bg-black/40 group-hover/thumb:bg-black/20 flex items-center justify-center transition-colors">
+                      <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg group-hover/thumb:scale-110 transition-transform">
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   <Badge className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-md text-white text-[11px] border border-white/10 font-normal">
                     {exercise.muscle_group}
                   </Badge>
+
+                  {/* Badge de plataforma quando houver */}
+                  {isVimeo && (
+                    <Badge className="absolute top-2.5 right-2.5 bg-[#00adef]/90 text-white text-[10px] border-0 font-semibold shadow-sm">
+                      Vimeo
+                    </Badge>
+                  )}
+                  {isYouTube && (
+                    <Badge className="absolute top-2.5 right-2.5 bg-red-600/90 text-white text-[10px] border-0 font-semibold shadow-sm">
+                      YouTube
+                    </Badge>
+                  )}
+                  {!hasVideo && (
+                    <Badge className="absolute top-2.5 right-2.5 bg-black/60 text-[#8A8F98] text-[10px] border border-white/10 font-normal">
+                      Sem vídeo
+                    </Badge>
+                  )}
                 </div>
 
                 {/* Conteúdo */}
@@ -228,18 +270,25 @@ export default function ExerciseList() {
                   </div>
 
                   <div className="flex items-center justify-between pt-3 mt-2 border-t border-[#2A2A2A]">
-                    <button
-                      onClick={() =>
-                        setActiveVideo({
-                          title: exercise.name,
-                          youtubeId: exercise.youtube_id,
-                          youtubeUrl: exercise.youtube_url,
-                        })
-                      }
-                      className="text-xs text-primary hover:underline flex items-center gap-1 font-medium py-1"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current" /> Ver vídeo
-                    </button>
+                    {hasVideo ? (
+                      <button
+                        onClick={() =>
+                          setActiveVideo({
+                            title: exercise.name,
+                            youtubeId: exercise.youtube_id,
+                            youtubeUrl: exercise.youtube_url,
+                          })
+                        }
+                        className="text-xs text-primary hover:underline flex items-center gap-1 font-medium py-1"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" /> Ver vídeo{' '}
+                        {isVimeo ? 'Vimeo' : ''}
+                      </button>
+                    ) : (
+                      <span className="text-[11px] text-[#8A8F98] flex items-center gap-1 py-1">
+                        <VideoOff className="w-3.5 h-3.5 opacity-60" /> Vídeo não cadastrado
+                      </span>
+                    )}
 
                     {isAdmin && (
                       <div className="flex items-center gap-1">

@@ -35,6 +35,8 @@ export const MUSCLE_GROUPS: MuscleGroup[] = [
   'Alongamento',
 ]
 
+export type VideoPlatform = 'youtube' | 'vimeo' | 'none'
+
 export interface Exercise {
   id: string
   name: string

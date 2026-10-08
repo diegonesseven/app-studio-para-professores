@@ -21,6 +21,7 @@ import {
   ChevronUp,
   ChevronDown,
   Calendar,
+  VideoOff,
 } from 'lucide-react'
 import ExercisePickerModal from '@/components/ExercisePickerModal'
 import pb from '@/lib/pocketbase/client'
@@ -523,17 +524,31 @@ export default function StudentTrainingColumn({
                       </button>
                     )}
 
-                    {ex && (
-                      <button
-                        type="button"
-                        onClick={() => onOpenVideo(ex)}
-                        className="h-9 w-9 sm:h-9.5 sm:w-9.5 p-1.5 rounded-xl bg-primary/20 text-secondary hover:bg-primary/30 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/40 shadow-sm"
-                        title="Ver demonstração em vídeo"
-                        aria-label={`Ver vídeo de ${name}`}
-                      >
-                        <Play className="w-4 h-4 fill-current shrink-0" />
-                      </button>
-                    )}
+                    {ex &&
+                      (() => {
+                        const hasVideo = Boolean(ex.youtube_url || ex.youtube_id)
+                        return hasVideo ? (
+                          <button
+                            type="button"
+                            onClick={() => onOpenVideo(ex)}
+                            className="h-9 w-9 sm:h-9.5 sm:w-9.5 p-1.5 rounded-xl bg-primary/20 text-secondary hover:bg-primary/30 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/40 shadow-sm"
+                            title="Ver demonstração em vídeo"
+                            aria-label={`Ver vídeo de ${name}`}
+                          >
+                            <Play className="w-4 h-4 fill-current shrink-0" />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onOpenVideo(ex)}
+                            className="h-9 w-9 sm:h-9.5 sm:w-9.5 p-1.5 rounded-xl bg-[#202020] text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] active:scale-95 transition-all flex items-center justify-center border border-[#333333]"
+                            title="Vídeo não cadastrado ainda (toque para ver)"
+                            aria-label={`Vídeo não cadastrado de ${name}`}
+                          >
+                            <VideoOff className="w-4 h-4 shrink-0 opacity-70" />
+                          </button>
+                        )
+                      })()}
                   </div>
                 </div>
 

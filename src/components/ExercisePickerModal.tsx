@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { exercisesService } from '@/services/exercises'
 import type { Exercise } from '@/types'
-import { Search, Plus, Dumbbell, Play, Check, X } from 'lucide-react'
+import { Search, Plus, Dumbbell, Play, Check, X, VideoOff } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -179,16 +179,29 @@ export default function ExercisePickerModal({
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {ex.youtube_id && onPreviewVideo && (
-                      <button
-                        type="button"
-                        onClick={() => onPreviewVideo(ex)}
-                        className="p-2 rounded-lg text-[#9CA5B8] hover:text-secondary hover:bg-[#181C2E] transition-colors"
-                        title="Prévia do vídeo"
-                      >
-                        <Play className="w-4 h-4 fill-current" />
-                      </button>
-                    )}
+                    {(() => {
+                      const hasVideo = Boolean(ex.youtube_id || ex.youtube_url)
+                      if (!onPreviewVideo) return null
+                      return hasVideo ? (
+                        <button
+                          type="button"
+                          onClick={() => onPreviewVideo(ex)}
+                          className="p-2 rounded-lg text-[#9CA5B8] hover:text-secondary hover:bg-[#181C2E] transition-colors"
+                          title="Prévia do vídeo"
+                        >
+                          <Play className="w-4 h-4 fill-current" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onPreviewVideo(ex)}
+                          className="p-2 rounded-lg text-[#8A8F98]/40 hover:text-[#8A8F98] hover:bg-[#181C2E] transition-colors"
+                          title="Sem vídeo cadastrado (toque para detalhes)"
+                        >
+                          <VideoOff className="w-4 h-4" />
+                        </button>
+                      )
+                    })()}
 
                     <Button
                       size="sm"

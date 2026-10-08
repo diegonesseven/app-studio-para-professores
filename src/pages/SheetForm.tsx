@@ -36,6 +36,7 @@ import {
   Download,
   Calendar,
   CheckCircle2,
+  VideoOff,
 } from 'lucide-react'
 import { workoutProgressService } from '@/services/workoutProgress'
 import { shareOrExportSheet } from '@/services/trainingSheetPdf'
@@ -642,7 +643,7 @@ export default function SheetForm() {
                           >
                             {exName}
                           </h4>
-                          {ytId && (
+                          {ytId || ytUrl ? (
                             <button
                               type="button"
                               onClick={() =>
@@ -656,6 +657,21 @@ export default function SheetForm() {
                               title="Assistir demonstração"
                             >
                               <Play className="w-3 h-3 fill-current" />
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setActiveVideo({
+                                  title: exName,
+                                  youtubeId: ytId,
+                                  youtubeUrl: ytUrl,
+                                })
+                              }
+                              className="p-1 rounded bg-[#222222] text-[#8A8F98] hover:text-white transition-colors shrink-0 mt-0.5"
+                              title="Sem vídeo cadastrado (toque para ver detalhes)"
+                            >
+                              <VideoOff className="w-3 h-3" />
                             </button>
                           )}
                         </div>
