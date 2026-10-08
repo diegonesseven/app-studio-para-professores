@@ -161,18 +161,18 @@ export default function ExercisePickerModal({
                       </div>
                     )}
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white block truncate">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start gap-2 flex-wrap">
+                        <span className="text-sm font-bold text-white block break-words leading-snug">
                           {ex.name}
                         </span>
                         {isCurrent && (
-                          <span className="text-[10px] bg-primary/40 text-white font-bold px-1.5 py-0.2 rounded">
+                          <span className="text-[10px] bg-primary/40 text-white font-bold px-1.5 py-0.2 rounded shrink-0">
                             Atual
                           </span>
                         )}
                       </div>
-                      <Badge className="bg-[#181C2E] text-[#9CA5B8] text-[10px] font-normal px-2 py-0 border-0 mt-0.5">
+                      <Badge className="bg-[#181C2E] text-[#9CA5B8] text-[10px] font-normal px-2 py-0 border-0 mt-1">
                         {ex.muscle_group}
                       </Badge>
                     </div>

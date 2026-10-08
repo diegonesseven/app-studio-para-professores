@@ -65,6 +65,7 @@ export default function SheetForm() {
   const [student, setStudent] = useState<Student | null>(null)
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
+  const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0])
   const [sheetCreated, setSheetCreated] = useState<string>('')
   const [completedSessionsCount, setCompletedSessionsCount] = useState<number>(0)
   const [activeTab, setActiveTab] = useState<SeriesKey>('A')
@@ -121,6 +122,11 @@ export default function SheetForm() {
           setTitle(sheet.title || '')
           setNotes(sheet.notes || '')
           setSheetCreated(sheet.created || '')
+          if (sheet.start_date) {
+            setStartDate(sheet.start_date.split('T')[0])
+          } else if (sheet.created) {
+            setStartDate(sheet.created.split('T')[0])
+          }
 
           const initialSeries: SeriesData = {
             A: sheet.series_data?.A || [],
@@ -310,11 +316,16 @@ export default function SheetForm() {
         }))
       })
 
+      const parsedStartDate = startDate
+        ? new Date(startDate).toISOString()
+        : new Date().toISOString()
+
       const payload = {
         student: student.id,
         title: sanitizeText(title) || `Ficha de Treino - ${student.name}`,
         notes: sanitizeText(notes),
         series_data: cleanedSeriesData,
+        start_date: parsedStartDate,
       }
 
       if (isEditing && id) {
@@ -324,10 +335,15 @@ export default function SheetForm() {
           description: 'Alterações registradas no Studio Bru Oliveira.',
         })
       } else {
-        await trainingSheetsService.create(payload)
+        // Ao criar uma ficha nova para o aluno, arquiva as anteriores para histórico (Requisito 4)
+        await trainingSheetsService.archivePreviousSheets(student.id)
+        await trainingSheetsService.create({
+          ...payload,
+          is_archived: false,
+        })
         toast({
           title: 'Ficha criada com sucesso',
-          description: 'A nova ficha já pode ser usada nas aulas.',
+          description: 'A nova ficha está ativa e a anterior foi arquivada no cadastro.',
         })
       }
       navigate('/treinos')
@@ -410,6 +426,7 @@ export default function SheetForm() {
                   title,
                   notes,
                   series_data: seriesData,
+                  start_date: startDate ? new Date(startDate).toISOString() : sheetCreated,
                   created: sheetCreated,
                   updated: '',
                 }
@@ -458,8 +475,8 @@ export default function SheetForm() {
               <span>
                 Início da ficha:{' '}
                 <strong className="text-primary font-bold">
-                  {sheetCreated
-                    ? new Date(sheetCreated).toLocaleDateString('pt-BR', {
+                  {startDate
+                    ? new Date(`${startDate}T12:00:00`).toLocaleDateString('pt-BR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -479,8 +496,8 @@ export default function SheetForm() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-1.5 md:col-span-1">
             <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
               Título da Ficha
             </Label>
@@ -492,14 +509,26 @@ export default function SheetForm() {
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 md:col-span-1">
             <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
-              Observações do Professor / Recomendações
+              Data de Início da Ficha
+            </Label>
+            <Input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-[#121212] border-[#2E2E2E] text-white font-semibold h-11 focus-visible:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-1.5 md:col-span-1">
+            <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+              Observações / Recomendações
             </Label>
             <Input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Ex: Descanso controlado de 60s, priorizar cadência controlada"
+              placeholder="Ex: Descanso 60s, priorizar cadência"
               className="bg-[#121212] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
             />
           </div>
@@ -606,8 +635,8 @@ export default function SheetForm() {
                         </span>
                       </div>
 
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start gap-2">
                           <h4
                             onClick={() =>
                               setActiveVideo({
@@ -616,7 +645,7 @@ export default function SheetForm() {
                                 youtubeUrl: ytUrl,
                               })
                             }
-                            className="text-base font-bold text-white hover:text-secondary cursor-pointer transition-colors truncate"
+                            className="text-base font-bold text-white hover:text-secondary cursor-pointer transition-colors break-words leading-snug"
                           >
                             {exName}
                           </h4>
@@ -630,14 +659,14 @@ export default function SheetForm() {
                                   youtubeUrl: ytUrl,
                                 })
                               }
-                              className="p-1 rounded bg-primary/20 text-secondary hover:bg-primary/30 transition-colors"
+                              className="p-1 rounded bg-primary/20 text-secondary hover:bg-primary/30 transition-colors shrink-0 mt-0.5"
                               title="Assistir demonstração"
                             >
                               <Play className="w-3 h-3 fill-current" />
                             </button>
                           )}
                         </div>
-                        <span className="text-[11px] text-[#8A8F98] block">
+                        <span className="text-[11px] text-[#8A8F98] block mt-0.5">
                           Agrupamento: <strong className="text-white">{muscle}</strong>
                         </span>
                       </div>

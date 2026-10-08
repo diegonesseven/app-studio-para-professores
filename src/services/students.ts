@@ -123,4 +123,33 @@ export const studentsService = {
     const res = await pb.collection('students').getList(1, 1)
     return res.totalItems
   },
+
+  getAnamnesisPhotoUrl(student: Student, filename: string): string {
+    return pb.files.getUrl(student, filename)
+  },
+
+  /**
+   * Upload de fotos adicionais na anamnese do aluno
+   */
+  async uploadAnamnesisPhotos(id: string, files: File[]): Promise<Student> {
+    const formData = new FormData()
+    files.forEach((file) => {
+      formData.append('anamnesis_photos', file)
+    })
+    return pb.collection('students').update<Student>(id, formData)
+  },
+
+  /**
+   * Remove uma foto específica da anamnese do aluno
+   */
+  async removeAnamnesisPhoto(
+    id: string,
+    filenameToRemove: string,
+    currentPhotos: string[],
+  ): Promise<Student> {
+    const remaining = currentPhotos.filter((f) => f !== filenameToRemove)
+    return pb.collection('students').update<Student>(id, {
+      anamnesis_photos: remaining,
+    })
+  },
 }

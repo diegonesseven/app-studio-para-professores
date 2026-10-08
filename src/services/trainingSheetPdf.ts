@@ -45,8 +45,9 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     year: 'numeric',
   })
 
-  const sheetStartDate = sheet.created
-    ? new Date(sheet.created).toLocaleDateString('pt-BR', {
+  const rawStartDate = sheet.start_date || sheet.created
+  const sheetStartDate = rawStartDate
+    ? new Date(rawStartDate).toLocaleDateString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',

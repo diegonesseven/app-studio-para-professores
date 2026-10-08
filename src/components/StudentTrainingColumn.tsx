@@ -34,6 +34,7 @@ interface StudentTrainingColumnProps {
   activeSeries: SeriesKey
   onSelectSeries: (series: SeriesKey) => void
   completedExercises: Record<number, boolean>
+  inProgressExercises?: Record<number, boolean>
   onToggleExercise: (index: number) => void
   onOpenAnamnese: () => void
   onEditStudent: () => void
@@ -63,6 +64,7 @@ interface StudentTrainingColumnProps {
   onExportPdf?: (student: Student, sheet: TrainingSheet) => void
   canEdit?: boolean
   completedSessionsCount?: number
+  onEditStartDate?: (sheet: TrainingSheet) => void
 }
 
 export default function StudentTrainingColumn({
@@ -71,6 +73,7 @@ export default function StudentTrainingColumn({
   activeSeries,
   onSelectSeries,
   completedExercises,
+  inProgressExercises = {},
   onToggleExercise,
   onOpenAnamnese,
   onEditStudent,
@@ -84,6 +87,7 @@ export default function StudentTrainingColumn({
   onExportPdf,
   canEdit = true,
   completedSessionsCount,
+  onEditStartDate,
 }: StudentTrainingColumnProps) {
   const currentExercises: ExerciseBlock[] = sheet?.series_data?.[activeSeries] || []
   const totalCount = currentExercises.length
@@ -288,24 +292,37 @@ export default function StudentTrainingColumn({
           </div>
         </div>
 
-        {/* Badges de Início da Ficha e Sessões Concluídas */}
+        {/* Badges de Início da Ficha (com botão de edição rápida) e Sessões Concluídas */}
         {sheet && (
           <div className="flex items-center gap-1.5 flex-wrap mt-2">
-            <Badge className="bg-[#181C2E] text-[#9CA5B8] border border-[#2B324D] text-[10px] px-2 py-0.5 font-medium flex items-center gap-1">
-              <Calendar className="w-3 h-3 text-primary" />
-              <span>
-                Início da ficha:{' '}
-                <strong className="text-white">
-                  {sheet.created
-                    ? new Date(sheet.created).toLocaleDateString('pt-BR', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                      })
-                    : 'Recente'}
-                </strong>
-              </span>
-            </Badge>
+            <div className="flex items-center gap-1">
+              <Badge className="bg-[#181C2E] text-[#9CA5B8] border border-[#2B324D] text-[10px] px-2 py-0.5 font-medium flex items-center gap-1">
+                <Calendar className="w-3 h-3 text-primary" />
+                <span>
+                  Início da ficha:{' '}
+                  <strong className="text-white">
+                    {sheet.start_date || sheet.created
+                      ? new Date(sheet.start_date || sheet.created).toLocaleDateString('pt-BR', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })
+                      : 'Recente'}
+                  </strong>
+                </span>
+              </Badge>
+              {canEdit && onEditStartDate && (
+                <button
+                  type="button"
+                  onClick={() => onEditStartDate(sheet)}
+                  className="p-1 rounded text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E] transition-colors"
+                  title="Alterar data de início da ficha"
+                  aria-label="Alterar data de início da ficha"
+                >
+                  <Pencil className="w-3 h-3" />
+                </button>
+              )}
+            </div>
 
             {completedSessionsCount !== undefined && (
               <Badge className="bg-secondary/15 text-white border border-secondary/35 text-[10px] px-2 py-0.5 font-semibold flex items-center gap-1">
@@ -389,9 +406,7 @@ export default function StudentTrainingColumn({
             const name = ex?.name || 'Exercício'
             const muscle = ex?.muscle_group || 'Geral'
             const isDone = Boolean(completedExercises[idx])
-            // Descobre o primeiro exercício não concluído para dar destaque (continuidade)
-            const firstUndoneIndex = currentExercises.findIndex((_, i) => !completedExercises[i])
-            const isCurrentFocus = !isDone && idx === firstUndoneIndex
+            const isInProgress = !isDone && Boolean(inProgressExercises[idx])
             const isEditingThis = editingIndex === idx
 
             const isNoteExpanded = Boolean(expandedNotes[idx])
@@ -403,35 +418,60 @@ export default function StudentTrainingColumn({
                   isEditingThis
                     ? 'bg-[#181C2E] border-primary ring-2 ring-primary/30 shadow-xl'
                     : isDone
-                      ? 'bg-secondary/10 border-secondary/40 shadow-sm'
-                      : isCurrentFocus
-                        ? 'bg-primary/10 border-primary ring-2 ring-primary/40 shadow-md'
+                      ? 'bg-emerald-950/30 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/30'
+                      : isInProgress
+                        ? 'bg-amber-950/30 border-amber-500/60 shadow-md ring-2 ring-amber-500/50'
                         : 'bg-[#151515] border-[#2E2E2E] hover:border-primary/50 shadow-sm'
                 }`}
               >
-                {isCurrentFocus && (
-                  <div className="flex items-center gap-1.5 mb-2 text-[11px] font-extrabold uppercase tracking-wider text-secondary">
-                    <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                    <span>Próximo exercício • Continuar daqui</span>
+                {isInProgress && (
+                  <div className="flex items-center gap-1.5 mb-2 text-[11px] font-black uppercase tracking-wider text-amber-300">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                    <span>Em execução agora • 1º toque</span>
                   </div>
                 )}
-                {/* 1. TOPO: Checkmark + NOME DO EXERCÍCIO + Ações (lápis e vídeo) num bloco horizontal ampliado */}
+                {isDone && (
+                  <div className="flex items-center gap-1.5 mb-2 text-[11px] font-black uppercase tracking-wider text-emerald-400">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+                    <span>Exercício concluído • 2º toque</span>
+                  </div>
+                )}
+                {/* 1. TOPO: Botão de status de 2 toques + NOME DO EXERCÍCIO + Ações num bloco horizontal ampliado */}
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0 flex-1">
-                    {/* Botão de Checkmark da sessão - 44x44px (ampliado para toque e visualização rápida à distância) */}
+                    {/* Botão de 2 Toques: Nenhum -> Amarelo (Em execução) -> Verde (Concluído) -> Nenhum */}
                     <button
                       type="button"
                       onClick={() => onToggleExercise(idx)}
                       className={`min-w-[44px] min-h-[44px] w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform active:scale-95 ${
                         isDone
-                          ? 'bg-secondary text-secondary-foreground shadow-md shadow-secondary/35 animate-check-pop ring-2 ring-secondary/50 font-bold'
-                          : isCurrentFocus
-                            ? 'border-2 border-primary bg-primary/20 text-primary hover:bg-primary/30'
-                            : 'border-2 border-[#454545] bg-[#1F1F1F] text-transparent hover:border-primary hover:text-primary/40'
+                          ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/40 ring-2 ring-emerald-400 font-black'
+                          : isInProgress
+                            ? 'bg-amber-400 text-black shadow-md shadow-amber-400/40 ring-2 ring-amber-300 font-black animate-pulse'
+                            : 'border-2 border-[#454545] bg-[#1F1F1F] text-transparent hover:border-amber-400 hover:text-amber-400/50'
                       }`}
-                      aria-label={isDone ? 'Desmarcar exercício' : 'Marcar como concluído'}
+                      title={
+                        isDone
+                          ? 'Concluído (toque para desmarcar)'
+                          : isInProgress
+                            ? 'Em execução (toque para concluir)'
+                            : 'Nenhum (toque para iniciar execução)'
+                      }
+                      aria-label={
+                        isDone
+                          ? 'Concluído (toque para desmarcar)'
+                          : isInProgress
+                            ? 'Em execução (toque para concluir)'
+                            : 'Nenhum (toque para iniciar execução)'
+                      }
                     >
-                      <Check className="w-6 h-6 stroke-[3.5]" />
+                      {isDone ? (
+                        <Check className="w-6 h-6 stroke-[3.5]" />
+                      ) : isInProgress ? (
+                        <Play className="w-5 h-5 fill-current stroke-[2.5]" />
+                      ) : (
+                        <Check className="w-6 h-6 stroke-[3.5]" />
+                      )}
                     </button>
 
                     {/* Nome do exercício com badge número e grupo muscular ampliado */}
@@ -447,8 +487,12 @@ export default function StudentTrainingColumn({
 
                       <h3
                         onClick={() => ex && onOpenVideo(ex)}
-                        className={`text-base sm:text-lg font-black leading-snug truncate transition-colors cursor-pointer ${
-                          isDone ? 'line-through text-[#8A8F98]' : 'text-white hover:text-primary'
+                        className={`text-base sm:text-lg font-black leading-snug break-words transition-colors cursor-pointer ${
+                          isDone
+                            ? 'line-through text-emerald-200/60'
+                            : isInProgress
+                              ? 'text-amber-200 hover:text-amber-100'
+                              : 'text-white hover:text-primary'
                         }`}
                         title={name}
                       >

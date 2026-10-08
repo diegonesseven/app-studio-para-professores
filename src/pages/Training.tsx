@@ -31,6 +31,7 @@ import {
   Plus,
   ChevronLeft,
   ChevronRight,
+  Calendar,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -77,11 +78,19 @@ export default function Training() {
   // Série ativa por aluno: { [studentId]: 'A' | 'B' | ... }
   const [activeSeriesMap, setActiveSeriesMap] = useState<Record<string, SeriesKey>>({})
 
-  // Exercícios marcados como feitos na sessão: { [studentId]: { [exerciseIndex]: true } }
+  // Exercícios marcados como feitos na sessão (verde): { [studentId]: { [exerciseIndex]: true } }
   const [completedMap, setCompletedMap] = useState<Record<string, Record<number, boolean>>>({})
+
+  // Exercícios em execução na sessão (amarelo - 1º toque): { [studentId]: { [exerciseIndex]: true } }
+  const [inProgressMap, setInProgressMap] = useState<Record<string, Record<number, boolean>>>({})
 
   // ID do registro de progresso em andamento na nuvem: { [studentId]: recordId }
   const [sessionRecordMap, setSessionRecordMap] = useState<Record<string, string>>({})
+
+  // Modal para editar data de início da ficha
+  const [editingStartDateSheet, setEditingStartDateSheet] = useState<TrainingSheet | null>(null)
+  const [newStartDateInput, setNewStartDateInput] = useState<string>('')
+  const [savingStartDate, setSavingStartDate] = useState(false)
 
   // Mobile carrossel tab ativa (índice 0, 1, 2 ou 3)
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0)
@@ -177,6 +186,7 @@ export default function Training() {
         const newCompletedSessionsMap: Record<string, number> = {}
         const newSeriesMap: Record<string, SeriesKey> = { ...activeSeriesMap }
         const newCompletedMap: Record<string, Record<number, boolean>> = { ...completedMap }
+        const newInProgressMap: Record<string, Record<number, boolean>> = { ...inProgressMap }
         const newSessionRecords: Record<string, string> = { ...sessionRecordMap }
 
         await Promise.all(
@@ -196,12 +206,14 @@ export default function Training() {
 
             let seriesToOpen: SeriesKey = newSeriesMap[st.id] || 'A'
             let initialCompleted: Record<number, boolean> = {}
+            let initialInProgress: Record<number, boolean> = {}
 
             if (latest && !newSeriesMap[st.id]) {
               // Verifica se a série mais recente NÃO foi concluída inteiramente (continuidade)
               const seriesExercises = sheet?.series_data?.[latest.series_completed] || []
               const totalEx = seriesExercises.length
               const savedIndices = latest.completed_indices || []
+              const savedInProgress = latest.in_progress_indices || []
               const hasUnfinishedExercises =
                 latest.is_completed === false ||
                 (totalEx > 0 && savedIndices.length < totalEx && latest.is_completed !== true)
@@ -211,6 +223,9 @@ export default function Training() {
                 seriesToOpen = latest.series_completed
                 savedIndices.forEach((i) => {
                   initialCompleted[i] = true
+                })
+                savedInProgress.forEach((i) => {
+                  initialInProgress[i] = true
                 })
                 newSessionRecords[st.id] = latest.id
               } else {
@@ -225,6 +240,9 @@ export default function Training() {
             if (Object.keys(initialCompleted).length > 0) {
               newCompletedMap[st.id] = initialCompleted
             }
+            if (Object.keys(initialInProgress).length > 0) {
+              newInProgressMap[st.id] = initialInProgress
+            }
           }),
         )
 
@@ -232,6 +250,7 @@ export default function Training() {
         setCompletedSessionsCountMap(newCompletedSessionsMap)
         setActiveSeriesMap(newSeriesMap)
         setCompletedMap(newCompletedMap)
+        setInProgressMap(newInProgressMap)
         setSessionRecordMap(newSessionRecords)
       } catch (err: unknown) {
         toast({
@@ -294,14 +313,22 @@ export default function Training() {
 
     try {
       const existing = await workoutProgressService.getActiveSession(studentId, sheet.id, seriesKey)
-      if (existing && existing.completed_indices) {
+      if (existing) {
         const cMap: Record<number, boolean> = {}
-        existing.completed_indices.forEach((idx) => {
+        const ipMap: Record<number, boolean> = {}
+        ;(existing.completed_indices || []).forEach((idx) => {
           cMap[idx] = true
+        })
+        ;(existing.in_progress_indices || []).forEach((idx) => {
+          ipMap[idx] = true
         })
         setCompletedMap((prev) => ({
           ...prev,
           [studentId]: cMap,
+        }))
+        setInProgressMap((prev) => ({
+          ...prev,
+          [studentId]: ipMap,
         }))
         setSessionRecordMap((prev) => ({
           ...prev,
@@ -312,25 +339,48 @@ export default function Training() {
           ...prev,
           [studentId]: {},
         }))
+        setInProgressMap((prev) => ({
+          ...prev,
+          [studentId]: {},
+        }))
       }
     } catch {
       /* intentionally ignored */
     }
   }
 
-  // Marcar/Desmarcar exercício do aluno com persistência imediata na nuvem
+  // Sistema de 2 toques por exercício:
+  // 1º toque: amarelo ("em execução")
+  // 2º toque: verde ("concluído")
+  // 3º toque: desmarca / volta a nenhum
   const handleToggleExercise = async (studentId: string, idx: number) => {
-    const studentMap = { ...(completedMap[studentId] || {}) }
-    const nextVal = !studentMap[idx]
-    if (nextVal) {
-      studentMap[idx] = true
+    const studentCompleted = { ...(completedMap[studentId] || {}) }
+    const studentInProgress = { ...(inProgressMap[studentId] || {}) }
+
+    const isDone = Boolean(studentCompleted[idx])
+    const isInProg = Boolean(studentInProgress[idx])
+
+    if (!isInProg && !isDone) {
+      // 1º toque: Em execução (amarelo)
+      studentInProgress[idx] = true
+      delete studentCompleted[idx]
+    } else if (isInProg && !isDone) {
+      // 2º toque: Concluído (verde)
+      delete studentInProgress[idx]
+      studentCompleted[idx] = true
     } else {
-      delete studentMap[idx]
+      // 3º toque: Volta a nenhum (desmarcar por engano)
+      delete studentInProgress[idx]
+      delete studentCompleted[idx]
     }
 
+    setInProgressMap((prev) => ({
+      ...prev,
+      [studentId]: studentInProgress,
+    }))
     setCompletedMap((prev) => ({
       ...prev,
-      [studentId]: studentMap,
+      [studentId]: studentCompleted,
     }))
 
     // Persistência na nuvem (PocketBase) para sincronizar entre dispositivos
@@ -339,9 +389,13 @@ export default function Training() {
     if (!sheet) return
 
     const exercisesInSeries = sheet.series_data?.[currentSeries] || []
-    const completedIndices = Object.keys(studentMap)
+    const completedIndices = Object.keys(studentCompleted)
       .map(Number)
-      .filter((i) => studentMap[i])
+      .filter((i) => studentCompleted[i])
+      .sort((a, b) => a - b)
+    const inProgressIndices = Object.keys(studentInProgress)
+      .map(Number)
+      .filter((i) => studentInProgress[i])
       .sort((a, b) => a - b)
 
     const isAllDone =
@@ -354,11 +408,14 @@ export default function Training() {
         training_sheet: sheet.id,
         series_completed: currentSeries,
         completed_indices: completedIndices,
+        in_progress_indices: inProgressIndices,
         is_completed: isAllDone,
         exercises_snapshot: exercisesInSeries,
         notes: isAllDone
           ? `Série ${currentSeries} 100% concluída`
-          : `Em andamento (${completedIndices.length}/${exercisesInSeries.length})`,
+          : inProgressIndices.length > 0
+            ? `Executando exercício #${inProgressIndices.map((i) => i + 1).join(', #')} (${completedIndices.length}/${exercisesInSeries.length} concluídos)`
+            : `Em andamento (${completedIndices.length}/${exercisesInSeries.length})`,
       })
       if (saved && saved.id) {
         setSessionRecordMap((prev) => ({
@@ -595,8 +652,12 @@ export default function Training() {
         nextSeries: nextKey,
       })
 
-      // Limpar checks da série atual desse aluno
+      // Limpar checks e execuções da série atual desse aluno
       setCompletedMap((prev) => ({
+        ...prev,
+        [student.id]: {},
+      }))
+      setInProgressMap((prev) => ({
         ...prev,
         [student.id]: {},
       }))
@@ -605,7 +666,6 @@ export default function Training() {
         delete next[student.id]
         return next
       })
-
       // Atualizar contagem de sessões concluídas
       const updatedCount = await workoutProgressService.countCompletedSessions(student.id, sheet.id)
       setCompletedSessionsCountMap((prev) => ({
@@ -659,7 +719,7 @@ export default function Training() {
         notes: `Ficha inteira concluída na sessão`,
       })
 
-      // Marcar todos os exercícios como checados visualmente
+      // Marcar todos os exercícios como concluídos visualmente e limpar em execução
       const allDone: Record<number, boolean> = {}
       currentExercises.forEach((_, i) => {
         allDone[i] = true
@@ -668,6 +728,10 @@ export default function Training() {
       setCompletedMap((prev) => ({
         ...prev,
         [student.id]: allDone,
+      }))
+      setInProgressMap((prev) => ({
+        ...prev,
+        [student.id]: {},
       }))
 
       const updatedCount = await workoutProgressService.countCompletedSessions(student.id, sheet.id)
@@ -688,6 +752,45 @@ export default function Training() {
       })
     } finally {
       setSheetCompleteConfirm(null)
+    }
+  }
+
+  // Abrir modal para editar data de início da ficha
+  const handleOpenEditStartDate = (sheet: TrainingSheet) => {
+    setEditingStartDateSheet(sheet)
+    const currentVal = sheet.start_date || sheet.created
+    if (currentVal) {
+      setNewStartDateInput(currentVal.split('T')[0])
+    } else {
+      setNewStartDateInput(new Date().toISOString().split('T')[0])
+    }
+  }
+
+  // Salvar nova data de início da ficha
+  const handleSaveStartDate = async () => {
+    if (!editingStartDateSheet || !newStartDateInput) return
+    setSavingStartDate(true)
+    try {
+      const updated = await trainingSheetsService.update(editingStartDateSheet.id, {
+        start_date: new Date(newStartDateInput).toISOString(),
+      })
+      setSheetsMap((prev) => ({
+        ...prev,
+        [editingStartDateSheet.student]: updated,
+      }))
+      toast({
+        title: 'Data de início atualizada',
+        description: 'A nova data agora é refletida no treino e nos PDFs da ficha.',
+      })
+      setEditingStartDateSheet(null)
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao salvar data de início',
+        description: err instanceof Error ? err.message : 'Falha na gravação',
+        variant: 'destructive',
+      })
+    } finally {
+      setSavingStartDate(false)
     }
   }
 
@@ -846,8 +949,10 @@ export default function Training() {
                     activeSeries={activeSeries}
                     onSelectSeries={(series) => handleSelectSeriesForStudent(st.id, series)}
                     completedExercises={completedExercises}
+                    inProgressExercises={inProgressMap[st.id] || {}}
                     onToggleExercise={(idx) => handleToggleExercise(st.id, idx)}
                     onOpenAnamnese={() => setAnamneseStudent(st)}
+                    onEditStartDate={handleOpenEditStartDate}
                     onEditStudent={() => navigate(`/alunos/${st.id}/editar`)}
                     onOpenVideo={(ex) =>
                       setActiveVideo({
@@ -939,10 +1044,12 @@ export default function Training() {
                     handleSelectSeriesForStudent(selectedStudents[mobileActiveIndex].id, series)
                   }
                   completedExercises={completedMap[selectedStudents[mobileActiveIndex].id] || {}}
+                  inProgressExercises={inProgressMap[selectedStudents[mobileActiveIndex].id] || {}}
                   onToggleExercise={(idx) =>
                     handleToggleExercise(selectedStudents[mobileActiveIndex].id, idx)
                   }
                   onOpenAnamnese={() => setAnamneseStudent(selectedStudents[mobileActiveIndex])}
+                  onEditStartDate={handleOpenEditStartDate}
                   onEditStudent={() =>
                     navigate(`/alunos/${selectedStudents[mobileActiveIndex].id}/editar`)
                   }
@@ -1025,6 +1132,63 @@ export default function Training() {
               className="bg-primary hover:opacity-90 text-primary-foreground font-semibold"
             >
               Sim, avançar para Série {advanceDialog?.nextSeries}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE EDITAR DATA DE INÍCIO DA FICHA */}
+      <Dialog
+        open={Boolean(editingStartDateSheet)}
+        onOpenChange={(open) => !open && setEditingStartDateSheet(null)}
+      >
+        <DialogContent className="bg-card border-border text-white sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-primary" /> Alterar Data de Início da Ficha
+            </DialogTitle>
+            <DialogDescription className="text-[#8A8F98] text-sm">
+              Altere a data oficial de início da ficha de{' '}
+              <strong className="text-white">
+                {editingStartDateSheet?.expand?.student?.name || 'aluno'}
+              </strong>
+              . Essa data será exibida no treino, nos cabeçalhos e na ficha impressa/PDF.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2 space-y-2">
+            <label
+              htmlFor="startDateInput"
+              className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold block"
+            >
+              Nova data de início
+            </label>
+            <Input
+              id="startDateInput"
+              type="date"
+              value={newStartDateInput}
+              onChange={(e) => setNewStartDateInput(e.target.value)}
+              className="bg-[#121522] border-[#252B3E] text-white h-11 focus-visible:ring-primary"
+            />
+          </div>
+
+          <DialogFooter className="flex sm:justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={savingStartDate}
+              onClick={() => setEditingStartDateSheet(null)}
+              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              disabled={savingStartDate || !newStartDateInput}
+              onClick={handleSaveStartDate}
+              className="bg-primary hover:opacity-90 text-primary-foreground font-semibold"
+            >
+              {savingStartDate ? 'Salvando...' : 'Salvar Data'}
             </Button>
           </DialogFooter>
         </DialogContent>

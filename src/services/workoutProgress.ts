@@ -69,6 +69,7 @@ export const workoutProgressService = {
     training_sheet: string
     series_completed: SeriesKey
     completed_indices: number[]
+    in_progress_indices?: number[]
     is_completed: boolean
     exercises_snapshot?: ExerciseBlock[]
     teacher?: string
@@ -79,6 +80,7 @@ export const workoutProgressService = {
       training_sheet: data.training_sheet,
       series_completed: data.series_completed,
       completed_indices: data.completed_indices,
+      in_progress_indices: data.in_progress_indices || [],
       is_completed: data.is_completed,
       exercises_snapshot: data.exercises_snapshot,
       teacher: data.teacher || pb.authStore.record?.id || undefined,

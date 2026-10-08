@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T01:21:30.356Z",
+  "generatedAt": "2026-10-08T14:23:32.904Z",
   "collections": [
     {
       "name": "users",
@@ -162,6 +162,18 @@
           "type": "file",
           "required": false,
           "system": false
+        },
+        {
+          "name": "anamnesis_photos",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "anamnesis_data",
+          "type": "json",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": [
@@ -291,6 +303,18 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "start_date",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "is_archived",
+          "type": "bool",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": ["CREATE INDEX idx_training_sheets_student ON training_sheets (student)"]
@@ -375,6 +399,12 @@
         {
           "name": "is_completed",
           "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "in_progress_indices",
+          "type": "json",
           "required": false,
           "system": false
         }

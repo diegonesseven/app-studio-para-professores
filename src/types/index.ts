@@ -58,12 +58,34 @@ export const GOAL_OPTIONS = [
 
 export type GoalOption = (typeof GOAL_OPTIONS)[number]
 
+export interface AnamnesisData {
+  treinou_personal_antes?: string // "Já treinou com Personal antes?"
+  profissao?: string // "Profissão"
+  objetivos?: string[] // "Objetivo: ( ) Emagrecimento ( ) Condicionamento ..."
+  enfase_musculatura?: string // "Você deseja dar ênfase em alguma musculatura? Qual?"
+  praticou_exercicio?: 'SIM' | 'NAO' | '' // "Já praticou algum exercício físico?"
+  praticou_exercicio_quais?: string // "... Quais?"
+  tempo_sem_praticar?: string // "Há quanto tempo não pratica um exercício físico?"
+  restricao_exercicio?: 'SIM' | 'NAO' | '' // "Possui alguma restrição à exercício físico?"
+  restricao_exercicio_quais?: string // "... Quais?"
+  possui_doenca?: string[] // "Possui alguma doença? ( ) Diabetes ( ) Hipertensão ( ) Outros"
+  possui_doenca_outros?: string
+  possui_lesao?: string // "Possui alguma lesão?"
+  dores_corpo?: 'SIM' | 'NAO' | '' // "Dores em alguma parte do corpo?"
+  dores_corpo_quais?: string // "... Quais?"
+  faz_dieta?: 'SIM' | 'NAO' | '' // "Faz dieta?"
+  faz_nutricionista?: 'SIM' | 'NAO' | '' // "Faz acompanhamento com nutricionista?"
+  uso_substancias?: string[] // "Faz uso de ( ) Álcool ( ) Tabaco"
+}
+
 export interface Student {
   id: string
   name: string
   birthdate?: string
   phone?: string
   photo?: string
+  anamnesis_photos?: string[]
+  anamnesis_data?: AnamnesisData
   general_observations?: string
   health_history?: string
   injuries?: string
@@ -107,6 +129,8 @@ export interface TrainingSheet {
   title?: string
   notes?: string
   series_data?: SeriesData
+  start_date?: string
+  is_archived?: boolean
   created: string
   updated: string
 }
@@ -123,6 +147,7 @@ export interface WorkoutProgress {
   notes?: string
   teacher?: string
   completed_indices?: number[]
+  in_progress_indices?: number[]
   is_completed?: boolean
   created: string
   updated: string

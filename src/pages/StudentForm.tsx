@@ -17,12 +17,12 @@ import { studentsService } from '@/services/students'
 import { workoutProgressService } from '@/services/workoutProgress'
 import { exercisesService } from '@/services/exercises'
 import {
-  type ExperienceLevel,
-  type GoalOption,
-  GOAL_OPTIONS,
   type WorkoutProgress,
   type Exercise,
   type Student,
+  type TrainingSheet,
+  type AnamnesisData,
+  SERIES_KEYS,
 } from '@/types'
 import { maskPhone, validatePhone, sanitizeText } from '@/lib/validation'
 import { trainingSheetsService } from '@/services/trainingSheets'
@@ -49,6 +49,9 @@ import {
   Share2,
   Camera,
   X,
+  Layers,
+  Plus,
+  Maximize2,
 } from 'lucide-react'
 
 export default function StudentForm() {
@@ -67,15 +70,42 @@ export default function StudentForm() {
   const [removePhoto, setRemovePhoto] = useState(false)
   const [generalObservations, setGeneralObservations] = useState('')
 
-  // Anamnese (opcional)
-  const [anamneseOpen, setAnamneseOpen] = useState(false)
-  const [healthHistory, setHealthHistory] = useState('')
-  const [injuries, setInjuries] = useState('')
-  const [surgeries, setSurgeries] = useState('')
+  // Anamnese - Restrições médicas (permanece intacto)
   const [restrictions, setRestrictions] = useState('')
-  const [goals, setGoals] = useState<GoalOption[]>([])
-  const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>('Iniciante')
-  const [teacherObservations, setTeacherObservations] = useState('')
+  const [anamneseOpen, setAnamneseOpen] = useState(false)
+
+  // Novo modelo exato de Anamnese (Itens 5 e 6)
+  const [treinouPersonalAntes, setTreinouPersonalAntes] = useState('')
+  const [profissao, setProfissao] = useState('')
+  const [objetivosSelecionados, setObjetivosSelecionados] = useState<string[]>([])
+  const [enfaseMusculatura, setEnfaseMusculatura] = useState('')
+  const [praticouExercicio, setPraticouExercicio] = useState<'SIM' | 'NAO' | ''>('')
+  const [praticouExercicioQuais, setPraticouExercicioQuais] = useState('')
+  const [tempoSemPraticar, setTempoSemPraticar] = useState('')
+  const [restricaoExercicio, setRestricaoExercicio] = useState<'SIM' | 'NAO' | ''>('')
+  const [restricaoExercicioQuais, setRestricaoExercicioQuais] = useState('')
+  const [doencasSelecionadas, setDoencasSelecionadas] = useState<string[]>([])
+  const [doencasOutros, setDoencasOutros] = useState('')
+  const [possuiLesao, setPossuiLesao] = useState('')
+  const [doresCorpo, setDoresCorpo] = useState<'SIM' | 'NAO' | ''>('')
+  const [doresCorpoQuais, setDoresCorpoQuais] = useState('')
+  const [fazDieta, setFazDieta] = useState<'SIM' | 'NAO' | ''>('')
+  const [fazNutricionista, setFazNutricionista] = useState<'SIM' | 'NAO' | ''>('')
+  const [usoSubstancias, setUsoSubstancias] = useState<string[]>([])
+
+  // Fotos na Anamnese (Item 5)
+  const [existingAnamnesisPhotos, setExistingAnamnesisPhotos] = useState<string[]>([])
+  const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([])
+  const [previewEnlargedPhoto, setPreviewEnlargedPhoto] = useState<string | null>(null)
+
+  // Preservação de dados antigos para não perder histórico anterior
+  const [legacyHealthHistory, setLegacyHealthHistory] = useState('')
+  const [legacySurgeries, setLegacySurgeries] = useState('')
+  const [legacyTeacherObs, setLegacyTeacherObs] = useState('')
+
+  // Histórico de Fichas Anteriores do aluno (Item 4)
+  const [allStudentSheets, setAllStudentSheets] = useState<TrainingSheet[]>([])
+  const [viewingArchivedSheet, setViewingArchivedSheet] = useState<TrainingSheet | null>(null)
 
   // Histórico de treinos do aluno com o professor
   const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
@@ -92,9 +122,10 @@ export default function StudentForm() {
       Promise.all([
         studentsService.getById(id),
         workoutProgressService.getAll(id, 50),
+        trainingSheetsService.getHistoryByStudent(id),
         exercisesService.getAll(),
       ])
-        .then(([st, history, exList]) => {
+        .then(([st, history, sheets, exList]) => {
           setName(st.name)
           setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
           setPhone(st.phone ? maskPhone(st.phone) : '')
@@ -105,15 +136,48 @@ export default function StudentForm() {
           }
           setRemovePhoto(false)
           setGeneralObservations(st.general_observations || '')
-
-          setHealthHistory(st.health_history || '')
-          setInjuries(st.injuries || '')
-          setSurgeries(st.surgeries || '')
           setRestrictions(st.restrictions || '')
-          setGoals(st.goals || [])
-          setExperienceLevel(st.experience_level || 'Iniciante')
-          setTeacherObservations(st.teacher_observations || '')
 
+          // Fotos da anamnese
+          setExistingAnamnesisPhotos(st.anamnesis_photos || [])
+
+          // Dados estruturados da nova anamnese ou mapeamento/preservação dos dados legados
+          const anData = st.anamnesis_data || {}
+          setTreinouPersonalAntes(anData.treinou_personal_antes || '')
+          setProfissao(anData.profissao || '')
+
+          // Se já tem objetivos estruturados usa eles; se não, mapeia dos goals legados
+          if (anData.objetivos && anData.objetivos.length > 0) {
+            setObjetivosSelecionados(anData.objetivos)
+          } else if (st.goals && st.goals.length > 0) {
+            setObjetivosSelecionados(st.goals as string[])
+          }
+
+          setEnfaseMusculatura(anData.enfase_musculatura || '')
+          setPraticouExercicio(anData.praticou_exercicio || '')
+          setPraticouExercicioQuais(anData.praticou_exercicio_quais || '')
+          setTempoSemPraticar(anData.tempo_sem_praticar || '')
+          setRestricaoExercicio(anData.restricao_exercicio || (st.restrictions ? 'SIM' : ''))
+          setRestricaoExercicioQuais(anData.restricao_exercicio_quais || '')
+
+          setDoencasSelecionadas(anData.possui_doenca || [])
+          setDoencasOutros(anData.possui_doenca_outros || '')
+
+          // Lesão: se não estiver na anData, usa o campo legacy injuries
+          setPossuiLesao(anData.possui_lesao || st.injuries || '')
+
+          setDoresCorpo(anData.dores_corpo || '')
+          setDoresCorpoQuais(anData.dores_corpo_quais || '')
+          setFazDieta(anData.faz_dieta || '')
+          setFazNutricionista(anData.faz_nutricionista || '')
+          setUsoSubstancias(anData.uso_substancias || [])
+
+          // Campos legados preservados
+          setLegacyHealthHistory(st.health_history || '')
+          setLegacySurgeries(st.surgeries || '')
+          setLegacyTeacherObs(st.teacher_observations || '')
+
+          setAllStudentSheets(sheets)
           setStudentHistory(history)
           const map: Record<string, Exercise> = {}
           exList.forEach((e) => {
@@ -122,12 +186,11 @@ export default function StudentForm() {
           setExercisesMap(map)
 
           if (
-            st.health_history ||
-            st.injuries ||
-            st.surgeries ||
             st.restrictions ||
-            (st.goals && st.goals.length > 0) ||
-            st.teacher_observations
+            st.anamnesis_data ||
+            st.injuries ||
+            st.health_history ||
+            (st.anamnesis_photos && st.anamnesis_photos.length > 0)
           ) {
             setAnamneseOpen(true)
           }
@@ -144,8 +207,78 @@ export default function StudentForm() {
     }
   }, [id, navigate])
 
-  const toggleGoal = (goal: GoalOption) => {
-    setGoals((prev) => (prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal]))
+  const toggleObjetivo = (item: string) => {
+    setObjetivosSelecionados((prev) =>
+      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
+    )
+  }
+
+  const toggleDoenca = (item: string) => {
+    setDoencasSelecionadas((prev) =>
+      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
+    )
+  }
+
+  const toggleUsoSubstancia = (item: string) => {
+    setUsoSubstancias((prev) =>
+      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
+    )
+  }
+
+  const handleAnamnesisPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+
+    const validFiles: File[] = []
+    const allowed = ['image/jpeg', 'image/png', 'image/webp']
+
+    for (const f of files) {
+      if (!allowed.includes(f.type)) {
+        toast({
+          title: 'Formato inválido',
+          description: `O arquivo ${f.name} não é JPG, PNG ou WebP.`,
+          variant: 'destructive',
+        })
+        continue
+      }
+      if (f.size > 5 * 1024 * 1024) {
+        toast({
+          title: 'Arquivo muito grande',
+          description: `A foto ${f.name} excede o limite de 5MB.`,
+          variant: 'destructive',
+        })
+        continue
+      }
+      validFiles.push(f)
+    }
+
+    setNewPhotoFiles((prev) => [...prev, ...validFiles])
+    e.target.value = ''
+  }
+
+  const handleRemoveExistingPhoto = async (filename: string) => {
+    if (!id) {
+      setExistingAnamnesisPhotos((prev) => prev.filter((f) => f !== filename))
+      return
+    }
+    try {
+      await studentsService.removeAnamnesisPhoto(id, filename, existingAnamnesisPhotos)
+      setExistingAnamnesisPhotos((prev) => prev.filter((f) => f !== filename))
+      toast({
+        title: 'Foto removida',
+        description: 'A foto foi excluída da anamnese do aluno.',
+      })
+    } catch {
+      toast({
+        title: 'Erro ao remover foto',
+        description: 'Não foi possível excluir a imagem.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleRemoveNewPhoto = (index: number) => {
+    setNewPhotoFiles((prev) => prev.filter((_, i) => i !== index))
   }
 
   const handlePhoneChange = (val: string) => {
@@ -225,18 +358,38 @@ export default function StudentForm() {
 
     setSaving(true)
     try {
+      const anamnesisDataObj: AnamnesisData = {
+        treinou_personal_antes: sanitizeText(treinouPersonalAntes),
+        profissao: sanitizeText(profissao),
+        objetivos: objetivosSelecionados,
+        enfase_musculatura: sanitizeText(enfaseMusculatura),
+        praticou_exercicio: praticouExercicio,
+        praticou_exercicio_quais: sanitizeText(praticouExercicioQuais),
+        tempo_sem_praticar: sanitizeText(tempoSemPraticar),
+        restricao_exercicio: restricaoExercicio,
+        restricao_exercicio_quais: sanitizeText(restricaoExercicioQuais),
+        possui_doenca: doencasSelecionadas,
+        possui_doenca_outros: sanitizeText(doencasOutros),
+        possui_lesao: sanitizeText(possuiLesao),
+        dores_corpo: doresCorpo,
+        dores_corpo_quais: sanitizeText(doresCorpoQuais),
+        faz_dieta: fazDieta,
+        faz_nutricionista: fazNutricionista,
+        uso_substancias: usoSubstancias,
+      }
+
       const payload = {
         name: sanitizedName,
         birthdate: birthdate ? new Date(birthdate).toISOString() : undefined,
         phone: phone.trim() ? sanitizeText(phone.trim()) : undefined,
         general_observations: sanitizeText(generalObservations) || undefined,
-        health_history: sanitizeText(healthHistory) || undefined,
-        injuries: sanitizeText(injuries) || undefined,
-        surgeries: sanitizeText(surgeries) || undefined,
         restrictions: sanitizeText(restrictions) || undefined,
-        goals: goals.length ? goals : undefined,
-        experience_level: experienceLevel,
-        teacher_observations: sanitizeText(teacherObservations) || undefined,
+        anamnesis_data: anamnesisDataObj,
+        // Mantém campos legados mapeados / preservados
+        injuries: sanitizeText(possuiLesao) || legacyHealthHistory,
+        health_history: legacyHealthHistory || undefined,
+        surgeries: legacySurgeries || undefined,
+        teacher_observations: legacyTeacherObs || undefined,
       }
 
       let savedId = id
@@ -245,15 +398,21 @@ export default function StudentForm() {
           photoFile,
           removePhoto,
         })
+        if (newPhotoFiles.length > 0) {
+          await studentsService.uploadAnamnesisPhotos(id, newPhotoFiles)
+        }
         toast({
           title: 'Aluno salvo com sucesso',
-          description: 'Cadastro atualizado.',
+          description: 'Cadastro e anamnese atualizados.',
         })
       } else {
         const created = await studentsService.create(payload, {
           photoFile,
         })
         savedId = created.id
+        if (newPhotoFiles.length > 0 && created.id) {
+          await studentsService.uploadAnamnesisPhotos(created.id, newPhotoFiles)
+        }
         toast({
           title: 'Aluno salvo com sucesso',
           description: 'Novo aluno cadastrado no Studio Bru Oliveira.',
@@ -515,9 +674,7 @@ export default function StudentForm() {
                         name,
                         phone,
                         birthdate,
-                        experience_level: experienceLevel,
                         restrictions,
-                        goals,
                         created: '',
                         updated: '',
                       }
@@ -655,12 +812,128 @@ export default function StudentForm() {
           </div>
         )}
 
-        {/* Bloco 3: Anamnese (Colapsável / Opcional) */}
+        {/* Bloco 3: Histórico de Fichas do Aluno (Item 4) */}
+        {isEditing && (
+          <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl p-6 sm:p-8 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#252B3E] gap-2 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    Fichas Anteriores e Histórico
+                    <span className="text-xs bg-primary/30 text-white font-semibold px-2 py-0.5 rounded-full">
+                      {allStudentSheets.length} ficha(s)
+                    </span>
+                  </h3>
+                  <p className="text-xs text-[#9CA5B8]">
+                    Todas as fichas criadas para este aluno ficam arquivadas aqui para consulta
+                  </p>
+                </div>
+              </div>
+
+              <Link to={`/fichas/nova?student=${id}`}>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs h-9 px-3 flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Criar Nova Ficha
+                </Button>
+              </Link>
+            </div>
+
+            {allStudentSheets.length === 0 ? (
+              <div className="py-6 text-center text-xs text-[#9CA5B8] bg-[#121522] rounded-xl border border-[#252B3E] p-4">
+                Nenhuma ficha montada para este aluno ainda.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {allStudentSheets.map((sh, idx) => {
+                  const isCurrentActive = idx === 0 && !sh.is_archived
+                  const rawDate = sh.start_date || sh.created
+                  const dateStr = rawDate
+                    ? new Date(rawDate).toLocaleDateString('pt-BR')
+                    : 'Data não informada'
+
+                  const totalExercises = Object.values(sh.series_data || {}).reduce(
+                    (acc, list) => acc + (list?.length || 0),
+                    0,
+                  )
+
+                  return (
+                    <div
+                      key={sh.id}
+                      className={`p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 ${
+                        isCurrentActive
+                          ? 'bg-[#1A2138] border-primary/60 shadow-md ring-1 ring-primary/40'
+                          : 'bg-[#121522] border-[#252B3E] hover:border-[#384260]'
+                      }`}
+                    >
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span
+                            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                              isCurrentActive
+                                ? 'bg-secondary/20 text-secondary border border-secondary/40'
+                                : 'bg-[#252B3E] text-[#9CA5B8]'
+                            }`}
+                          >
+                            {isCurrentActive ? 'Ficha Atual Ativa' : 'Ficha Anterior / Arquivada'}
+                          </span>
+                          <span className="text-[11px] text-[#9CA5B8] flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-primary" /> {dateStr}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-white text-sm truncate">
+                          {sh.title || `Ficha de Treino - ${name}`}
+                        </h4>
+                        <p className="text-xs text-[#9CA5B8]">
+                          {totalExercises} exercícios no total • Séries{' '}
+                          {Object.keys(sh.series_data || {})
+                            .filter((k) => (sh.series_data as any)?.[k]?.length > 0)
+                            .join(', ') || 'Nenhuma'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-[#252B3E]">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setViewingArchivedSheet(sh)}
+                          className="flex-1 border-[#2E2E2E] bg-[#171717] hover:bg-[#252525] text-white text-xs h-8 flex items-center justify-center gap-1.5"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-secondary" /> Visualizar Ficha
+                        </Button>
+
+                        <Link to={`/fichas/${sh.id}`} className="shrink-0">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-white text-xs h-8 px-2.5"
+                            title="Editar ficha"
+                          >
+                            Editar
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Bloco 4: Anamnese (Itens 5 e 6 - Modelo Exato Solicitado) */}
         <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl overflow-hidden">
           <button
             type="button"
             onClick={() => setAnamneseOpen(!anamneseOpen)}
-            className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-[#252525] transition-colors"
+            className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-[#20263B] transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center">
@@ -668,13 +941,13 @@ export default function StudentForm() {
               </div>
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  Anamnese (opcional)
-                  <span className="text-xs bg-[#2A2A2A] text-[#8A8F98] font-normal px-2 py-0.5 rounded-full">
-                    Não impede criação de fichas
+                  Anamnese Completa do Aluno
+                  <span className="text-xs bg-[#252B3E] text-[#9CA5B8] font-normal px-2 py-0.5 rounded-full">
+                    Opcional
                   </span>
                 </h3>
-                <p className="text-xs text-[#8A8F98]">
-                  Histórico médico, lesões, cirurgias, restrições e objetivos
+                <p className="text-xs text-[#9CA5B8]">
+                  Histórico médico, fotos de laudos/evolução, restrições e questionário de saúde
                 </p>
               </div>
             </div>
@@ -687,63 +960,15 @@ export default function StudentForm() {
           </button>
 
           {anamneseOpen && (
-            <div className="p-6 sm:p-8 pt-0 border-t border-[#2E2E2E] space-y-5 animate-fade-in">
-              {/* Nível de Experiência */}
-              <div className="space-y-2 pt-4">
-                <Label className="text-sm text-white font-medium">
-                  Nível de Experiência do Aluno
-                </Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['Iniciante', 'Intermediário', 'Avançado'] as ExperienceLevel[]).map(
-                    (level) => (
-                      <button
-                        type="button"
-                        key={level}
-                        onClick={() => setExperienceLevel(level)}
-                        className={`h-11 rounded-lg text-xs sm:text-sm font-semibold transition-all border ${
-                          experienceLevel === level
-                            ? 'bg-primary border-primary text-primary-foreground shadow-md'
-                            : 'bg-[#121212] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
-                        }`}
-                      >
-                        {level}
-                      </button>
-                    ),
-                  )}
-                </div>
-              </div>
-
-              {/* Objetivos */}
-              <div className="space-y-2">
-                <Label className="text-sm text-white font-medium">Objetivos Principais</Label>
-                <div className="flex flex-wrap gap-2">
-                  {GOAL_OPTIONS.map((goal) => {
-                    const isSelected = goals.includes(goal)
-                    return (
-                      <button
-                        type="button"
-                        key={goal}
-                        onClick={() => toggleGoal(goal)}
-                        className={`px-3.5 py-2 rounded-lg text-xs font-medium border transition-all ${
-                          isSelected
-                            ? 'bg-primary/20 border-primary text-secondary font-bold'
-                            : 'bg-[#121212] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
-                        }`}
-                      >
-                        {goal}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Restrições (Importante) */}
-              <div className="space-y-1.5">
+            <div className="p-6 sm:p-8 pt-0 border-t border-[#252B3E] space-y-6 animate-fade-in">
+              {/* CAMPO FIXO: Restrições médicas / Cuidado em aula (permanece intacto) */}
+              <div className="space-y-1.5 pt-4">
                 <Label
                   htmlFor="restr"
-                  className="text-sm text-amber-300 font-medium flex items-center gap-1.5"
+                  className="text-sm text-amber-300 font-bold flex items-center gap-1.5"
                 >
-                  <AlertCircle className="w-4 h-4" /> Restrições Médicas / Cuidados em Aula
+                  <AlertCircle className="w-4 h-4 text-amber-400" /> Restrições médicas / Cuidado em
+                  aula
                 </Label>
                 <Textarea
                   id="restr"
@@ -751,68 +976,503 @@ export default function StudentForm() {
                   placeholder="Ex: Não pode correr, joelho sensível, hipertensão controlada..."
                   value={restrictions}
                   onChange={(e) => setRestrictions(e.target.value)}
-                  className="bg-[#121212] border-amber-900/50 text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-amber-500"
+                  className="bg-[#121522] border-amber-900/60 text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-amber-500"
                 />
               </div>
 
-              {/* Lesões */}
-              <div className="space-y-1.5">
-                <Label htmlFor="inj" className="text-sm text-white font-medium">
-                  Lesões Anteriores ou Dores Crônicas
-                </Label>
-                <Textarea
-                  id="inj"
-                  rows={2}
-                  placeholder="Ex: Hérnia de disco L4-L5 em 2021, tendinite no ombro..."
-                  value={injuries}
-                  onChange={(e) => setInjuries(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
-                />
+              {/* FOTOS NA ANAMNESE (Item 5) */}
+              <div className="space-y-3 p-4 rounded-xl bg-[#121522] border border-[#252B3E]">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <Label className="text-sm text-white font-bold flex items-center gap-2">
+                      <Camera className="w-4 h-4 text-primary" /> Fotos na Anamnese
+                    </Label>
+                    <p className="text-xs text-[#9CA5B8]">
+                      Anexe laudos médicos entregues pelo aluno, fotos de postura ou evolução
+                      antes/depois (máx 5MB cada)
+                    </p>
+                  </div>
+                  <label
+                    htmlFor="anamnesis-photos-input"
+                    className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 transition-opacity"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Adicionar Fotos
+                    <input
+                      id="anamnesis-photos-input"
+                      type="file"
+                      multiple
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={handleAnamnesisPhotoSelect}
+                    />
+                  </label>
+                </div>
+
+                {/* Grid de Fotos Existentes e Novas */}
+                {existingAnamnesisPhotos.length === 0 && newPhotoFiles.length === 0 ? (
+                  <p className="text-xs text-[#8A8F98] italic py-2">
+                    Nenhuma foto anexada à anamnese até o momento.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3 pt-2">
+                    {/* Fotos salvas no servidor */}
+                    {existingAnamnesisPhotos.map((photoName) => {
+                      const url = id
+                        ? studentsService.getAnamnesisPhotoUrl(
+                            { id, collectionId: 'students' } as any,
+                            photoName,
+                          )
+                        : ''
+                      return (
+                        <div
+                          key={photoName}
+                          className="relative group rounded-xl overflow-hidden border border-[#252B3E] bg-black aspect-square"
+                        >
+                          <img
+                            src={url}
+                            alt="Foto da anamnese"
+                            className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => setPreviewEnlargedPhoto(url)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setPreviewEnlargedPhoto(url)}
+                            className="absolute top-1 left-1 p-1 rounded-md bg-black/60 text-white hover:bg-black"
+                            title="Ampliar foto"
+                          >
+                            <Maximize2 className="w-3 h-3" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveExistingPhoto(photoName)}
+                            className="absolute top-1 right-1 p-1 rounded-md bg-red-600/80 text-white hover:bg-red-600"
+                            title="Remover foto"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )
+                    })}
+
+                    {/* Novas fotos selecionadas para envio */}
+                    {newPhotoFiles.map((file, idx) => {
+                      const tempUrl = URL.createObjectURL(file)
+                      return (
+                        <div
+                          key={`${file.name}-${idx}`}
+                          className="relative group rounded-xl overflow-hidden border-2 border-primary/60 bg-black aspect-square"
+                        >
+                          <img
+                            src={tempUrl}
+                            alt={file.name}
+                            className="w-full h-full object-cover cursor-pointer"
+                            onClick={() => setPreviewEnlargedPhoto(tempUrl)}
+                          />
+                          <span className="absolute bottom-1 left-1 right-1 bg-primary text-primary-foreground text-[9px] font-bold text-center rounded py-0.5">
+                            Nova
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveNewPhoto(idx)}
+                            className="absolute top-1 right-1 p-1 rounded-md bg-red-600/80 text-white hover:bg-red-600"
+                            title="Remover"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
-              {/* Cirurgias */}
-              <div className="space-y-1.5">
-                <Label htmlFor="surg" className="text-sm text-white font-medium">
-                  Cirurgias Realizadas
-                </Label>
-                <Textarea
-                  id="surg"
-                  rows={2}
-                  placeholder="Ex: Artroscopia joelho esquerdo, apendicectomia..."
-                  value={surgeries}
-                  onChange={(e) => setSurgeries(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
-                />
-              </div>
+              {/* MODELO EXATO DE CAMPOS DA ANAMNESE (Item 6) */}
+              <div className="space-y-4 pt-2">
+                {/* 1. Já treinou com Personal antes? */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="treinouPersonal"
+                    className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                  >
+                    Já treinou com Personal antes?
+                  </Label>
+                  <Input
+                    id="treinouPersonal"
+                    placeholder="Ex: Sim, durante 6 meses em 2022..."
+                    value={treinouPersonalAntes}
+                    onChange={(e) => setTreinouPersonalAntes(e.target.value)}
+                    className="bg-[#121522] border-[#252B3E] text-white h-11"
+                  />
+                </div>
 
-              {/* Histórico Clínico */}
-              <div className="space-y-1.5">
-                <Label htmlFor="health" className="text-sm text-white font-medium">
-                  Histórico de Saúde Geral
-                </Label>
-                <Textarea
-                  id="health"
-                  rows={2}
-                  placeholder="Ex: Histórico familiar de cardiopatias, diabetes, medicamentos de uso contínuo..."
-                  value={healthHistory}
-                  onChange={(e) => setHealthHistory(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
-                />
-              </div>
+                {/* 2. Profissão */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="profissao"
+                    className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                  >
+                    Profissão
+                  </Label>
+                  <Input
+                    id="profissao"
+                    placeholder="Ex: Arquiteta, Advogado, Desenvolvedor..."
+                    value={profissao}
+                    onChange={(e) => setProfissao(e.target.value)}
+                    className="bg-[#121522] border-[#252B3E] text-white h-11"
+                  />
+                </div>
 
-              {/* Observações do Professor */}
-              <div className="space-y-1.5">
-                <Label htmlFor="profObs" className="text-sm text-white font-medium">
-                  Observações e Avaliação do Professor
-                </Label>
-                <Textarea
-                  id="profObs"
-                  rows={2}
-                  placeholder="Ex: Avaliação postural inicial, testes de mobilidade de quadril e tornozelo..."
-                  value={teacherObservations}
-                  onChange={(e) => setTeacherObservations(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
-                />
+                {/* 3. Objetivo */}
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Objetivo:
+                  </Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {[
+                      'Emagrecimento',
+                      'Condicionamento',
+                      'Hipertrofia',
+                      'Alívio de estresse',
+                      'Fortalecimento',
+                      'Lazer',
+                      'Recomendação médica',
+                      'Outros',
+                    ].map((item) => {
+                      const isSel = objetivosSelecionados.includes(item)
+                      return (
+                        <button
+                          type="button"
+                          key={item}
+                          onClick={() => toggleObjetivo(item)}
+                          className={`p-2.5 rounded-lg text-xs font-semibold border text-left flex items-center gap-2 transition-all ${
+                            isSel
+                              ? 'bg-primary/20 border-primary text-secondary font-bold shadow-sm'
+                              : 'bg-[#121522] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                          }`}
+                        >
+                          <span
+                            className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                              isSel
+                                ? 'bg-primary border-primary text-primary-foreground'
+                                : 'border-[#4A5578]'
+                            }`}
+                          >
+                            {isSel && <CheckCircle2 className="w-3.5 h-3.5" />}
+                          </span>
+                          <span>( ) {item}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* 4. Você deseja dar ênfase em alguma musculatura? Qual? */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="enfase"
+                    className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                  >
+                    Você deseja dar ênfase em alguma musculatura? Qual?
+                  </Label>
+                  <Input
+                    id="enfase"
+                    placeholder="Ex: Glúteos e posteriores de coxa, dorsais..."
+                    value={enfaseMusculatura}
+                    onChange={(e) => setEnfaseMusculatura(e.target.value)}
+                    className="bg-[#121522] border-[#252B3E] text-white h-11"
+                  />
+                </div>
+
+                {/* 5. Já praticou algum exercício físico? ( ) NÃO ( ) SIM. Quais? */}
+                <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Já praticou algum exercício físico?
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="praticouExercicio"
+                        value="NAO"
+                        checked={praticouExercicio === 'NAO'}
+                        onChange={() => setPraticouExercicio('NAO')}
+                        className="accent-primary"
+                      />
+                      <span>( ) NÃO</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="praticouExercicio"
+                        value="SIM"
+                        checked={praticouExercicio === 'SIM'}
+                        onChange={() => setPraticouExercicio('SIM')}
+                        className="accent-primary"
+                      />
+                      <span>( ) SIM. Quais?</span>
+                    </label>
+                  </div>
+                  {praticouExercicio === 'SIM' && (
+                    <Input
+                      placeholder="Quais exercícios já praticou? Ex: Musculação, natação, corrida..."
+                      value={praticouExercicioQuais}
+                      onChange={(e) => setPraticouExercicioQuais(e.target.value)}
+                      className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                    />
+                  )}
+                </div>
+
+                {/* 6. Há quanto tempo não pratica um exercício físico? */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="tempoSem"
+                    className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                  >
+                    Há quanto tempo não pratica um exercício físico?
+                  </Label>
+                  <Input
+                    id="tempoSem"
+                    placeholder="Ex: Parado há 1 ano, nunca treinou regularmente..."
+                    value={tempoSemPraticar}
+                    onChange={(e) => setTempoSemPraticar(e.target.value)}
+                    className="bg-[#121522] border-[#252B3E] text-white h-11"
+                  />
+                </div>
+
+                {/* 7. Possui alguma restrição à exercício físico? ( ) NÃO ( ) SIM. Quais? */}
+                <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Possui alguma restrição à exercício físico?
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="restricaoExercicio"
+                        value="NAO"
+                        checked={restricaoExercicio === 'NAO'}
+                        onChange={() => setRestricaoExercicio('NAO')}
+                        className="accent-primary"
+                      />
+                      <span>( ) NÃO</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="restricaoExercicio"
+                        value="SIM"
+                        checked={restricaoExercicio === 'SIM'}
+                        onChange={() => setRestricaoExercicio('SIM')}
+                        className="accent-primary"
+                      />
+                      <span>( ) SIM. Quais?</span>
+                    </label>
+                  </div>
+                  {restricaoExercicio === 'SIM' && (
+                    <Input
+                      placeholder="Quais restrições? Ex: Cargas axiais na coluna, impactos..."
+                      value={restricaoExercicioQuais}
+                      onChange={(e) => setRestricaoExercicioQuais(e.target.value)}
+                      className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                    />
+                  )}
+                </div>
+
+                {/* 8. Possui alguma doença? ( ) Diabetes ( ) Hipertensão ( ) Outros */}
+                <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Possui alguma doença?
+                  </Label>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    {['Diabetes', 'Hipertensão', 'Outros'].map((d) => {
+                      const isSel = doencasSelecionadas.includes(d)
+                      return (
+                        <button
+                          type="button"
+                          key={d}
+                          onClick={() => toggleDoenca(d)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-2 transition-all ${
+                            isSel
+                              ? 'bg-primary/20 border-primary text-secondary font-bold'
+                              : 'bg-[#181C2E] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                          }`}
+                        >
+                          <span
+                            className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
+                              isSel
+                                ? 'bg-primary border-primary text-primary-foreground'
+                                : 'border-[#4A5578]'
+                            }`}
+                          >
+                            {isSel && <CheckCircle2 className="w-3 h-3" />}
+                          </span>
+                          <span>( ) {d}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {doencasSelecionadas.includes('Outros') && (
+                    <Input
+                      placeholder="Especifique outras doenças..."
+                      value={doencasOutros}
+                      onChange={(e) => setDoencasOutros(e.target.value)}
+                      className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                    />
+                  )}
+                </div>
+
+                {/* 9. Possui alguma lesão? */}
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="lesao"
+                    className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                  >
+                    Possui alguma lesão?
+                  </Label>
+                  <Input
+                    id="lesao"
+                    placeholder="Ex: Menisco no joelho direito, tendinopatia patelar..."
+                    value={possuiLesao}
+                    onChange={(e) => setPossuiLesao(e.target.value)}
+                    className="bg-[#121522] border-[#252B3E] text-white h-11"
+                  />
+                </div>
+
+                {/* 10. Dores em alguma parte do corpo? ( ) NÃO ( ) SIM. Quais? */}
+                <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Dores em alguma parte do corpo?
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="doresCorpo"
+                        value="NAO"
+                        checked={doresCorpo === 'NAO'}
+                        onChange={() => setDoresCorpo('NAO')}
+                        className="accent-primary"
+                      />
+                      <span>( ) NÃO</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="doresCorpo"
+                        value="SIM"
+                        checked={doresCorpo === 'SIM'}
+                        onChange={() => setDoresCorpo('SIM')}
+                        className="accent-primary"
+                      />
+                      <span>( ) SIM. Quais?</span>
+                    </label>
+                  </div>
+                  {doresCorpo === 'SIM' && (
+                    <Input
+                      placeholder="Quais partes do corpo? Ex: Lombar ao final do dia, ombro..."
+                      value={doresCorpoQuais}
+                      onChange={(e) => setDoresCorpoQuais(e.target.value)}
+                      className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                    />
+                  )}
+                </div>
+
+                {/* 11. Faz dieta? ( ) SIM ( ) NÃO */}
+                <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Faz dieta?
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="fazDieta"
+                        value="SIM"
+                        checked={fazDieta === 'SIM'}
+                        onChange={() => setFazDieta('SIM')}
+                        className="accent-primary"
+                      />
+                      <span>( ) SIM</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="fazDieta"
+                        value="NAO"
+                        checked={fazDieta === 'NAO'}
+                        onChange={() => setFazDieta('NAO')}
+                        className="accent-primary"
+                      />
+                      <span>( ) NÃO</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 12. Faz acompanhamento com nutricionista? ( ) SIM ( ) NÃO */}
+                <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Faz acompanhamento com nutricionista?
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="fazNutricionista"
+                        value="SIM"
+                        checked={fazNutricionista === 'SIM'}
+                        onChange={() => setFazNutricionista('SIM')}
+                        className="accent-primary"
+                      />
+                      <span>( ) SIM</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <input
+                        type="radio"
+                        name="fazNutricionista"
+                        value="NAO"
+                        checked={fazNutricionista === 'NAO'}
+                        onChange={() => setFazNutricionista('NAO')}
+                        className="accent-primary"
+                      />
+                      <span>( ) NÃO</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* 13. Faz uso de ( ) Álcool ( ) Tabaco */}
+                <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+                  <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    Faz uso de
+                  </Label>
+                  <div className="flex items-center gap-4">
+                    {['Álcool', 'Tabaco'].map((sub) => {
+                      const isSel = usoSubstancias.includes(sub)
+                      return (
+                        <button
+                          type="button"
+                          key={sub}
+                          onClick={() => toggleUsoSubstancia(sub)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-2 transition-all ${
+                            isSel
+                              ? 'bg-primary/20 border-primary text-secondary font-bold'
+                              : 'bg-[#181C2E] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                          }`}
+                        >
+                          <span
+                            className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
+                              isSel
+                                ? 'bg-primary border-primary text-primary-foreground'
+                                : 'border-[#4A5578]'
+                            }`}
+                          >
+                            {isSel && <CheckCircle2 className="w-3 h-3" />}
+                          </span>
+                          <span>( ) {sub}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -839,6 +1499,155 @@ export default function StudentForm() {
           </Button>
         </div>
       </form>
+
+      {/* MODAL DE FOTO AMPLIADA DA ANAMNESE */}
+      <Dialog
+        open={Boolean(previewEnlargedPhoto)}
+        onOpenChange={(open) => !open && setPreviewEnlargedPhoto(null)}
+      >
+        <DialogContent className="bg-black/95 border-[#252B3E] text-white sm:max-w-3xl p-3 flex flex-col items-center">
+          <div className="w-full flex justify-end">
+            <button
+              type="button"
+              onClick={() => setPreviewEnlargedPhoto(null)}
+              className="p-1 rounded-lg text-[#9CA5B8] hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          {previewEnlargedPhoto && (
+            <img
+              src={previewEnlargedPhoto}
+              alt="Visualização ampliada"
+              className="max-h-[75vh] w-auto max-w-full object-contain rounded-lg"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL DE CONSULTA DE FICHA ANTERIOR ARQUIVADA (Item 4) */}
+      <Dialog
+        open={Boolean(viewingArchivedSheet)}
+        onOpenChange={(open) => !open && setViewingArchivedSheet(null)}
+      >
+        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="border-b border-[#252B3E] pb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase tracking-wider text-secondary font-bold">
+                Consulta de Ficha Arquivada
+              </span>
+              <span className="bg-[#252B3E] text-[#9CA5B8] text-xs font-bold px-2 py-0.5 rounded-full">
+                {viewingArchivedSheet?.start_date || viewingArchivedSheet?.created
+                  ? new Date(
+                      viewingArchivedSheet.start_date || viewingArchivedSheet.created,
+                    ).toLocaleDateString('pt-BR')
+                  : 'Histórico'}
+              </span>
+            </div>
+            <DialogTitle className="text-lg font-bold text-white">
+              {viewingArchivedSheet?.title || `Ficha de Treino - ${name}`}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#9CA5B8]">
+              {viewingArchivedSheet?.notes || 'Sem observações adicionais.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-3 overflow-y-auto space-y-4 flex-1 pr-1">
+            {SERIES_KEYS.map((k) => {
+              const blocks = viewingArchivedSheet?.series_data?.[k] || []
+              if (blocks.length === 0) return null
+
+              return (
+                <div key={k} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-md bg-primary text-primary-foreground font-black text-xs flex items-center justify-center">
+                      {k}
+                    </span>
+                    <span className="font-bold text-sm text-white">Série {k}</span>
+                    <span className="text-xs text-[#9CA5B8]">({blocks.length} exercícios)</span>
+                  </div>
+
+                  <div className="space-y-1.5 pl-2">
+                    {blocks.map((b, i) => {
+                      const ex = exercisesMap[b.exercise_id]
+                      return (
+                        <div
+                          key={i}
+                          className="p-2.5 rounded-lg bg-[#121522] border border-[#252B3E] flex items-center justify-between text-xs gap-2"
+                        >
+                          <div className="min-w-0">
+                            <span className="font-bold text-white block truncate">
+                              #{i + 1} {ex?.name || 'Exercício'}
+                            </span>
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              {ex?.muscle_group || 'Geral'} {b.notes ? `• ${b.notes}` : ''}
+                            </span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-secondary font-bold block">
+                              {b.sets}x {b.reps || '10-12'}
+                            </span>
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              {b.load ? `Carga: ${b.load}` : 'Carga padrão'}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <DialogFooter className="border-t border-[#252B3E] pt-3 flex sm:justify-between items-center gap-2">
+            {viewingArchivedSheet && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const st: Student = {
+                      id: id || '',
+                      name,
+                      phone,
+                      birthdate,
+                      restrictions,
+                      created: '',
+                      updated: '',
+                    }
+                    await shareOrExportSheet({
+                      student: st,
+                      sheet: viewingArchivedSheet,
+                      exercisesMap,
+                      studioName: appearance.studio_name,
+                      primaryColor: appearance.primary_color,
+                      logoUrl: appearance.logo_url,
+                    })
+                  } catch {
+                    toast({
+                      title: 'Erro ao gerar PDF',
+                      variant: 'destructive',
+                    })
+                  }
+                }}
+                className="border-secondary/40 bg-secondary/15 hover:bg-secondary/25 text-white font-bold text-xs h-9 px-3 flex items-center gap-1.5"
+              >
+                <Share2 className="w-3.5 h-3.5 text-secondary" /> Exportar PDF Desta Ficha
+              </Button>
+            )}
+
+            <Button
+              type="button"
+              onClick={() => setViewingArchivedSheet(null)}
+              className="bg-primary hover:opacity-90 text-primary-foreground text-xs h-9 font-semibold"
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal de Detalhes dos Exercícios Concluídos no Treino */}
       <Dialog
