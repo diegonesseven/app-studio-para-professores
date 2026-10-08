@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T14:23:32.904Z",
+  "generatedAt": "2026-10-08T17:13:19.763Z",
   "collections": [
     {
       "name": "users",
@@ -489,6 +489,63 @@
         }
       ],
       "indexes": ["CREATE UNIQUE INDEX idx_app_settings_key ON app_settings (key)"]
+    },
+    {
+      "name": "physical_assessments",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.id != ''",
+        "view": "@request.auth.id != ''",
+        "create": "@request.auth.id != ''",
+        "update": "@request.auth.id != ''",
+        "delete": "@request.auth.id != ''"
+      },
+      "fields": [
+        {
+          "name": "student",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "students"
+        },
+        {
+          "name": "date",
+          "type": "date",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "sex",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["M", "F"]
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_pa_student ON physical_assessments (student)",
+        "CREATE INDEX idx_pa_student_date ON physical_assessments (student, date DESC)"
+      ]
     }
   ]
 }

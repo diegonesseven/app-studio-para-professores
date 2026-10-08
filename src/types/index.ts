@@ -158,6 +158,48 @@ export interface WorkoutProgress {
   }
 }
 
+export interface BilateralMeasure {
+  direito?: number | null
+  esquerdo?: number | null
+}
+
+export interface PhysicalAssessmentData {
+  // Dados de Composição Corporal
+  peso?: number | null // kg
+  imc?: number | null // kg/m² (calculado ou manual)
+  gordura?: number | null // %
+  musculos?: number | null // %
+  mr?: number | null // kcal (metabolismo basal)
+  idade_biologica?: number | null // anos
+  gordura_visceral?: number | null // índice 1-30
+
+  // Perimetria (cm)
+  antebraco?: BilateralMeasure
+  biceps?: BilateralMeasure
+  torax?: number | null
+  ombro?: number | null
+  cintura?: number | null
+  abdomen?: number | null
+  quadril?: number | null
+  coxa?: BilateralMeasure
+  panturrilha?: BilateralMeasure
+}
+
+export interface PhysicalAssessment {
+  id: string
+  collectionId: string
+  collectionName: string
+  student: string
+  date: string
+  sex?: 'M' | 'F'
+  data: PhysicalAssessmentData
+  created: string
+  updated: string
+  expand?: {
+    student?: Student
+  }
+}
+
 export interface AppAppearanceSettings {
   id: string
   collectionId: string

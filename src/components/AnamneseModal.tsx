@@ -18,12 +18,16 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { studentsService } from '@/services/students'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Link } from 'react-router-dom'
+import { TrendingUp } from 'lucide-react'
 
 interface AnamneseModalProps {
   isOpen: boolean
   onClose: () => void
   student: Student | null
 }
+
+export { AnamneseModal }
 
 export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModalProps) {
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null)
@@ -363,7 +367,21 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-card/60 border-t border-border flex justify-end">
+        <div className="p-4 bg-card/60 border-t border-border flex items-center justify-between gap-2">
+          {student?.id ? (
+            <Link to={`/alunos/${student.id}/editar`} onClick={onClose}>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-white text-xs h-9 px-3 flex items-center gap-1.5"
+              >
+                <TrendingUp className="w-3.5 h-3.5 text-secondary" /> Ver Avaliação Física
+              </Button>
+            </Link>
+          ) : (
+            <div />
+          )}
+
           <Button
             onClick={onClose}
             className="bg-primary hover:opacity-90 text-primary-foreground text-xs h-9 px-4"
