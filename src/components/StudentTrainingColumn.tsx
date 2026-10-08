@@ -20,10 +20,13 @@ import {
   Printer,
   ChevronUp,
   ChevronDown,
+  Calendar,
 } from 'lucide-react'
 import ExercisePickerModal from '@/components/ExercisePickerModal'
+import pb from '@/lib/pocketbase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 
 interface StudentTrainingColumnProps {
   student: Student
@@ -59,6 +62,7 @@ interface StudentTrainingColumnProps {
   ) => Promise<boolean>
   onExportPdf?: (student: Student, sheet: TrainingSheet) => void
   canEdit?: boolean
+  completedSessionsCount?: number
 }
 
 export default function StudentTrainingColumn({
@@ -79,6 +83,7 @@ export default function StudentTrainingColumn({
   onRemoveExerciseFromSeries,
   onExportPdf,
   canEdit = true,
+  completedSessionsCount,
 }: StudentTrainingColumnProps) {
   const currentExercises: ExerciseBlock[] = sheet?.series_data?.[activeSeries] || []
   const totalCount = currentExercises.length
@@ -128,9 +133,13 @@ export default function StudentTrainingColumn({
 
   const handleSaveEdit = async (idx: number) => {
     if (!editDraft || !sheet || !onUpdateExerciseBlock) return
+    const finalDraft: ExerciseBlock = {
+      ...editDraft,
+      sets: Math.max(1, editDraft.sets || 1),
+    }
     setSavingEdit(true)
     try {
-      const ok = await onUpdateExerciseBlock(student.id, sheet.id, activeSeries, idx, editDraft)
+      const ok = await onUpdateExerciseBlock(student.id, sheet.id, activeSeries, idx, finalDraft)
       if (ok) {
         setEditingIndex(null)
         setEditDraft(null)
@@ -209,8 +218,16 @@ export default function StudentTrainingColumn({
       <div className="p-3 sm:p-3.5 bg-card/60 border-b border-border shrink-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#2A2A2A] border-2 border-primary/40 text-primary font-black text-sm flex items-center justify-center shrink-0">
-              {initials}
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#2A2A2A] border-2 border-primary/40 text-primary font-black text-sm flex items-center justify-center shrink-0 overflow-hidden">
+              {student.photo ? (
+                <img
+                  src={pb.files.getURL(student as any, student.photo)}
+                  alt={student.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                initials
+              )}
             </div>
             <div className="min-w-0">
               <h2
@@ -270,6 +287,37 @@ export default function StudentTrainingColumn({
             </button>
           </div>
         </div>
+
+        {/* Badges de Início da Ficha e Sessões Concluídas */}
+        {sheet && (
+          <div className="flex items-center gap-1.5 flex-wrap mt-2">
+            <Badge className="bg-[#181C2E] text-[#9CA5B8] border border-[#2B324D] text-[10px] px-2 py-0.5 font-medium flex items-center gap-1">
+              <Calendar className="w-3 h-3 text-primary" />
+              <span>
+                Início da ficha:{' '}
+                <strong className="text-white">
+                  {sheet.created
+                    ? new Date(sheet.created).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                    : 'Recente'}
+                </strong>
+              </span>
+            </Badge>
+
+            {completedSessionsCount !== undefined && (
+              <Badge className="bg-secondary/15 text-white border border-secondary/35 text-[10px] px-2 py-0.5 font-semibold flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3 text-secondary" />
+                <span>
+                  Sessões concluídas:{' '}
+                  <strong className="text-secondary">{completedSessionsCount}</strong>
+                </span>
+              </Badge>
+            )}
+          </div>
+        )}
 
         {/* Alerta de Restrição rápida se existir (compacto) */}
         {student.restrictions && (
@@ -498,13 +546,30 @@ export default function StudentTrainingColumn({
                           type="number"
                           min={1}
                           max={30}
-                          value={editDraft.sets}
-                          onChange={(e) =>
+                          value={editDraft.sets === 0 ? '' : editDraft.sets}
+                          onChange={(e) => {
+                            const val = e.target.value
+                            if (val === '') {
+                              setEditDraft({
+                                ...editDraft,
+                                sets: 0,
+                              })
+                              return
+                            }
+                            const parsed = parseInt(val, 10)
                             setEditDraft({
                               ...editDraft,
-                              sets: parseInt(e.target.value) || 1,
+                              sets: Number.isNaN(parsed) ? 0 : parsed,
                             })
-                          }
+                          }}
+                          onBlur={() => {
+                            if (!editDraft.sets || editDraft.sets < 1) {
+                              setEditDraft({
+                                ...editDraft,
+                                sets: 1,
+                              })
+                            }
+                          }}
                           className="h-10 bg-[#1E1E1E] border-[#383838] text-white font-black text-center text-sm focus-visible:ring-primary px-1"
                         />
                       </div>

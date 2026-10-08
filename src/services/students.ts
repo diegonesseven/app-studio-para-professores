@@ -27,7 +27,7 @@ export const studentsService = {
     return pb.collection('students').getOne<Student>(id)
   },
 
-  async create(data: Partial<Student>): Promise<Student> {
+  async create(data: Partial<Student>, options?: { photoFile?: File | null }): Promise<Student> {
     const sanitized: Record<string, unknown> = {
       ...data,
       criado_por: pb.authStore.record?.id || undefined,
@@ -49,10 +49,29 @@ export const studentsService = {
       sanitized.teacher_observations = sanitizeText(data.teacher_observations)
     }
 
+    if (options?.photoFile) {
+      const formData = new FormData()
+      Object.entries(sanitized).forEach(([key, val]) => {
+        if (val !== undefined && val !== null) {
+          if (Array.isArray(val)) {
+            val.forEach((item) => formData.append(key, String(item)))
+          } else {
+            formData.append(key, typeof val === 'object' ? JSON.stringify(val) : String(val))
+          }
+        }
+      })
+      formData.append('photo', options.photoFile)
+      return pb.collection('students').create<Student>(formData)
+    }
+
     return pb.collection('students').create<Student>(sanitized)
   },
 
-  async update(id: string, data: Partial<Student>): Promise<Student> {
+  async update(
+    id: string,
+    data: Partial<Student>,
+    options?: { photoFile?: File | null; removePhoto?: boolean },
+  ): Promise<Student> {
     const sanitized: Record<string, unknown> = { ...data }
     if (typeof data.name === 'string') sanitized.name = sanitizeText(data.name)
     if (typeof data.phone === 'string') sanitized.phone = sanitizeText(data.phone)
@@ -69,6 +88,28 @@ export const studentsService = {
     }
     if (typeof data.teacher_observations === 'string') {
       sanitized.teacher_observations = sanitizeText(data.teacher_observations)
+    }
+
+    if (options?.photoFile || options?.removePhoto) {
+      const formData = new FormData()
+      Object.entries(sanitized).forEach(([key, val]) => {
+        if (key === 'photo') return
+        if (val !== undefined && val !== null) {
+          if (Array.isArray(val)) {
+            val.forEach((item) => formData.append(key, String(item)))
+          } else {
+            formData.append(key, typeof val === 'object' ? JSON.stringify(val) : String(val))
+          }
+        }
+      })
+
+      if (options.photoFile) {
+        formData.append('photo', options.photoFile)
+      } else if (options.removePhoto) {
+        formData.append('photo', '')
+      }
+
+      return pb.collection('students').update<Student>(id, formData)
     }
 
     return pb.collection('students').update<Student>(id, sanitized)

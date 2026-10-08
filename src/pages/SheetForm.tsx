@@ -33,7 +33,10 @@ import {
   Share2,
   Printer,
   Download,
+  Calendar,
+  CheckCircle2,
 } from 'lucide-react'
+import { workoutProgressService } from '@/services/workoutProgress'
 import { shareOrExportSheet } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
@@ -62,6 +65,8 @@ export default function SheetForm() {
   const [student, setStudent] = useState<Student | null>(null)
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
+  const [sheetCreated, setSheetCreated] = useState<string>('')
+  const [completedSessionsCount, setCompletedSessionsCount] = useState<number>(0)
   const [activeTab, setActiveTab] = useState<SeriesKey>('A')
 
   // Mapa de exercícios completo por ID para exibição de detalhes
@@ -115,6 +120,7 @@ export default function SheetForm() {
           const sheet = await trainingSheetsService.getById(id)
           setTitle(sheet.title || '')
           setNotes(sheet.notes || '')
+          setSheetCreated(sheet.created || '')
 
           const initialSeries: SeriesData = {
             A: sheet.series_data?.A || [],
@@ -124,6 +130,13 @@ export default function SheetForm() {
             E: sheet.series_data?.E || [],
           }
           setSeriesData(initialSeries)
+
+          // Carregar contagem de sessões concluídas desta ficha
+          const countSessions = await workoutProgressService.countCompletedSessions(
+            sheet.student,
+            sheet.id,
+          )
+          setCompletedSessionsCount(countSessions)
 
           // Carregar aluno vinculado
           const st = await studentsService.getById(sheet.student)
@@ -289,6 +302,7 @@ export default function SheetForm() {
         const blocks = seriesData[key] || []
         cleanedSeriesData[key] = blocks.map((b) => ({
           ...b,
+          sets: Math.max(1, b.sets || 1),
           reps: sanitizeText(b.reps),
           time: sanitizeText(b.time),
           load: sanitizeText(b.load),
@@ -396,7 +410,7 @@ export default function SheetForm() {
                   title,
                   notes,
                   series_data: seriesData,
-                  created: '',
+                  created: sheetCreated,
                   updated: '',
                 }
                 const res = await shareOrExportSheet({
@@ -406,6 +420,7 @@ export default function SheetForm() {
                   studioName: appearance.studio_name,
                   primaryColor: appearance.primary_color,
                   logoUrl: appearance.logo_url,
+                  completedSessionsCount,
                 })
                 if (res === 'opened') {
                   toast({
@@ -434,29 +449,60 @@ export default function SheetForm() {
       </div>
 
       {/* Identificação da Ficha */}
-      <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-5 sm:p-6 shadow-md grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
-            Título da Ficha
-          </Label>
-          <Input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Ex: Ficha Hipertrofia & Força Geral"
-            className="bg-[#121212] border-[#2E2E2E] text-white font-semibold h-11 focus-visible:ring-primary"
-          />
-        </div>
+      <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-5 sm:p-6 shadow-md space-y-4">
+        {/* Badges de Início da Ficha e Sessões Concluídas */}
+        {isEditing && (
+          <div className="flex items-center gap-2 flex-wrap pb-2 border-b border-[#282828]">
+            <Badge className="bg-[#141414] text-white border border-[#333333] text-xs px-3 py-1 font-semibold flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-primary" />
+              <span>
+                Início da ficha:{' '}
+                <strong className="text-primary font-bold">
+                  {sheetCreated
+                    ? new Date(sheetCreated).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                    : 'Hoje'}
+                </strong>
+              </span>
+            </Badge>
 
-        <div className="space-y-1.5">
-          <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
-            Observações do Professor / Recomendações
-          </Label>
-          <Input
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Ex: Descanso controlado de 60s, priorizar cadência controlada"
-            className="bg-[#121212] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
-          />
+            <Badge className="bg-secondary/15 text-white border border-secondary/40 text-xs px-3 py-1 font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-secondary" />
+              <span>
+                Sessões concluídas:{' '}
+                <strong className="text-secondary font-black">{completedSessionsCount}</strong>
+              </span>
+            </Badge>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+              Título da Ficha
+            </Label>
+            <Input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Ex: Ficha Hipertrofia & Força Geral"
+              className="bg-[#121212] border-[#2E2E2E] text-white font-semibold h-11 focus-visible:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+              Observações do Professor / Recomendações
+            </Label>
+            <Input
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Ex: Descanso controlado de 60s, priorizar cadência controlada"
+              className="bg-[#121212] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+            />
+          </div>
         </div>
       </div>
 
@@ -627,10 +673,21 @@ export default function SheetForm() {
                         type="number"
                         min={1}
                         max={20}
-                        value={block.sets}
-                        onChange={(e) =>
-                          handleUpdateBlock(index, 'sets', parseInt(e.target.value) || 1)
-                        }
+                        value={block.sets === 0 ? '' : block.sets}
+                        onChange={(e) => {
+                          const val = e.target.value
+                          if (val === '') {
+                            handleUpdateBlock(index, 'sets', 0)
+                            return
+                          }
+                          const parsed = parseInt(val, 10)
+                          handleUpdateBlock(index, 'sets', Number.isNaN(parsed) ? 0 : parsed)
+                        }}
+                        onBlur={() => {
+                          if (!block.sets || block.sets < 1) {
+                            handleUpdateBlock(index, 'sets', 1)
+                          }
+                        }}
                         className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
                       />
                     </div>

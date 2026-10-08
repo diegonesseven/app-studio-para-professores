@@ -63,6 +63,7 @@ export interface Student {
   name: string
   birthdate?: string
   phone?: string
+  photo?: string
   general_observations?: string
   health_history?: string
   injuries?: string

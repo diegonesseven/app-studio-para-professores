@@ -11,6 +11,7 @@ export interface SheetExportData {
   primaryColor?: string
   secondaryColor?: string
   logoUrl?: string
+  completedSessionsCount?: number
 }
 
 function getInitials(name: string): string {
@@ -33,6 +34,7 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     studioName = 'Studio Bru Oliveira',
     primaryColor = '#8B5CF6',
     logoUrl,
+    completedSessionsCount,
   } = data
 
   const effectiveLogo = logoUrl || STUDIO_LOGO_SRC
@@ -42,6 +44,14 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
     month: '2-digit',
     year: 'numeric',
   })
+
+  const sheetStartDate = sheet.created
+    ? new Date(sheet.created).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    : dateGenerated
 
   const sheetTitle = sheet.title || `Ficha de Treino - ${student.name}`
   const sheetNotes = sheet.notes || ''
@@ -475,6 +485,8 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
       </div>
       <div class="meta-box">
         <div>Ficha: <strong>${escapeHtml(sheetTitle)}</strong></div>
+        <div>Início da ficha: <strong>${sheetStartDate}</strong></div>
+        ${completedSessionsCount !== undefined ? `<div>Sessões concluídas: <strong>${completedSessionsCount}</strong></div>` : ''}
         <div>Emissão: <strong>${dateGenerated}</strong></div>
       </div>
     </header>
@@ -485,6 +497,8 @@ export function generateTrainingSheetHtml(data: SheetExportData): string {
         <div class="student-name">${escapeHtml(student.name)}</div>
         <div class="student-info">
           ${student.phone ? `WhatsApp: <strong>${escapeHtml(student.phone)}</strong> • ` : ''}
+          Início: <strong>${sheetStartDate}</strong> • 
+          ${completedSessionsCount !== undefined ? `Sessões feitas: <strong>${completedSessionsCount}</strong> • ` : ''}
           Nível: <strong>${escapeHtml(student.experience_level || 'Iniciante')}</strong>
         </div>
       </div>

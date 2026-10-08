@@ -101,11 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         await pb.collection('users').authRefresh()
         syncUserFromStore()
-      } catch (_) {
-        // Só desloga se o token estiver definitivamente inválido e não houver record
-        if (!pb.authStore.isValid) {
-          logout()
-        }
+      } catch (err) {
+        // Preserva o token e o usuário atuais em caso de instabilidade ou erro transitório
+        // Não dispara logout() por falha temporária
+        console.warn('refreshUser: falha ao atualizar sessão, mantendo credenciais ativas:', err)
       }
     }
   }

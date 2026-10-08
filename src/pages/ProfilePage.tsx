@@ -67,6 +67,28 @@ export default function ProfilePage() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          title: 'Formato não permitido',
+          description: 'A foto deve ser uma imagem nos formatos JPEG, PNG ou WebP.',
+          variant: 'destructive',
+        })
+        e.target.value = ''
+        return
+      }
+
+      const maxBytes = 5 * 1024 * 1024 // 5MB
+      if (file.size > maxBytes) {
+        toast({
+          title: 'Arquivo muito grande',
+          description: 'A imagem deve ter no máximo 5MB.',
+          variant: 'destructive',
+        })
+        e.target.value = ''
+        return
+      }
+
       setAvatarFile(file)
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -92,23 +114,30 @@ export default function ProfilePage() {
     }
 
     try {
-      setSavingProfile(true)
-      setProfileSuccess(false)
+      const sanitizedName = sanitizeText(name)
       await profileService.updateProfile(user.id, {
-        name: cleanName,
-        avatar: avatarFile,
+        name: sanitizedName,
+        avatar: avatarFile || undefined,
       })
-      await refreshUser()
-      setProfileSuccess(true)
+
+      try {
+        await refreshUser()
+      } catch (refreshErr) {
+        console.warn('Perfil salvo no servidor, mas falha ao sincronizar dados locais:', refreshErr)
+      }
+      setAvatarFile(null)
+
       toast({
-        title: 'Perfil atualizado com sucesso!',
-        description: 'Suas informações cadastrais foram salvas.',
+        title: 'Perfil atualizado!',
+        description: 'Seu nome e foto foram salvos com sucesso.',
       })
-      setTimeout(() => setProfileSuccess(false), 4000)
-    } catch (err: unknown) {
+    } catch (err) {
+      console.error('Erro ao atualizar perfil:', err)
       toast({
         title: 'Erro ao atualizar perfil',
-        description: parseProfileErrorMessage(err),
+        description:
+          parseProfileErrorMessage(err) ||
+          'Não foi possível salvar as alterações. Verifique o arquivo e tente novamente.',
         variant: 'destructive',
       })
     } finally {

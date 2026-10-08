@@ -23,6 +23,7 @@ import { trainingSheetsService } from '@/services/trainingSheets'
 import { exercisesService } from '@/services/exercises'
 import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
+import pb from '@/lib/pocketbase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -266,8 +267,16 @@ export default function StudentList() {
                   {/* Topo do Card */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border border-primary/30 text-primary font-bold text-sm flex items-center justify-center shrink-0">
-                        {initials}
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border border-primary/30 text-primary font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden">
+                        {student.photo ? (
+                          <img
+                            src={pb.files.getURL(student as any, student.photo)}
+                            alt={student.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          initials
+                        )}
                       </div>
                       <div className="min-w-0">
                         <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors truncate">

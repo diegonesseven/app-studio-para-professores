@@ -16,6 +16,17 @@ export const workoutProgressService = {
     })
   },
 
+  async countCompletedSessions(studentId: string, sheetId: string): Promise<number> {
+    try {
+      const res = await pb.collection('workout_progress').getList(1, 1, {
+        filter: `student = "${studentId}" && training_sheet = "${sheetId}" && is_completed = true`,
+      })
+      return res.totalItems
+    } catch (_) {
+      return 0
+    }
+  },
+
   async getLatestByStudent(studentId: string): Promise<WorkoutProgress | null> {
     try {
       const records = await pb.collection('workout_progress').getList<WorkoutProgress>(1, 1, {

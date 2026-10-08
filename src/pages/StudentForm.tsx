@@ -28,6 +28,7 @@ import { maskPhone, validatePhone, sanitizeText } from '@/lib/validation'
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { shareOrExportSheet } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
+import pb from '@/lib/pocketbase/client'
 import {
   ArrowLeft,
   User,
@@ -46,6 +47,8 @@ import {
   CheckCircle2,
   Eye,
   Share2,
+  Camera,
+  X,
 } from 'lucide-react'
 
 export default function StudentForm() {
@@ -59,6 +62,9 @@ export default function StudentForm() {
   const [birthdate, setBirthdate] = useState('')
   const [phone, setPhone] = useState('')
   const [phoneError, setPhoneError] = useState<string | null>(null)
+  const [photoFile, setPhotoFile] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [removePhoto, setRemovePhoto] = useState(false)
   const [generalObservations, setGeneralObservations] = useState('')
 
   // Anamnese (opcional)
@@ -92,6 +98,12 @@ export default function StudentForm() {
           setName(st.name)
           setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
           setPhone(st.phone ? maskPhone(st.phone) : '')
+          if (st.photo) {
+            setPhotoPreview(pb.files.getURL(st as any, st.photo))
+          } else {
+            setPhotoPreview(null)
+          }
+          setRemovePhoto(false)
           setGeneralObservations(st.general_observations || '')
 
           setHealthHistory(st.health_history || '')
@@ -146,6 +158,47 @@ export default function StudentForm() {
     }
   }
 
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: 'Formato inválido',
+        description: 'A foto deve ser uma imagem JPG, PNG, WebP ou GIF.',
+        variant: 'destructive',
+      })
+      e.target.value = ''
+      return
+    }
+
+    const maxBytes = 5 * 1024 * 1024 // 5MB
+    if (file.size > maxBytes) {
+      toast({
+        title: 'Arquivo muito grande',
+        description: 'A imagem deve ter no máximo 5MB.',
+        variant: 'destructive',
+      })
+      e.target.value = ''
+      return
+    }
+
+    setPhotoFile(file)
+    setRemovePhoto(false)
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setPhotoPreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleRemovePhoto = () => {
+    setPhotoFile(null)
+    setPhotoPreview(null)
+    setRemovePhoto(true)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setPhoneError(null)
@@ -188,13 +241,18 @@ export default function StudentForm() {
 
       let savedId = id
       if (isEditing && id) {
-        await studentsService.update(id, payload)
+        await studentsService.update(id, payload, {
+          photoFile,
+          removePhoto,
+        })
         toast({
           title: 'Aluno salvo com sucesso',
           description: 'Cadastro atualizado.',
         })
       } else {
-        const created = await studentsService.create(payload)
+        const created = await studentsService.create(payload, {
+          photoFile,
+        })
         savedId = created.id
         toast({
           title: 'Aluno salvo com sucesso',
@@ -271,6 +329,78 @@ export default function StudentForm() {
               <p className="text-xs text-[#9CA5B8]">
                 Informações de contato e dados pessoais básicos
               </p>
+            </div>
+          </div>
+
+          {/* Foto do Aluno */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 pb-2">
+            <div className="relative group shrink-0">
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border-2 border-primary/40 flex items-center justify-center overflow-hidden shadow-inner">
+                {photoPreview ? (
+                  <img
+                    src={photoPreview}
+                    alt={name || 'Aluno'}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-primary font-black text-2xl flex items-center justify-center">
+                    {name ? (
+                      name
+                        .split(' ')
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((n) => n[0].toUpperCase())
+                        .join('')
+                    ) : (
+                      <User className="w-10 h-10 text-primary/60" />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <label
+                htmlFor="student-photo-upload"
+                className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-primary text-primary-foreground shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+                title="Adicionar ou trocar foto do aluno"
+              >
+                <Camera className="w-4 h-4" />
+                <input
+                  id="student-photo-upload"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handlePhotoSelect}
+                />
+              </label>
+            </div>
+
+            <div className="flex-1 text-center sm:text-left space-y-1.5 min-w-0">
+              <div className="flex items-center justify-center sm:justify-start gap-2">
+                <span className="text-sm font-semibold text-white">Foto do Aluno</span>
+                <span className="text-[11px] text-[#8A8F98]">(opcional, máx 5MB)</span>
+              </div>
+              <p className="text-xs text-[#9CA5B8]">
+                Aparece no cabeçalho dos treinos e na lista de alunos para identificação visual
+                imediata.
+              </p>
+              <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
+                <label
+                  htmlFor="student-photo-upload"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#252B3E] hover:bg-[#30374E] text-white border border-[#3A4363] cursor-pointer transition-colors"
+                >
+                  <Camera className="w-3.5 h-3.5 text-primary" />
+                  {photoPreview ? 'Trocar foto' : 'Selecionar foto'}
+                </label>
+                {photoPreview && (
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="inline-flex items-center gap-1 text-xs text-red-400 hover:text-red-300 px-2 py-1.5 rounded-lg hover:bg-red-950/30 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" /> Remover
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 

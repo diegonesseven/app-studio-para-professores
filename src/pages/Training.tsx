@@ -69,6 +69,9 @@ export default function Training() {
   // Dados carregados dos alunos selecionados
   const [selectedStudents, setSelectedStudents] = useState<Student[]>([])
   const [sheetsMap, setSheetsMap] = useState<Record<string, TrainingSheet | null>>({})
+  const [completedSessionsCountMap, setCompletedSessionsCountMap] = useState<
+    Record<string, number>
+  >({})
   const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
 
   // Série ativa por aluno: { [studentId]: 'A' | 'B' | ... }
@@ -171,6 +174,7 @@ export default function Training() {
 
         // Carregar fichas e histórico recente de cada aluno para determinar onde começar
         const newSheetsMap: Record<string, TrainingSheet | null> = {}
+        const newCompletedSessionsMap: Record<string, number> = {}
         const newSeriesMap: Record<string, SeriesKey> = { ...activeSeriesMap }
         const newCompletedMap: Record<string, Record<number, boolean>> = { ...completedMap }
         const newSessionRecords: Record<string, string> = { ...sessionRecordMap }
@@ -179,6 +183,13 @@ export default function Training() {
           studentsData.map(async (st) => {
             const sheet = await trainingSheetsService.getByStudent(st.id)
             newSheetsMap[st.id] = sheet
+
+            if (sheet) {
+              const count = await workoutProgressService.countCompletedSessions(st.id, sheet.id)
+              newCompletedSessionsMap[st.id] = count
+            } else {
+              newCompletedSessionsMap[st.id] = 0
+            }
 
             // Descobre o último registro do aluno no backend
             const latest = await workoutProgressService.getLatestByStudent(st.id)
@@ -218,6 +229,7 @@ export default function Training() {
         )
 
         setSheetsMap(newSheetsMap)
+        setCompletedSessionsCountMap(newCompletedSessionsMap)
         setActiveSeriesMap(newSeriesMap)
         setCompletedMap(newCompletedMap)
         setSessionRecordMap(newSessionRecords)
@@ -529,6 +541,7 @@ export default function Training() {
         studioName: appearance.studio_name,
         primaryColor: appearance.primary_color,
         logoUrl: appearance.logo_url,
+        completedSessionsCount: completedSessionsCountMap[student.id] || 0,
       })
       if (result === 'opened') {
         toast({
@@ -544,6 +557,7 @@ export default function Training() {
         studioName: appearance.studio_name,
         primaryColor: appearance.primary_color,
         logoUrl: appearance.logo_url,
+        completedSessionsCount: completedSessionsCountMap[student.id] || 0,
       })
     }
   }
@@ -591,6 +605,13 @@ export default function Training() {
         delete next[student.id]
         return next
       })
+
+      // Atualizar contagem de sessões concluídas
+      const updatedCount = await workoutProgressService.countCompletedSessions(student.id, sheet.id)
+      setCompletedSessionsCountMap((prev) => ({
+        ...prev,
+        [student.id]: updatedCount,
+      }))
 
       toast({
         title: `Série ${currentSeries} concluída!`,
@@ -647,6 +668,12 @@ export default function Training() {
       setCompletedMap((prev) => ({
         ...prev,
         [student.id]: allDone,
+      }))
+
+      const updatedCount = await workoutProgressService.countCompletedSessions(student.id, sheet.id)
+      setCompletedSessionsCountMap((prev) => ({
+        ...prev,
+        [student.id]: updatedCount,
       }))
 
       toast({
@@ -843,6 +870,7 @@ export default function Training() {
                     onRemoveExerciseFromSeries={handleRemoveExerciseFromSeries}
                     onExportPdf={handleExportPdf}
                     canEdit={canEditTraining}
+                    completedSessionsCount={completedSessionsCountMap[st.id] ?? 0}
                   />
                 </div>
               )
@@ -939,6 +967,9 @@ export default function Training() {
                   onRemoveExerciseFromSeries={handleRemoveExerciseFromSeries}
                   onExportPdf={handleExportPdf}
                   canEdit={canEditTraining}
+                  completedSessionsCount={
+                    completedSessionsCountMap[selectedStudents[mobileActiveIndex].id] ?? 0
+                  }
                 />
               </div>
             )}
