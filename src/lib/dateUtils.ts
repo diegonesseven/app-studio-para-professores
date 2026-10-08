@@ -33,7 +33,6 @@ export function extractDateInputVal(dateStr?: string | Date | null): string {
 
   return ''
 }
-
 /**
  * Converte qualquer representação de data para formato legível pt-BR (DD/MM/AAAA).
  * Retorna fallback (padrão: "—" ou string vazia se especificado) quando a data for nula ou inválida.
