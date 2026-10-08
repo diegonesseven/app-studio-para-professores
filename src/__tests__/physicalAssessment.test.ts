@@ -7,6 +7,7 @@ import {
   classifySkeletalMuscle,
   classifyVisceralFat,
 } from '../lib/omronClassification'
+import { calculateEvolution, formatMetricValue } from '../lib/assessmentComparison'
 
 describe('Omron Bioimpedância e Avaliação Física', () => {
   describe('Cálculo de Idade e IMC', () => {
@@ -145,6 +146,70 @@ describe('Omron Bioimpedância e Avaliação Física', () => {
       const res = classifyVisceralFat(18)
       expect(res?.label).toBe('Muito alto')
       expect(res?.statusColor).toBe('red')
+    })
+  })
+
+  describe('5. Comparativo Automático de Avaliação Física', () => {
+    it('formata valores métricos com ou sem unidade', () => {
+      expect(formatMetricValue(68.5, 'kg')).toBe('68,5 kg')
+      expect(formatMetricValue(1420, 'kcal')).toBe('1420 kcal')
+      expect(formatMetricValue(null)).toBe('—')
+      expect(formatMetricValue(undefined)).toBe('—')
+    })
+
+    it('calcula evolução positiva quando o percentual de músculos sobe (desired: higher)', () => {
+      // Anterior: 25.0%, Atual: 26.5% -> +1.5% (better)
+      const evo = calculateEvolution(26.5, 25.0, 'higher', '%')
+      expect(evo).not.toBeNull()
+      expect(evo?.diff).toBe(1.5)
+      expect(evo?.diffFormatted).toBe('+1,5 %')
+      expect(evo?.trend).toBe('better')
+      expect(evo?.arrow).toBe('up')
+    })
+
+    it('calcula evolução negativa quando o percentual de músculos cai (desired: higher)', () => {
+      // Anterior: 28.0%, Atual: 26.0% -> -2.0% (worse)
+      const evo = calculateEvolution(26.0, 28.0, 'higher', '%')
+      expect(evo).not.toBeNull()
+      expect(evo?.diff).toBe(-2)
+      expect(evo?.diffFormatted).toBe('-2 %')
+      expect(evo?.trend).toBe('worse')
+      expect(evo?.arrow).toBe('down')
+    })
+
+    it('calcula evolução positiva quando gordura/peso/cintura reduzem (desired: lower)', () => {
+      // Anterior: 30.0%, Atual: 27.5% -> -2.5% (better)
+      const evoFat = calculateEvolution(27.5, 30.0, 'lower', '%')
+      expect(evoFat?.trend).toBe('better')
+      expect(evoFat?.arrow).toBe('down')
+      expect(evoFat?.diffFormatted).toBe('-2,5 %')
+
+      // Peso: Anterior 72.0kg, Atual 70.0kg -> -2kg (better)
+      const evoWeight = calculateEvolution(70.0, 72.0, 'lower', 'kg')
+      expect(evoWeight?.trend).toBe('better')
+      expect(evoWeight?.arrow).toBe('down')
+    })
+
+    it('calcula evolução negativa quando gordura aumenta (desired: lower)', () => {
+      // Anterior: 22.0%, Atual: 25.0% -> +3.0% (worse)
+      const evo = calculateEvolution(25.0, 22.0, 'lower', '%')
+      expect(evo?.trend).toBe('worse')
+      expect(evo?.arrow).toBe('up')
+      expect(evo?.diffFormatted).toBe('+3 %')
+    })
+
+    it('reconhece estabilidade quando a diferença é zero ou menor que 0.05', () => {
+      const evo = calculateEvolution(30.0, 30.0, 'higher', '%')
+      expect(evo?.diff).toBe(0)
+      expect(evo?.trend).toBe('neutral')
+      expect(evo?.arrow).toBe('equal')
+      expect(evo?.label).toBe('Estável')
+    })
+
+    it('retorna null se qualquer um dos valores não estiver preenchido', () => {
+      expect(calculateEvolution(null, 30.0, 'lower')).toBeNull()
+      expect(calculateEvolution(25.0, null, 'lower')).toBeNull()
+      expect(calculateEvolution(undefined, undefined, 'lower')).toBeNull()
     })
   })
 })
