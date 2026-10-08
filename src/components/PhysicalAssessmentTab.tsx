@@ -19,8 +19,14 @@ import {
   classifyBodyFat,
   classifySkeletalMuscle,
   classifyVisceralFat,
+  calculateWaistHipRatio,
+  classifyWaistHipRatio,
   type ClassificationResult,
 } from '@/lib/omronClassification'
+import {
+  downloadAssessmentImage,
+  shareOrDownloadAssessmentImage,
+} from '@/services/assessmentImageExport'
 import {
   calculateEvolution,
   formatMetricValue,
@@ -47,6 +53,9 @@ import {
   Minus,
   Sparkles,
   History,
+  Save,
+  Download,
+  Share2,
 } from 'lucide-react'
 
 interface PhysicalAssessmentTabProps {
@@ -81,6 +90,13 @@ export function PhysicalAssessmentTab({
   // Diálogo para deletar avaliação
   const [deleteCandidate, setDeleteCandidate] = useState<PhysicalAssessment | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // Feedback do botão explícito "Salvar Avaliação"
+  const [savingAssessment, setSavingAssessment] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+
+  // Estado da exportação da imagem
+  const [exportingImage, setExportingImage] = useState(false)
 
   // Carregar avaliações do aluno
   const loadAssessments = useCallback(async () => {
@@ -335,21 +351,28 @@ export function PhysicalAssessmentTab({
 
   // Atualizar data da avaliação inline
   const handleUpdateDate = async (assessment: PhysicalAssessment, newDate: string) => {
-    if (!newDate || newDate === assessment.date) return
+    if (!newDate) return
+    // Formatar como YYYY-MM-DD
+    const cleanDate = newDate.split('T')[0]
+    const currentDateClean = assessment.date ? assessment.date.split('T')[0] : ''
+    if (cleanDate === currentDateClean) return
+
     try {
-      await physicalAssessmentsService.update(assessment.id, { date: newDate })
+      const updated = await physicalAssessmentsService.update(assessment.id, { date: cleanDate })
       setAssessments((prev) =>
         prev
-          .map((a) => (a.id === assessment.id ? { ...a, date: newDate } : a))
+          .map((a) => (a.id === assessment.id ? { ...a, date: updated.date || cleanDate } : a))
           .sort((a, b) => (a.date || '').localeCompare(b.date || '')),
       )
       toast({
-        title: 'Data atualizada',
-        description: 'A data da avaliação foi salva.',
+        title: 'Data da avaliação atualizada',
+        description: 'A nova data foi salva com sucesso no registro.',
       })
-    } catch {
+    } catch (err) {
+      console.error('Erro ao atualizar data da avaliação:', err)
       toast({
         title: 'Erro ao alterar data',
+        description: 'Não foi possível gravar a nova data da avaliação.',
         variant: 'destructive',
       })
     }
@@ -448,6 +471,113 @@ export function PhysicalAssessmentTab({
     )
   }
 
+  // Ação explícita de salvar a avaliação
+  const handleSaveAssessmentExplicitly = async () => {
+    if (!currentAssessment) return
+    setSavingAssessment(true)
+    try {
+      const cleanDate = currentAssessment.date ? currentAssessment.date.split('T')[0] : ''
+      await physicalAssessmentsService.update(currentAssessment.id, {
+        data: currentAssessment.data || {},
+        date: cleanDate || undefined,
+        sex: currentAssessment.sex || 'F',
+      })
+      setSaveSuccess(true)
+      toast({
+        title: 'Avaliação salva com sucesso!',
+        description: 'Todas as medidas e dados da avaliação foram confirmados e gravados.',
+      })
+      setTimeout(() => setSaveSuccess(false), 4000)
+    } catch (err) {
+      console.error('Erro ao salvar avaliação:', err)
+      toast({
+        title: 'Erro ao salvar avaliação',
+        description: 'Não foi possível gravar os dados. Tente novamente.',
+        variant: 'destructive',
+      })
+    } finally {
+      setSavingAssessment(false)
+    }
+  }
+
+  // Exportar imagem (Baixar PNG)
+  const handleDownloadImage = async () => {
+    if (!currentAssessment) return
+    setExportingImage(true)
+    try {
+      const heightNum = fixedHeight ? parseFloat(fixedHeight.replace(',', '.')) : null
+      const formattedDate = currentAssessment.date
+        ? new Date(currentAssessment.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
+        : new Date().toLocaleDateString('pt-BR')
+
+      await downloadAssessmentImage({
+        studentName,
+        studentAge,
+        assessmentDate: formattedDate,
+        sex: currentAssessment.sex || 'F',
+        heightCm: heightNum && !isNaN(heightNum) ? heightNum : null,
+        currentAssessment,
+        previousAssessment,
+      })
+      toast({
+        title: 'Imagem gerada com sucesso!',
+        description: 'O arquivo PNG da avaliação foi baixado para o seu dispositivo.',
+      })
+    } catch (err) {
+      console.error('Erro ao gerar imagem:', err)
+      toast({
+        title: 'Erro ao gerar imagem',
+        description: 'Não foi possível renderizar a imagem da avaliação.',
+        variant: 'destructive',
+      })
+    } finally {
+      setExportingImage(false)
+    }
+  }
+
+  // Compartilhar imagem (WhatsApp / Web Share API ou download)
+  const handleShareImage = async () => {
+    if (!currentAssessment) return
+    setExportingImage(true)
+    try {
+      const heightNum = fixedHeight ? parseFloat(fixedHeight.replace(',', '.')) : null
+      const formattedDate = currentAssessment.date
+        ? new Date(currentAssessment.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
+        : new Date().toLocaleDateString('pt-BR')
+
+      const result = await shareOrDownloadAssessmentImage({
+        studentName,
+        studentAge,
+        assessmentDate: formattedDate,
+        sex: currentAssessment.sex || 'F',
+        heightCm: heightNum && !isNaN(heightNum) ? heightNum : null,
+        currentAssessment,
+        previousAssessment,
+      })
+
+      if (result === 'shared') {
+        toast({
+          title: 'Compartilhamento concluído!',
+          description: 'A avaliação física foi compartilhada com sucesso.',
+        })
+      } else {
+        toast({
+          title: 'Imagem baixada com sucesso!',
+          description: 'Pronta para envio pelo WhatsApp ou outros aplicativos.',
+        })
+      }
+    } catch (err) {
+      console.error('Erro ao compartilhar imagem:', err)
+      toast({
+        title: 'Erro no compartilhamento',
+        description: 'Não foi possível compartilhar a imagem. Baixe-a pelo botão ao lado.',
+        variant: 'destructive',
+      })
+    } finally {
+      setExportingImage(false)
+    }
+  }
+
   // Formatador da data da avaliação selecionada
   const selectedDateFormatted = currentAssessment?.date
     ? new Date(currentAssessment.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
@@ -479,6 +609,60 @@ export function PhysicalAssessmentTab({
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          {currentAssessment && (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadImage}
+                disabled={exportingImage}
+                className="border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs h-9 px-3 flex items-center gap-1.5"
+                title="Baixar imagem (PNG) com parâmetros, referências e resultados para enviar ao aluno"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Baixar Imagem</span>
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleShareImage}
+                disabled={exportingImage}
+                className="border-[#25D366]/40 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] text-xs h-9 px-3 flex items-center gap-1.5"
+                title="Compartilhar resultado da avaliação com o aluno via WhatsApp ou outro app"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Compartilhar</span>
+              </Button>
+
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleSaveAssessmentExplicitly}
+                disabled={savingAssessment}
+                className={`font-bold text-xs h-9 px-3.5 flex items-center gap-1.5 shadow transition-all ${
+                  saveSuccess
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    : 'bg-primary hover:opacity-90 text-primary-foreground'
+                }`}
+                title="Salvar todas as alterações da avaliação e confirmar gravação"
+              >
+                {saveSuccess ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" /> Avaliação Salva!
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-3.5 h-3.5" />
+                    <span>{savingAssessment ? 'Salvando...' : 'Salvar Avaliação'}</span>
+                  </>
+                )}
+              </Button>
+            </>
+          )}
+
           <Button
             type="button"
             variant="outline"
@@ -502,6 +686,24 @@ export function PhysicalAssessmentTab({
           </Button>
         </div>
       </div>
+
+      {/* Alerta quando faltar Idade no cadastro do Aluno */}
+      {(!studentAge || studentAge <= 0) && (
+        <div className="bg-amber-500/10 border border-amber-500/40 rounded-xl p-3.5 flex items-start gap-3 text-xs text-amber-200">
+          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <span className="font-bold text-amber-300 block">
+              Atenção: Idade do aluno não identificada no cadastro
+            </span>
+            <p className="text-[#C5CEE0]">
+              As tabelas de referência Omron para <strong>% de Gordura Corporal</strong> e{' '}
+              <strong>% de Músculos Esqueléticos</strong> utilizam a idade e o sexo para definir as
+              faixas corretas. Complete o campo de <strong>Data de Nascimento</strong> nos dados do
+              aluno para que a classificação seja exata por faixa etária (20–39, 40–59 ou 60+ anos).
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Bloco Cinza do Topo (Idade e Altura - Fixos) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-[#121522] border border-[#252B3E] p-4 rounded-xl">
@@ -874,8 +1076,8 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.gordura ?? null
                   const currSex = currentAssessment.sex || 'F'
                   const prevSex = previousAssessment?.sex || 'F'
-                  const currClassif = classifyBodyFat(curr, currSex)
-                  const prevClassif = classifyBodyFat(prev, prevSex)
+                  const currClassif = classifyBodyFat(curr, currSex, studentAge)
+                  const prevClassif = classifyBodyFat(prev, prevSex, studentAge)
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
                       <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
@@ -1346,6 +1548,52 @@ export function PhysicalAssessmentTab({
                           }
                           className="bg-[#181C2E] border-[#252B3E] text-white text-xs h-8 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px]"
                         />
+                      </td>
+                    </tr>
+                  )
+                })()}
+
+                {/* 2.7.1 RELAÇÃO CINTURA-QUADRIL (RCQ) - Calculada automaticamente */}
+                {(() => {
+                  const currCintura = currentAssessment.data?.cintura ?? null
+                  const currQuadril = currentAssessment.data?.quadril ?? null
+                  const prevCintura = previousAssessment?.data?.cintura ?? null
+                  const prevQuadril = previousAssessment?.data?.quadril ?? null
+
+                  const currRcq = calculateWaistHipRatio(currCintura, currQuadril)
+                  const prevRcq = calculateWaistHipRatio(prevCintura, prevQuadril)
+
+                  const currSex = currentAssessment.sex || 'F'
+                  const prevSex = previousAssessment?.sex || 'F'
+
+                  const currClassif = classifyWaistHipRatio(currRcq, currSex)
+                  const prevClassif = classifyWaistHipRatio(prevRcq, prevSex)
+
+                  return (
+                    <tr className="hover:bg-[#1A2035] transition-colors bg-primary/5">
+                      <td className="p-2.5 font-bold text-primary sticky left-0 bg-[#151928] z-10 border-r border-[#252B3E]">
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-1">
+                            RELAÇÃO CINTURA-QUADRIL (RCQ)
+                          </span>
+                          <span className="text-[10px] text-[#9CA5B8] font-normal">
+                            ({currSex === 'M' ? '< 0,90' : '< 0,85'})
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Coluna Anterior */}
+                      {previousAssessment &&
+                        renderPreviousCell(currRcq, prevRcq, 'lower', '', prevClassif)}
+
+                      {/* Coluna Atual (Calculado automaticamente a partir de Cintura e Quadril) */}
+                      <td colSpan={2} className="p-1.5 border-r border-[#252B3E] text-center">
+                        <div className="flex flex-col items-center justify-center gap-1">
+                          <div className="text-xs font-mono font-bold text-white bg-[#181C2E] border border-[#252B3E] rounded h-8 px-3 flex items-center justify-center min-w-[100px]">
+                            {currRcq !== null ? currRcq.toFixed(2).replace('.', ',') : '—'}
+                          </div>
+                          {renderBadge(currClassif)}
+                        </div>
                       </td>
                     </tr>
                   )

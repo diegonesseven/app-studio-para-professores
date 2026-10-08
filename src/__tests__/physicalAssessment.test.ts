@@ -6,6 +6,8 @@ import {
   classifyBodyFat,
   classifySkeletalMuscle,
   classifyVisceralFat,
+  calculateWaistHipRatio,
+  classifyWaistHipRatio,
 } from '../lib/omronClassification'
 import { calculateEvolution, formatMetricValue } from '../lib/assessmentComparison'
 
@@ -35,9 +37,9 @@ describe('Omron Bioimpedância e Avaliação Física', () => {
   })
 
   describe('1. Classificação IMC Omron', () => {
-    it('classifica IMC < 18,5 como Baixo peso (amarelo)', () => {
+    it('classifica IMC < 18,5 como Abaixo do peso (amarelo)', () => {
       const res = classifyImc(18.0)
-      expect(res?.label).toBe('Baixo peso')
+      expect(res?.label).toBe('Abaixo do peso')
       expect(res?.statusColor).toBe('yellow')
     })
 
@@ -68,84 +70,113 @@ describe('Omron Bioimpedância e Avaliação Física', () => {
     })
   })
 
-  describe('2. Classificação % Gordura Corporal (Homens e Mulheres)', () => {
-    it('Homem: 20% gordura = Alto (amarelo) conforme pedido do usuário', () => {
-      const res = classifyBodyFat(20.0, 'M')
+  describe('2. Classificação % Gordura Corporal (Nova Tabela Omron por Sexo e Faixa Etária)', () => {
+    it('Mulher 35 anos: 33% gordura = Alto conforme pedido do usuário', () => {
+      const res = classifyBodyFat(33.0, 'F', 35)
       expect(res?.label).toBe('Alto')
       expect(res?.statusColor).toBe('yellow')
     })
 
-    it('Homem: faixas normais (10,0 a 19,9%) e muito alto (>=25%)', () => {
-      expect(classifyBodyFat(8.5, 'M')?.label).toBe('Baixo')
-      expect(classifyBodyFat(8.5, 'M')?.statusColor).toBe('yellow')
-
-      expect(classifyBodyFat(15.0, 'M')?.label).toBe('Normal')
-      expect(classifyBodyFat(15.0, 'M')?.statusColor).toBe('green')
-
-      expect(classifyBodyFat(26.0, 'M')?.label).toBe('Muito alto')
-      expect(classifyBodyFat(26.0, 'M')?.statusColor).toBe('red')
+    it('Mulher 20-39 anos: faixas <21 baixo, 21-32.9 normal, 33-38.9 alto, >39 muito alto', () => {
+      expect(classifyBodyFat(19.5, 'F', 30)?.label).toBe('Baixo')
+      expect(classifyBodyFat(25.0, 'F', 30)?.label).toBe('Normal')
+      expect(classifyBodyFat(25.0, 'F', 30)?.statusColor).toBe('green')
+      expect(classifyBodyFat(35.0, 'F', 30)?.label).toBe('Alto')
+      expect(classifyBodyFat(40.0, 'F', 30)?.label).toBe('Muito alto')
+      expect(classifyBodyFat(40.0, 'F', 30)?.statusColor).toBe('red')
     })
 
-    it('Mulher: faixas baixo (<20%), normal (20-29.9%), alto (30-34.9%), muito alto (>=35%)', () => {
-      expect(classifyBodyFat(18.0, 'F')?.label).toBe('Baixo')
-      expect(classifyBodyFat(25.0, 'F')?.label).toBe('Normal')
-      expect(classifyBodyFat(25.0, 'F')?.statusColor).toBe('green')
+    it('Homem 20-39 anos: faixas <8 baixo, 8-19.9 normal, 20-24.9 alto, >25 muito alto', () => {
+      expect(classifyBodyFat(7.0, 'M', 25)?.label).toBe('Baixo')
+      expect(classifyBodyFat(15.0, 'M', 25)?.label).toBe('Normal')
+      expect(classifyBodyFat(15.0, 'M', 25)?.statusColor).toBe('green')
+      expect(classifyBodyFat(22.0, 'M', 25)?.label).toBe('Alto')
+      expect(classifyBodyFat(26.0, 'M', 25)?.label).toBe('Muito alto')
+      expect(classifyBodyFat(26.0, 'M', 25)?.statusColor).toBe('red')
+    })
 
-      expect(classifyBodyFat(32.0, 'F')?.label).toBe('Alto')
-      expect(classifyBodyFat(32.0, 'F')?.statusColor).toBe('yellow')
-
-      expect(classifyBodyFat(36.0, 'F')?.label).toBe('Muito alto')
-      expect(classifyBodyFat(36.0, 'F')?.statusColor).toBe('red')
+    it('Homem 40-59 anos: faixas <11 baixo, 11-21.9 normal, 22-27.9 alto, >28 muito alto', () => {
+      expect(classifyBodyFat(10.0, 'M', 50)?.label).toBe('Baixo')
+      expect(classifyBodyFat(18.0, 'M', 50)?.label).toBe('Normal')
+      expect(classifyBodyFat(24.0, 'M', 50)?.label).toBe('Alto')
+      expect(classifyBodyFat(29.0, 'M', 50)?.label).toBe('Muito alto')
     })
   })
 
-  describe('3. Classificação % Músculo Esquelético (sexo e idade)', () => {
-    it('Mulher 18-39: 25% músculo = Normal (verde) conforme pedido do usuário', () => {
-      // 18-39: Baixo <24,3%, Normal 24,3-30,3%, Alto >=30,4%
-      const res = classifySkeletalMuscle(25.0, 'F', 28)
-      expect(res?.label).toBe('Normal')
+  describe('3. Classificação % Músculo Esquelético (Nova Tabela Omron por Sexo e Idade)', () => {
+    it('Homem 45 anos: 40% músculo = Alto (Excelente) conforme pedido do usuário', () => {
+      // 40-59: Baixo <33,1 | Normal 33,1–39,1 | Alto 39,2–43,8 | Muito Alto >43,9
+      const res = classifySkeletalMuscle(40.0, 'M', 45)
+      expect(res?.label).toContain('Alto')
+      expect(res?.statusColor).toBe('green') // Alto é desejável/verde
+    })
+
+    it('Homem 45 anos: >43,9% músculo = Muito Alto (Excelente) verde', () => {
+      const res = classifySkeletalMuscle(44.5, 'M', 45)
+      expect(res?.label).toContain('Muito Alto')
       expect(res?.statusColor).toBe('green')
     })
 
-    it('Mulher 18-39: <24,3% = Baixo (amarelo) e >=30,4% = Alto (verde/excelente)', () => {
-      const low = classifySkeletalMuscle(22.0, 'F', 25)
+    it('Mulher 18-39: Baixo <24,3% (vermelho), Normal 24,3-30,3%, Alto 30,4-35,3%, Muito Alto >35,4%', () => {
+      const low = classifySkeletalMuscle(22.0, 'F', 28)
       expect(low?.label).toBe('Baixo')
-      expect(low?.statusColor).toBe('yellow')
+      expect(low?.statusColor).toBe('red')
 
-      const high = classifySkeletalMuscle(32.0, 'F', 25)
-      expect(high?.label).toContain('Alto')
-      expect(high?.statusColor).toBe('green')
-    })
-
-    it('Homens 40-59: Baixo <33,1%, Normal 33,1-39,1%, Alto >=39,2%', () => {
-      const normal = classifySkeletalMuscle(35.0, 'M', 45)
+      const normal = classifySkeletalMuscle(27.0, 'F', 28)
       expect(normal?.label).toBe('Normal')
       expect(normal?.statusColor).toBe('green')
 
-      const low = classifySkeletalMuscle(31.0, 'M', 50)
-      expect(low?.label).toBe('Baixo')
-      expect(low?.statusColor).toBe('yellow')
+      const high = classifySkeletalMuscle(32.0, 'F', 28)
+      expect(high?.label).toContain('Alto')
+      expect(high?.statusColor).toBe('green')
+
+      const veryHigh = classifySkeletalMuscle(36.0, 'F', 28)
+      expect(veryHigh?.label).toContain('Muito Alto')
+      expect(veryHigh?.statusColor).toBe('green')
     })
   })
 
   describe('4. Classificação Gordura Visceral', () => {
     it('Gordura visceral 12 = Alto (amarelo) conforme pedido do usuário', () => {
-      // 1-9 Normal, 10-14 Alto, 15-30 Muito alto
+      // <9 Normal, 10 a 14 Alto, >15 Muito alto
       const res = classifyVisceralFat(12)
       expect(res?.label).toBe('Alto')
       expect(res?.statusColor).toBe('yellow')
     })
 
-    it('Gordura visceral 1-9 = Normal (verde)', () => {
+    it('Gordura visceral < 9 (1 a 9) = Normal (verde)', () => {
       const res = classifyVisceralFat(5)
       expect(res?.label).toBe('Normal')
       expect(res?.statusColor).toBe('green')
     })
 
     it('Gordura visceral >= 15 = Muito alto (vermelho)', () => {
-      const res = classifyVisceralFat(18)
+      const res = classifyVisceralFat(16)
       expect(res?.label).toBe('Muito alto')
       expect(res?.statusColor).toBe('red')
+    })
+  })
+
+  describe('5. Relação Cintura-Quadril (RCQ)', () => {
+    it('calcula RCQ e classifica limites saudáveis (Fem <0,85 | Masc <0,90)', () => {
+      // Mulher cintura 70 quadril 100 => 0.70 (Saudável)
+      const rcqF = calculateWaistHipRatio(70, 100)
+      expect(rcqF).toBe(0.7)
+      expect(classifyWaistHipRatio(rcqF, 'F')?.label).toBe('Saudável')
+      expect(classifyWaistHipRatio(rcqF, 'F')?.statusColor).toBe('green')
+
+      // Mulher cintura 90 quadril 100 => 0.90 (Risco Elevado)
+      const rcqFHigh = calculateWaistHipRatio(90, 100)
+      expect(rcqFHigh).toBe(0.9)
+      expect(classifyWaistHipRatio(rcqFHigh, 'F')?.label).toBe('Risco Elevado')
+
+      // Homem cintura 85 quadril 100 => 0.85 (Saudável)
+      const rcqM = calculateWaistHipRatio(85, 100)
+      expect(classifyWaistHipRatio(rcqM, 'M')?.label).toBe('Saudável')
+
+      // Homem cintura 95 quadril 100 => 0.95 (Risco Elevado)
+      const rcqMHigh = calculateWaistHipRatio(95, 100)
+      expect(classifyWaistHipRatio(rcqMHigh, 'M')?.label).toBe('Risco Elevado')
     })
   })
 

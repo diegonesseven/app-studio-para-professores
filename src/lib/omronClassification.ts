@@ -1,21 +1,23 @@
 /**
  * Regras e Tabelas de Referência Omron Bioimpedância
- * Imagem 2 do pedido do usuário:
+ * Tabela de referência oficial Omron (Diretrizes de IMC OMS/NIH):
  * 1. IMC (kg/m²)
- * 2. % Gordura Corporal (Homens e Mulheres)
+ * 2. % Gordura Corporal (por sexo e faixas etárias: 20-39, 40-59, 60-79)
  * 3. % Músculo Esquelético (por sexo e faixas etárias: 18-39, 40-59, 60-80)
  * 4. Gordura Visceral (índice 1-30)
+ * 5. Relação Cintura-Quadril (níveis saudáveis: Fem <0,85 | Masc <0,90)
  */
 
 export type ClassificationLevel = 'baixo' | 'normal' | 'alto' | 'muito_alto'
 
 export interface ClassificationResult {
-  label: string // Ex: "Normal", "Baixo peso", "Sobrepeso", "Alto"
+  label: string // Ex: "Normal", "Baixo", "Alto", "Muito Alto"
   level: ClassificationLevel
   statusColor: 'green' | 'yellow' | 'red'
   badgeBg: string
   badgeText: string
   badgeBorder: string
+  rangeLabel?: string // Ex: "21,0 – 32,9%"
 }
 
 export function calculateAge(birthdateStr?: string, referenceDateStr?: string): number | null {
@@ -53,17 +55,23 @@ export function calculateImc(weightKg?: number | null, heightCm?: number | null)
 export function classifyImc(imc?: number | null): ClassificationResult | null {
   if (imc === null || imc === undefined || isNaN(imc) || imc <= 0) return null
 
+  // Tabela Omron IMC:
+  // Abaixo do peso: <18,5
+  // Normal: 18,5 – 24,9 (ou <25)
+  // Sobrepeso: 25 – 29,9 (ou 25 - 30)
+  // Obesidade: >= 30,0
   if (imc < 18.5) {
     return {
-      label: 'Baixo peso',
+      label: 'Abaixo do peso',
       level: 'baixo',
       statusColor: 'yellow',
       badgeBg: 'bg-amber-500/15',
       badgeText: 'text-amber-400',
       badgeBorder: 'border-amber-500/30',
+      rangeLabel: '< 18,5',
     }
   }
-  if (imc <= 24.9) {
+  if (imc < 25.0) {
     return {
       label: 'Normal',
       level: 'normal',
@@ -71,9 +79,10 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       badgeBg: 'bg-emerald-500/15',
       badgeText: 'text-emerald-400',
       badgeBorder: 'border-emerald-500/30',
+      rangeLabel: '18,5 – 24,9',
     }
   }
-  if (imc <= 29.9) {
+  if (imc < 30.0) {
     return {
       label: 'Sobrepeso',
       level: 'alto',
@@ -81,9 +90,10 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       badgeBg: 'bg-amber-500/15',
       badgeText: 'text-amber-400',
       badgeBorder: 'border-amber-500/30',
+      rangeLabel: '25,0 – 29,9',
     }
   }
-  if (imc <= 34.9) {
+  if (imc < 35.0) {
     return {
       label: 'Obesidade grau I',
       level: 'muito_alto',
@@ -91,9 +101,10 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       badgeBg: 'bg-rose-500/15',
       badgeText: 'text-rose-400',
       badgeBorder: 'border-rose-500/30',
+      rangeLabel: '30,0 – 34,9',
     }
   }
-  if (imc <= 39.9) {
+  if (imc < 40.0) {
     return {
       label: 'Obesidade grau II',
       level: 'muito_alto',
@@ -101,6 +112,7 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       badgeBg: 'bg-rose-500/15',
       badgeText: 'text-rose-400',
       badgeBorder: 'border-rose-500/30',
+      rangeLabel: '35,0 – 39,9',
     }
   }
   return {
@@ -110,71 +122,63 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
     badgeBg: 'bg-rose-500/15',
     badgeText: 'text-rose-400',
     badgeBorder: 'border-rose-500/30',
+    rangeLabel: '≥ 40,0',
   }
 }
 
 /**
- * 2. % Gordura Corporal
- * Homens:
- *   Baixo: 5,0 - 9,9% (amarelo)
- *   Normal: 10,0 - 19,9% (verde)
- *   Alto: 20,0 - 24,9% (amarelo)
- *   Muito alto: >= 25,0% (vermelho)
- * Mulheres:
- *   Baixo: 5,0 - 19,9% (amarelo)
- *   Normal: 20,0 - 29,9% (verde)
- *   Alto: 30,0 - 34,9% (amarelo)
- *   Muito alto: >= 35,0% (vermelho)
+ * 2. % Gordura Corporal (por sexo e faixa etária)
+ * NOVA TABELA OMRON:
+ * FEMININO:
+ *   20-39: BAIXO <21,0 | NORMAL 21,0–32,9 | ALTO 33,0–38,9 (38,09) | MUITO ALTO >=39,0
+ *   40-59: BAIXO <23,0 | NORMAL 23,0–33,9 | ALTO 34,0–39,9 | MUITO ALTO >=40,0
+ *   60-79: BAIXO <24,0 | NORMAL 24,0–35,9 | ALTO 36,0–41,9 | MUITO ALTO >=42,0
+ * MASCULINO:
+ *   20-39: BAIXO <8,0  | NORMAL 8,0–19,9  | ALTO 20,0–24,9 | MUITO ALTO >=25,0
+ *   40-59: BAIXO <11,0 | NORMAL 11,0–21,9 | ALTO 22,0–27,9 | MUITO ALTO >=28,0
+ *   60-79: BAIXO <13,0 | NORMAL 13,0–24,9 | ALTO 25,0–29,9 | MUITO ALTO >=30,0
  */
-export function classifyBodyFat(
-  fat?: number | null,
-  sex: 'M' | 'F' = 'F',
-): ClassificationResult | null {
-  if (fat === null || fat === undefined || isNaN(fat) || fat <= 0) return null
+export interface BodyFatThresholds {
+  ageRange: string
+  normalMin: number
+  altoMin: number
+  muitoAltoMin: number
+}
+
+export function getBodyFatThresholds(sex: 'M' | 'F' = 'F', age?: number | null): BodyFatThresholds {
+  const currentAge = age && age > 0 ? age : 30
 
   if (sex === 'M') {
-    if (fat < 10.0) {
-      return {
-        label: 'Baixo',
-        level: 'baixo',
-        statusColor: 'yellow',
-        badgeBg: 'bg-amber-500/15',
-        badgeText: 'text-amber-400',
-        badgeBorder: 'border-amber-500/30',
-      }
+    if (currentAge >= 60) {
+      return { ageRange: '60–79', normalMin: 13.0, altoMin: 25.0, muitoAltoMin: 30.0 }
     }
-    if (fat <= 19.9) {
-      return {
-        label: 'Normal',
-        level: 'normal',
-        statusColor: 'green',
-        badgeBg: 'bg-emerald-500/15',
-        badgeText: 'text-emerald-400',
-        badgeBorder: 'border-emerald-500/30',
-      }
+    if (currentAge >= 40) {
+      return { ageRange: '40–59', normalMin: 11.0, altoMin: 22.0, muitoAltoMin: 28.0 }
     }
-    if (fat <= 24.9) {
-      return {
-        label: 'Alto',
-        level: 'alto',
-        statusColor: 'yellow',
-        badgeBg: 'bg-amber-500/15',
-        badgeText: 'text-amber-400',
-        badgeBorder: 'border-amber-500/30',
-      }
-    }
-    return {
-      label: 'Muito alto',
-      level: 'muito_alto',
-      statusColor: 'red',
-      badgeBg: 'bg-rose-500/15',
-      badgeText: 'text-rose-400',
-      badgeBorder: 'border-rose-500/30',
-    }
+    return { ageRange: '20–39', normalMin: 8.0, altoMin: 20.0, muitoAltoMin: 25.0 }
   }
 
   // Mulheres
-  if (fat < 20.0) {
+  if (currentAge >= 60) {
+    return { ageRange: '60–79', normalMin: 24.0, altoMin: 36.0, muitoAltoMin: 42.0 }
+  }
+  if (currentAge >= 40) {
+    return { ageRange: '40–59', normalMin: 23.0, altoMin: 34.0, muitoAltoMin: 40.0 }
+  }
+  return { ageRange: '20–39', normalMin: 21.0, altoMin: 33.0, muitoAltoMin: 39.0 }
+}
+
+export function classifyBodyFat(
+  fat?: number | null,
+  sex: 'M' | 'F' = 'F',
+  age?: number | null,
+): ClassificationResult | null {
+  if (fat === null || fat === undefined || isNaN(fat) || fat <= 0) return null
+
+  const th = getBodyFatThresholds(sex, age)
+  const normalRangeText = `${th.normalMin.toString().replace('.', ',')} – ${(th.altoMin - 0.1).toFixed(1).replace('.', ',')}%`
+
+  if (fat < th.normalMin) {
     return {
       label: 'Baixo',
       level: 'baixo',
@@ -182,9 +186,11 @@ export function classifyBodyFat(
       badgeBg: 'bg-amber-500/15',
       badgeText: 'text-amber-400',
       badgeBorder: 'border-amber-500/30',
+      rangeLabel: `< ${th.normalMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
-  if (fat <= 29.9) {
+
+  if (fat < th.altoMin) {
     return {
       label: 'Normal',
       level: 'normal',
@@ -192,9 +198,11 @@ export function classifyBodyFat(
       badgeBg: 'bg-emerald-500/15',
       badgeText: 'text-emerald-400',
       badgeBorder: 'border-emerald-500/30',
+      rangeLabel: `${normalRangeText} (Ref: ${th.ageRange} anos)`,
     }
   }
-  if (fat <= 34.9) {
+
+  if (fat < th.muitoAltoMin) {
     return {
       label: 'Alto',
       level: 'alto',
@@ -202,8 +210,10 @@ export function classifyBodyFat(
       badgeBg: 'bg-amber-500/15',
       badgeText: 'text-amber-400',
       badgeBorder: 'border-amber-500/30',
+      rangeLabel: `${th.altoMin.toString().replace('.', ',')} – ${(th.muitoAltoMin - 0.1).toFixed(1).replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
+
   return {
     label: 'Muito alto',
     level: 'muito_alto',
@@ -211,20 +221,53 @@ export function classifyBodyFat(
     badgeBg: 'bg-rose-500/15',
     badgeText: 'text-rose-400',
     badgeBorder: 'border-rose-500/30',
+    rangeLabel: `≥ ${th.muitoAltoMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
   }
 }
 
 /**
- * 3. % Músculo Esquelético (quanto maior melhor: Alto é VERDE)
- * Homens:
- *   18 - 39: Baixo <33,3% | Normal 33,3 - 39,3% | Alto >=39,4%
- *   40 - 59: Baixo <33,1% | Normal 33,1 - 39,1% | Alto >=39,2%
- *   60 - 80: Baixo <32,9% | Normal 32,9 - 38,9% | Alto >=39,0%
- * Mulheres:
- *   18 - 39: Baixo <24,3% | Normal 24,3 - 30,3% | Alto >=30,4%
- *   40 - 59: Baixo <24,1% | Normal 24,1 - 30,1% | Alto >=30,2%
- *   60 - 80: Baixo <23,9% | Normal 23,9 - 29,9% | Alto >=30,0%
+ * 3. % Músculo Esquelético (por sexo e faixa etária)
+ * NOVA TABELA OMRON:
+ * (Para % Músculos, quanto MAIOR melhor: MUITO ALTO é o melhor resultado / verde excelente, ALTO é verde excelente, NORMAL é verde, BAIXO é vermelho/atenção)
+ * FEMININO:
+ *   18-39: BAIXO <24,3 | NORMAL 24,3–30,3 | ALTO 30,4–35,3 | MUITO ALTO >35,4 (>=35,4)
+ *   40-59: BAIXO <24,1 | NORMAL 24,1–30,1 | ALTO 30,2–35,1 | MUITO ALTO >35,2 (>=35,2)
+ *   60-80: BAIXO <23,9 | NORMAL 23,9–29,9 | ALTO 30,0–34,9 | MUITO ALTO >35,0 (>=35,0)
+ * MASCULINO:
+ *   18-39: BAIXO <33,0 (ou <33,3) | NORMAL 33,3–39,3 | ALTO 39,4–44,0 | MUITO ALTO >44,1 (>=44,1)
+ *   40-59: BAIXO <33,1            | NORMAL 33,1–39,1 | ALTO 39,2–43,8 | MUITO ALTO >43,9 (>=43,9)
+ *   60-80: BAIXO <32,9            | NORMAL 32,9–38,9 | ALTO 39,0–43,6 | MUITO ALTO >43,7 (>=43,7)
  */
+export interface MuscleThresholds {
+  ageRange: string
+  normalMin: number
+  altoMin: number
+  muitoAltoMin: number
+}
+
+export function getMuscleThresholds(sex: 'M' | 'F' = 'F', age?: number | null): MuscleThresholds {
+  const currentAge = age && age > 0 ? age : 30
+
+  if (sex === 'M') {
+    if (currentAge >= 60) {
+      return { ageRange: '60–80', normalMin: 32.9, altoMin: 39.0, muitoAltoMin: 43.7 }
+    }
+    if (currentAge >= 40) {
+      return { ageRange: '40–59', normalMin: 33.1, altoMin: 39.2, muitoAltoMin: 43.9 }
+    }
+    return { ageRange: '18–39', normalMin: 33.3, altoMin: 39.4, muitoAltoMin: 44.1 }
+  }
+
+  // Mulheres
+  if (currentAge >= 60) {
+    return { ageRange: '60–80', normalMin: 23.9, altoMin: 30.0, muitoAltoMin: 35.0 }
+  }
+  if (currentAge >= 40) {
+    return { ageRange: '40–59', normalMin: 24.1, altoMin: 30.2, muitoAltoMin: 35.2 }
+  }
+  return { ageRange: '18–39', normalMin: 24.3, altoMin: 30.4, muitoAltoMin: 35.4 }
+}
+
 export function classifySkeletalMuscle(
   muscle?: number | null,
   sex: 'M' | 'F' = 'F',
@@ -232,41 +275,21 @@ export function classifySkeletalMuscle(
 ): ClassificationResult | null {
   if (muscle === null || muscle === undefined || isNaN(muscle) || muscle <= 0) return null
 
-  // Faixa etária padrão se não informada: 18-39
-  const currentAge = age && age > 0 ? age : 30
+  const th = getMuscleThresholds(sex, age)
 
-  let thresholds = { low: 24.3, high: 30.4 }
-
-  if (sex === 'M') {
-    if (currentAge >= 60) {
-      thresholds = { low: 32.9, high: 39.0 }
-    } else if (currentAge >= 40) {
-      thresholds = { low: 33.1, high: 39.2 }
-    } else {
-      thresholds = { low: 33.3, high: 39.4 }
-    }
-  } else {
-    // Mulheres
-    if (currentAge >= 60) {
-      thresholds = { low: 23.9, high: 30.0 }
-    } else if (currentAge >= 40) {
-      thresholds = { low: 24.1, high: 30.2 }
-    } else {
-      thresholds = { low: 24.3, high: 30.4 }
-    }
-  }
-
-  if (muscle < thresholds.low) {
+  if (muscle < th.normalMin) {
     return {
       label: 'Baixo',
       level: 'baixo',
-      statusColor: 'yellow',
-      badgeBg: 'bg-amber-500/15',
-      badgeText: 'text-amber-400',
-      badgeBorder: 'border-amber-500/30',
+      statusColor: 'red', // Quanto maior melhor, portanto baixo é vermelho
+      badgeBg: 'bg-rose-500/15',
+      badgeText: 'text-rose-400',
+      badgeBorder: 'border-rose-500/30',
+      rangeLabel: `< ${th.normalMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
-  if (muscle < thresholds.high) {
+
+  if (muscle < th.altoMin) {
     return {
       label: 'Normal',
       level: 'normal',
@@ -274,15 +297,30 @@ export function classifySkeletalMuscle(
       badgeBg: 'bg-emerald-500/15',
       badgeText: 'text-emerald-400',
       badgeBorder: 'border-emerald-500/30',
+      rangeLabel: `${th.normalMin.toString().replace('.', ',')} – ${(th.altoMin - 0.1).toFixed(1).replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
+
+  if (muscle < th.muitoAltoMin) {
+    return {
+      label: 'Alto (Excelente)',
+      level: 'alto',
+      statusColor: 'green', // Desejável
+      badgeBg: 'bg-emerald-500/20',
+      badgeText: 'text-emerald-300 font-bold',
+      badgeBorder: 'border-emerald-500/40',
+      rangeLabel: `${th.altoMin.toString().replace('.', ',')} – ${(th.muitoAltoMin - 0.1).toFixed(1).replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
+    }
+  }
+
   return {
-    label: 'Alto (Excelente)',
-    level: 'alto',
-    statusColor: 'green', // Para músculos esqueléticos, ter alto é desejável e positivo!
-    badgeBg: 'bg-emerald-500/20',
-    badgeText: 'text-emerald-300 font-bold',
-    badgeBorder: 'border-emerald-500/40',
+    label: 'Muito Alto (Excelente)',
+    level: 'muito_alto',
+    statusColor: 'green', // Melhor resultado!
+    badgeBg: 'bg-emerald-500/25',
+    badgeText: 'text-emerald-200 font-black',
+    badgeBorder: 'border-emerald-400/50',
+    rangeLabel: `≥ ${th.muitoAltoMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
   }
 }
 
@@ -295,7 +333,11 @@ export function classifySkeletalMuscle(
 export function classifyVisceralFat(visceral?: number | null): ClassificationResult | null {
   if (visceral === null || visceral === undefined || isNaN(visceral) || visceral <= 0) return null
 
-  if (visceral <= 9) {
+  // Tabela Omron:
+  // NORMAL: <9 (1 a 9)
+  // ALTO: 10 a 14
+  // MUITO ALTO: >15 (ou >=15)
+  if (visceral < 10) {
     return {
       label: 'Normal',
       level: 'normal',
@@ -303,6 +345,7 @@ export function classifyVisceralFat(visceral?: number | null): ClassificationRes
       badgeBg: 'bg-emerald-500/15',
       badgeText: 'text-emerald-400',
       badgeBorder: 'border-emerald-500/30',
+      rangeLabel: '< 9 (1–9)',
     }
   }
   if (visceral <= 14) {
@@ -313,6 +356,7 @@ export function classifyVisceralFat(visceral?: number | null): ClassificationRes
       badgeBg: 'bg-amber-500/15',
       badgeText: 'text-amber-400',
       badgeBorder: 'border-amber-500/30',
+      rangeLabel: '10 a 14',
     }
   }
   return {
@@ -322,5 +366,53 @@ export function classifyVisceralFat(visceral?: number | null): ClassificationRes
     badgeBg: 'bg-rose-500/15',
     badgeText: 'text-rose-400',
     badgeBorder: 'border-rose-500/30',
+    rangeLabel: '> 15',
+  }
+}
+
+/**
+ * 5. Relação Cintura-Quadril (RCQ)
+ * Níveis saudáveis:
+ * FEMININO: < 0,85 (Saudável) | >= 0,85 (Risco aumentado)
+ * MASCULINO: < 0,90 (Saudável) | >= 0,90 (Risco aumentado)
+ */
+export function calculateWaistHipRatio(
+  waistCm?: number | null,
+  hipCm?: number | null,
+): number | null {
+  if (!waistCm || !hipCm || waistCm <= 0 || hipCm <= 0) return null
+  const ratio = waistCm / hipCm
+  return Math.round(ratio * 100) / 100
+}
+
+export function classifyWaistHipRatio(
+  ratio?: number | null,
+  sex: 'M' | 'F' = 'F',
+): ClassificationResult | null {
+  if (ratio === null || ratio === undefined || isNaN(ratio) || ratio <= 0) return null
+
+  const threshold = sex === 'M' ? 0.9 : 0.85
+  const thresholdStr = sex === 'M' ? '< 0,90' : '< 0,85'
+
+  if (ratio < threshold) {
+    return {
+      label: 'Saudável',
+      level: 'normal',
+      statusColor: 'green',
+      badgeBg: 'bg-emerald-500/15',
+      badgeText: 'text-emerald-400',
+      badgeBorder: 'border-emerald-500/30',
+      rangeLabel: `${thresholdStr} (Nível saudável)`,
+    }
+  }
+
+  return {
+    label: 'Risco Elevado',
+    level: 'alto',
+    statusColor: 'yellow',
+    badgeBg: 'bg-amber-500/15',
+    badgeText: 'text-amber-400',
+    badgeBorder: 'border-amber-500/30',
+    rangeLabel: `≥ ${threshold.toFixed(2).replace('.', ',')}`,
   }
 }
