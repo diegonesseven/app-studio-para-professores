@@ -22,10 +22,29 @@ export interface ClassificationResult {
 
 export function calculateAge(birthdateStr?: string, referenceDateStr?: string): number | null {
   if (!birthdateStr) return null
-  const birth = new Date(birthdateStr)
-  if (isNaN(birth.getTime())) return null
 
-  const ref = referenceDateStr ? new Date(referenceDateStr) : new Date()
+  // Suporte a formato PocketBase com espaço ou ISO com T ou apenas YYYY-MM-DD
+  const birthClean =
+    typeof birthdateStr === 'string' ? birthdateStr.trim().replace(' ', 'T') : birthdateStr
+  const birth = new Date(birthClean)
+  if (isNaN(birth.getTime())) {
+    // Tenta extrair YYYY-MM-DD via regex
+    const m = String(birthdateStr).match(/^(\d{4})-(\d{2})-(\d{2})/)
+    if (!m) return null
+    const [_, y, mo, d] = m
+    const fallbackDate = new Date(Number(y), Number(mo) - 1, Number(d))
+    if (isNaN(fallbackDate.getTime())) return null
+    const ref = referenceDateStr ? new Date(referenceDateStr.trim().replace(' ', 'T')) : new Date()
+    let age = ref.getFullYear() - fallbackDate.getFullYear()
+    const monthDiff = ref.getMonth() - fallbackDate.getMonth()
+    if (monthDiff < 0 || (monthDiff === 0 && ref.getDate() < fallbackDate.getDate())) {
+      age--
+    }
+    return age >= 0 ? age : null
+  }
+
+  const refClean = referenceDateStr ? referenceDateStr.trim().replace(' ', 'T') : undefined
+  const ref = refClean ? new Date(refClean) : new Date()
   let age = ref.getFullYear() - birth.getFullYear()
   const m = ref.getMonth() - birth.getMonth()
   if (m < 0 || (m === 0 && ref.getDate() < birth.getDate())) {

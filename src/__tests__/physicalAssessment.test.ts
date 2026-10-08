@@ -10,6 +10,55 @@ import {
   classifyWaistHipRatio,
 } from '../lib/omronClassification'
 import { calculateEvolution, formatMetricValue } from '../lib/assessmentComparison'
+import { extractDateInputVal, parseAndFormatDate } from '../lib/dateUtils'
+import { drawRoundRect } from '../services/assessmentImageExport'
+
+describe('Date Helpers para Avaliação Física (Prevenção de Invalid Date)', () => {
+  it('extractDateInputVal extrai YYYY-MM-DD de vários formatos sem quebrar', () => {
+    // Formato padrão PocketBase com espaço
+    expect(extractDateInputVal('2026-10-08 00:00:00.000Z')).toBe('2026-10-08')
+    // Formato ISO 8601
+    expect(extractDateInputVal('2026-10-08T14:30:00.000Z')).toBe('2026-10-08')
+    // Apenas data
+    expect(extractDateInputVal('2026-10-08')).toBe('2026-10-08')
+    // Formato brasileiro DD/MM/AAAA
+    expect(extractDateInputVal('08/10/2026')).toBe('2026-10-08')
+    // Nulo ou vazio
+    expect(extractDateInputVal('')).toBe('')
+    expect(extractDateInputVal(null)).toBe('')
+    expect(extractDateInputVal(undefined)).toBe('')
+  })
+
+  it('parseAndFormatDate formata para DD/MM/AAAA independente de espaço ou separador', () => {
+    // Formato padrão PocketBase com espaço (onde new Date(...split('T')[0] + 'T00:00:00') gerava Invalid Date)
+    expect(parseAndFormatDate('2026-10-08 00:00:00.000Z')).toBe('08/10/2026')
+    // Formato ISO com T
+    expect(parseAndFormatDate('2026-10-08T00:00:00.000Z')).toBe('08/10/2026')
+    // Apenas data YYYY-MM-DD
+    expect(parseAndFormatDate('2026-10-08')).toBe('08/10/2026')
+    // Formato nulo / vazio
+    expect(parseAndFormatDate(null)).toBe('—')
+    expect(parseAndFormatDate(undefined)).toBe('—')
+    expect(parseAndFormatDate('', 'Sem data')).toBe('Sem data')
+  })
+
+  it('drawRoundRect executa fallback sem lançar exceção quando ctx.roundRect não existe', () => {
+    const mockCtx = {
+      moveTo: () => {},
+      lineTo: () => {},
+      arcTo: () => {},
+      closePath: () => {},
+    } as unknown as CanvasRenderingContext2D
+
+    expect(() => {
+      drawRoundRect(mockCtx, 10, 10, 100, 50, 8)
+    }).not.toThrow()
+
+    expect(() => {
+      drawRoundRect(mockCtx, 10, 10, 100, 50, [8, 8, 0, 0])
+    }).not.toThrow()
+  })
+})
 
 describe('Omron Bioimpedância e Avaliação Física', () => {
   describe('Cálculo de Idade e IMC', () => {

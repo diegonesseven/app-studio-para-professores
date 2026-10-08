@@ -34,6 +34,7 @@ import {
 } from '@/lib/assessmentComparison'
 import { OmronReferenceModal } from '@/components/OmronReferenceModal'
 import pb from '@/lib/pocketbase/client'
+import { extractDateInputVal, parseAndFormatDate } from '@/lib/dateUtils'
 import {
   Activity,
   Plus,
@@ -83,7 +84,7 @@ export function PhysicalAssessmentTab({
 
   // Diálogo para adicionar avaliação
   const [newDateDialogOpen, setNewDateDialogOpen] = useState(false)
-  const [newAssessmentDate, setNewAssessmentDate] = useState(new Date().toISOString().split('T')[0])
+  const [newAssessmentDate, setNewAssessmentDate] = useState(() => extractDateInputVal(new Date()))
   const [newAssessmentSex, setNewAssessmentSex] = useState<'M' | 'F'>('F')
   const [creating, setCreating] = useState(false)
 
@@ -257,9 +258,7 @@ export function PhysicalAssessmentTab({
       setNewDateDialogOpen(false)
       toast({
         title: 'Nova avaliação criada',
-        description: `Avaliação do dia ${new Date(
-          newAssessmentDate + 'T00:00:00',
-        ).toLocaleDateString('pt-BR')} aberta para preenchimento.`,
+        description: `Avaliação do dia ${parseAndFormatDate(newAssessmentDate)} aberta para preenchimento.`,
       })
     } catch (err: unknown) {
       toast({
@@ -353,8 +352,8 @@ export function PhysicalAssessmentTab({
   const handleUpdateDate = async (assessment: PhysicalAssessment, newDate: string) => {
     if (!newDate) return
     // Formatar como YYYY-MM-DD
-    const cleanDate = newDate.split('T')[0]
-    const currentDateClean = assessment.date ? assessment.date.split('T')[0] : ''
+    const cleanDate = extractDateInputVal(newDate)
+    const currentDateClean = extractDateInputVal(assessment.date)
     if (cleanDate === currentDateClean) return
 
     try {
@@ -476,7 +475,7 @@ export function PhysicalAssessmentTab({
     if (!currentAssessment) return
     setSavingAssessment(true)
     try {
-      const cleanDate = currentAssessment.date ? currentAssessment.date.split('T')[0] : ''
+      const cleanDate = extractDateInputVal(currentAssessment.date)
       await physicalAssessmentsService.update(currentAssessment.id, {
         data: currentAssessment.data || {},
         date: cleanDate || undefined,
@@ -506,9 +505,10 @@ export function PhysicalAssessmentTab({
     setExportingImage(true)
     try {
       const heightNum = fixedHeight ? parseFloat(fixedHeight.replace(',', '.')) : null
-      const formattedDate = currentAssessment.date
-        ? new Date(currentAssessment.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
-        : new Date().toLocaleDateString('pt-BR')
+      const formattedDate = parseAndFormatDate(
+        currentAssessment.date,
+        parseAndFormatDate(new Date()),
+      )
 
       await downloadAssessmentImage({
         studentName,
@@ -541,9 +541,10 @@ export function PhysicalAssessmentTab({
     setExportingImage(true)
     try {
       const heightNum = fixedHeight ? parseFloat(fixedHeight.replace(',', '.')) : null
-      const formattedDate = currentAssessment.date
-        ? new Date(currentAssessment.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
-        : new Date().toLocaleDateString('pt-BR')
+      const formattedDate = parseAndFormatDate(
+        currentAssessment.date,
+        parseAndFormatDate(new Date()),
+      )
 
       const result = await shareOrDownloadAssessmentImage({
         studentName,
@@ -579,13 +580,9 @@ export function PhysicalAssessmentTab({
   }
 
   // Formatador da data da avaliação selecionada
-  const selectedDateFormatted = currentAssessment?.date
-    ? new Date(currentAssessment.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
-    : ''
+  const selectedDateFormatted = parseAndFormatDate(currentAssessment?.date, '')
 
-  const previousDateFormatted = previousAssessment?.date
-    ? new Date(previousAssessment.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
-    : ''
+  const previousDateFormatted = parseAndFormatDate(previousAssessment?.date, '')
 
   return (
     <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl overflow-hidden p-6 sm:p-8 space-y-6">
@@ -677,7 +674,7 @@ export function PhysicalAssessmentTab({
             type="button"
             size="sm"
             onClick={() => {
-              setNewAssessmentDate(new Date().toISOString().split('T')[0])
+              setNewAssessmentDate(extractDateInputVal(new Date()))
               setNewDateDialogOpen(true)
             }}
             className="bg-primary hover:opacity-90 text-primary-foreground font-bold text-xs h-9 px-3 flex items-center gap-1.5 shadow"
@@ -715,7 +712,7 @@ export function PhysicalAssessmentTab({
             {studentAge !== null ? `${studentAge} anos` : 'Não informada'}
             {studentBirthdate && (
               <span className="text-[11px] text-[#8A8F98] font-normal">
-                ({new Date(studentBirthdate).toLocaleDateString('pt-BR')})
+                ({parseAndFormatDate(studentBirthdate)})
               </span>
             )}
           </div>
@@ -820,9 +817,7 @@ export function PhysicalAssessmentTab({
                 className="bg-[#181C2E] border border-[#252B3E] text-white text-xs rounded-lg px-3 py-1.5 font-semibold focus:outline-none focus:ring-1 focus:ring-primary w-full md:w-auto"
               >
                 {sortedAssessments.map((ass, idx) => {
-                  const d = ass.date
-                    ? new Date(ass.date.split('T')[0] + 'T00:00:00').toLocaleDateString('pt-BR')
-                    : 'Sem data'
+                  const d = parseAndFormatDate(ass.date, 'Sem data')
                   const isLatest = idx === sortedAssessments.length - 1
                   return (
                     <option key={ass.id} value={ass.id}>
@@ -917,7 +912,7 @@ export function PhysicalAssessmentTab({
                       <span className="text-[11px] text-primary font-bold">DATA ATUAL:</span>
                       <input
                         type="date"
-                        value={currentAssessment.date ? currentAssessment.date.split('T')[0] : ''}
+                        value={extractDateInputVal(currentAssessment.date)}
                         onChange={(e) => handleUpdateDate(currentAssessment, e.target.value)}
                         className="bg-[#121522] border border-[#252B3E] text-white text-xs px-2 py-0.5 rounded font-mono"
                         title="Clique para alterar a data desta avaliação"
@@ -1813,11 +1808,7 @@ export function PhysicalAssessmentTab({
             <DialogDescription className="text-xs text-[#9CA5B8]">
               Esta ação removerá permanentemente a avaliação do dia{' '}
               <strong className="text-white">
-                {deleteCandidate?.date
-                  ? new Date(deleteCandidate.date.split('T')[0] + 'T00:00:00').toLocaleDateString(
-                      'pt-BR',
-                    )
-                  : ''}
+                {parseAndFormatDate(deleteCandidate?.date, '')}
               </strong>{' '}
               e todas as suas medidas registradas.
             </DialogDescription>

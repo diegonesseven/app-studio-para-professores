@@ -1,3 +1,4 @@
+import { parseAndFormatDate } from '@/lib/dateUtils'
 import { STUDIO_LOGO_SRC } from '@/assets/logo'
 import {
   type ClassificationResult,
@@ -32,7 +33,70 @@ interface ExportRow {
 }
 
 /**
- * Cria um canvas e renderiza visualmente a ficha de avaliação física em alta resolução (2x).
+ * Helper seguro para desenhar retângulos com cantos arredondados,
+ * com fallback para navegadores antigos onde `ctx.roundRect` não existe.
+ */
+export function drawRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  radii: number | number[] = 0,
+): void {
+  // Se o método nativo existir, use-o com segurança
+  if (typeof (ctx as any).roundRect === 'function') {
+    try {
+      ;(ctx as any).roundRect(x, y, w, h, radii)
+      return
+    } catch {
+      // Em caso de falha de argumentos em navegadores antigos, cai no fallback manual
+    }
+  }
+
+  // Fallback manual usando arcos e linhas
+  let rTopLeft = 0
+  let rTopRight = 0
+  let rBottomRight = 0
+  let rBottomLeft = 0
+
+  if (typeof radii === 'number') {
+    rTopLeft = rTopRight = rBottomRight = rBottomLeft = Math.max(0, radii)
+  } else if (Array.isArray(radii)) {
+    if (radii.length === 1) {
+      rTopLeft = rTopRight = rBottomRight = rBottomLeft = Math.max(0, radii[0] || 0)
+    } else if (radii.length === 2) {
+      rTopLeft = rBottomRight = Math.max(0, radii[0] || 0)
+      rTopRight = rBottomLeft = Math.max(0, radii[1] || 0)
+    } else if (radii.length === 4) {
+      rTopLeft = Math.max(0, radii[0] || 0)
+      rTopRight = Math.max(0, radii[1] || 0)
+      rBottomRight = Math.max(0, radii[2] || 0)
+      rBottomLeft = Math.max(0, radii[3] || 0)
+    }
+  }
+
+  // Garante que o raio não exceda metade da largura/altura
+  const maxR = Math.min(w / 2, h / 2)
+  rTopLeft = Math.min(rTopLeft, maxR)
+  rTopRight = Math.min(rTopRight, maxR)
+  rBottomRight = Math.min(rBottomRight, maxR)
+  rBottomLeft = Math.min(rBottomLeft, maxR)
+
+  ctx.moveTo(x + rTopLeft, y)
+  ctx.lineTo(x + w - rTopRight, y)
+  if (rTopRight > 0) ctx.arcTo(x + w, y, x + w, y + rTopRight, rTopRight)
+  ctx.lineTo(x + w, y + h - rBottomRight)
+  if (rBottomRight > 0) ctx.arcTo(x + w, y + h, x + w - rBottomRight, y + h, rBottomRight)
+  ctx.lineTo(x + rBottomLeft, y + h)
+  if (rBottomLeft > 0) ctx.arcTo(x, y + h, x, y + h - rBottomLeft, rBottomLeft)
+  ctx.lineTo(x, y + rTopLeft)
+  if (rTopLeft > 0) ctx.arcTo(x, y, x + rTopLeft, y, rTopLeft)
+  ctx.closePath()
+}
+
+/**
+ * Cria um canvas e renderiza visualmente a ficha de avaliação física em alta resolução.
  * Retorna um Blob PNG.
  */
 export async function generateAssessmentImageBlob(
@@ -207,19 +271,28 @@ export async function generateAssessmentImageBlob(
   addPerimBi('Coxa', data.coxa, prevData.coxa)
   addPerimBi('Panturrilha', data.panturrilha, prevData.panturrilha)
 
-  // Carrega logo opcionalmente
+  // Carrega logo opcionalmente sem crossOrigin para evitar erros com assets empacotados localmente/tainted canvas
   let logoImg: HTMLImageElement | null = null
   try {
-    logoImg = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => resolve(img)
-      img.onerror = () => reject(new Error('Logo not loadable'))
-      img.src = STUDIO_LOGO_SRC
-    })
+    if (STUDIO_LOGO_SRC) {
+      logoImg = await new Promise<HTMLImageElement | null>((resolve) => {
+        try {
+          const img = new Image()
+          // Não define crossOrigin para assets locais/data URI para não disparar erro CORS
+          img.onload = () => resolve(img)
+          img.onerror = () => resolve(null)
+          img.src = STUDIO_LOGO_SRC
+        } catch {
+          resolve(null)
+        }
+      })
+    }
   } catch {
     logoImg = null
   }
+
+  // Garante que a data da avaliação esteja devidamente formatada e sem "Invalid Date"
+  const safeAssessmentDate = parseAndFormatDate(assessmentDate, parseAndFormatDate(new Date()))
 
   // Dimensões do Canvas
   const width = 1080
@@ -298,7 +371,7 @@ export async function generateAssessmentImageBlob(
   // 2. CARD DO ALUNO (Barra horizontal com Dados)
   ctx.fillStyle = '#181C2E'
   ctx.beginPath()
-  ctx.roundRect(padding, y, width - padding * 2, 80, 12)
+  drawRoundRect(ctx, padding, y, width - padding * 2, 80, 12)
   ctx.fill()
   ctx.strokeStyle = '#2A324B'
   ctx.stroke()
@@ -320,7 +393,7 @@ export async function generateAssessmentImageBlob(
   ctx.fillText('DATA AVALIAÇÃO', padding + colWidth + 10, y + 26)
   ctx.fillStyle = '#FFFFFF'
   ctx.font = 'bold 16px sans-serif'
-  ctx.fillText(assessmentDate, padding + colWidth + 10, y + 54)
+  ctx.fillText(safeAssessmentDate, padding + colWidth + 10, y + 54)
 
   // Idade / Sexo
   ctx.fillStyle = '#9CA5B8'
@@ -354,7 +427,7 @@ export async function generateAssessmentImageBlob(
   // Cabeçalho da tabela
   ctx.fillStyle = '#1E243A'
   ctx.beginPath()
-  ctx.roundRect(padding, y, width - padding * 2, tableHeaderHeight, [8, 8, 0, 0])
+  drawRoundRect(ctx, padding, y, width - padding * 2, tableHeaderHeight, [8, 8, 0, 0])
   ctx.fill()
   ctx.strokeStyle = '#2D3550'
   ctx.stroke()
@@ -427,7 +500,7 @@ export async function generateAssessmentImageBlob(
 
       ctx.fillStyle = bgPill
       ctx.beginPath()
-      ctx.roundRect(pillX, pillY, pillW, pillH, 6)
+      drawRoundRect(ctx, pillX, pillY, pillW, pillH, 6)
       ctx.fill()
       ctx.strokeStyle = borderPill
       ctx.lineWidth = 1
@@ -457,7 +530,7 @@ export async function generateAssessmentImageBlob(
     y,
   )
 
-  const timestamp = new Date().toLocaleDateString('pt-BR')
+  const timestamp = parseAndFormatDate(new Date())
   ctx.textAlign = 'right'
   ctx.fillText(`Exportado em ${timestamp}`, width - padding - 4, y)
   ctx.textAlign = 'left'
@@ -485,8 +558,11 @@ export async function downloadAssessmentImage(
   const url = URL.createObjectURL(blob)
   const link = document.createElement('a')
   const safeName = (params.studentName || 'avaliacao').toLowerCase().replace(/[^a-z0-9]/g, '_')
-  link.download =
-    filename || `avaliacao_${safeName}_${params.assessmentDate.replace(/\//g, '-')}.png`
+  const safeDateStr = parseAndFormatDate(
+    params.assessmentDate,
+    parseAndFormatDate(new Date()),
+  ).replace(/\//g, '-')
+  link.download = filename || `avaliacao_${safeName}_${safeDateStr}.png`
   link.href = url
   document.body.appendChild(link)
   link.click()
@@ -496,22 +572,48 @@ export async function downloadAssessmentImage(
 
 /**
  * Compartilha o resultado como imagem via Web Share API (ex.: WhatsApp) ou faz fallback para download.
+ * Lida com NotAllowedError no iOS / WebViews e qualquer outra falha não-AbortError caindo imediatamente no download direto.
  */
 export async function shareOrDownloadAssessmentImage(
   params: AssessmentImageExportParams,
 ): Promise<'shared' | 'downloaded'> {
   const blob = await generateAssessmentImageBlob(params)
   const safeName = (params.studentName || 'avaliacao').toLowerCase().replace(/[^a-z0-9]/g, '_')
-  const fileName = `avaliacao_${safeName}_${params.assessmentDate.replace(/\//g, '-')}.png`
+  const safeDateStr = parseAndFormatDate(
+    params.assessmentDate,
+    parseAndFormatDate(new Date()),
+  ).replace(/\//g, '-')
+  const fileName = `avaliacao_${safeName}_${safeDateStr}.png`
+
+  // Helper interno para executar download direto
+  const triggerDirectDownload = () => {
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.download = fileName
+    link.href = url
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    return 'downloaded' as const
+  }
 
   // Verifica se o navegador suporta Web Share API com arquivos
-  const file = new File([blob], fileName, { type: 'image/png' })
-  if (
-    typeof navigator !== 'undefined' &&
-    navigator.share &&
-    navigator.canShare &&
-    navigator.canShare({ files: [file] })
-  ) {
+  let canTryShare = false
+  let file: File | null = null
+
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      file = new File([blob], fileName, { type: 'image/png' })
+      if (typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+        canTryShare = true
+      }
+    }
+  } catch {
+    canTryShare = false
+  }
+
+  if (canTryShare && file) {
     try {
       await navigator.share({
         files: [file],
@@ -520,21 +622,16 @@ export async function shareOrDownloadAssessmentImage(
       })
       return 'shared'
     } catch (err: unknown) {
+      // Se o usuário explicitamente cancelou a janela de compartilhamento, respeitamos
       if (err instanceof Error && err.name === 'AbortError') {
-        return 'shared' // Usuário cancelou a janela de compartilhamento
+        return 'shared'
       }
-      // Se falhou o share nativo, fallback para download
+      // Qualquer outro erro (como NotAllowedError no iOS, token de gesto expirado, etc.) cai imediatamente no download
+      console.warn('Falha no compartilhamento nativo; acionando download:', err)
+      return triggerDirectDownload()
     }
   }
 
   // Fallback: download direto do arquivo PNG
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.download = fileName
-  link.href = url
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-  return 'downloaded'
+  return triggerDirectDownload()
 }
