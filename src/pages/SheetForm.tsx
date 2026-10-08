@@ -40,6 +40,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { toast } from '@/hooks/use-toast'
 
 export default function SheetForm() {
@@ -68,6 +76,11 @@ export default function SheetForm() {
     E: [],
   })
 
+  // Lista de fichas existentes para opção de importar como base
+  const [availableSheets, setAvailableSheets] = useState<TrainingSheet[]>([])
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const [selectedSheetToImport, setSelectedSheetToImport] = useState<string>('')
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -85,13 +98,17 @@ export default function SheetForm() {
     async function init() {
       try {
         setLoading(true)
-        // 1. Carregar acervo de exercícios para mapa rápido
-        const exList = await exercisesService.getAll()
+        // 1. Carregar acervo de exercícios e fichas existentes para eventual importação
+        const [exList, allSheets] = await Promise.all([
+          exercisesService.getAll(),
+          trainingSheetsService.getAll(),
+        ])
         const map: Record<string, Exercise> = {}
         exList.forEach((e) => {
           map[e.id] = e
         })
         setExercisesMap(map)
+        setAvailableSheets(allSheets)
 
         if (id) {
           // Edição de ficha existente
@@ -134,6 +151,28 @@ export default function SheetForm() {
 
     init()
   }, [id, queryStudentId, navigate])
+
+  // Aplicar ficha de outro aluno como base desta ficha
+  const handleImportSheetAsBase = (sourceSheetId: string) => {
+    const source = availableSheets.find((s) => s.id === sourceSheetId)
+    if (!source) return
+
+    const sourceStudentName = source.expand?.student?.name || 'aluno'
+    const clonedSeries: SeriesData = source.series_data
+      ? JSON.parse(JSON.stringify(source.series_data))
+      : { A: [], B: [], C: [], D: [], E: [] }
+
+    setSeriesData(clonedSeries)
+    if (source.notes && !notes) {
+      setNotes(source.notes)
+    }
+
+    toast({
+      title: 'Ficha importada como base!',
+      description: `Séries A–E copiadas de ${sourceStudentName}. Ajuste os exercícios e clique em Salvar.`,
+    })
+    setImportModalOpen(false)
+  }
 
   const currentBlocks: ExerciseBlock[] = seriesData[activeTab] || []
 
@@ -325,6 +364,25 @@ export default function SheetForm() {
         </div>
 
         <div className="flex items-center gap-2">
+          {availableSheets.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const firstOther = availableSheets.find(
+                  (s) => s.student !== student?.id && s.id !== id,
+                )
+                setSelectedSheetToImport(firstOther?.id || availableSheets[0]?.id || '')
+                setImportModalOpen(true)
+              }}
+              className="border-[#2E2E2E] bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white font-semibold h-11 px-3 sm:px-4 text-xs sm:text-sm flex items-center gap-1.5"
+              title="Copiar séries de outro aluno como ponto de partida"
+            >
+              <Copy className="w-4 h-4 text-secondary" />
+              <span>Usar outra ficha como base</span>
+            </Button>
+          )}
+
           {student && isEditing && (
             <Button
               type="button"
@@ -681,6 +739,90 @@ export default function SheetForm() {
         youtubeId={activeVideo?.youtubeId}
         youtubeUrl={activeVideo?.youtubeUrl}
       />
+
+      {/* Modal Usar Outra Ficha Como Base (Item 3) */}
+      <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
+        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <Copy className="w-5 h-5 text-secondary" /> Usar ficha de outro aluno como base
+            </DialogTitle>
+            <DialogDescription className="text-[#8A8F98] text-sm">
+              Escolha uma ficha existente no Studio Bru Oliveira para copiar para este aluno. As
+              séries A–E, exercícios, repetições, cargas e observações atuais serão substituídos
+              pelas da ficha escolhida.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#8A8F98]">
+                Selecione a ficha modelo:
+              </label>
+              <select
+                value={selectedSheetToImport}
+                onChange={(e) => setSelectedSheetToImport(e.target.value)}
+                className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {availableSheets.map((sh) => {
+                  const sName = sh.expand?.student?.name || 'Aluno'
+                  const titleStr = sh.title || 'Ficha'
+                  return (
+                    <option key={sh.id} value={sh.id}>
+                      {sName} — {titleStr}
+                    </option>
+                  )
+                })}
+              </select>
+            </div>
+
+            {selectedSheetToImport &&
+              (() => {
+                const preview = availableSheets.find((s) => s.id === selectedSheetToImport)
+                if (!preview) return null
+                const seriesCount = Object.keys(preview.series_data || {}).filter(
+                  (k) => (preview.series_data as Record<string, unknown[]>)?.[k]?.length > 0,
+                )
+                return (
+                  <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3 text-xs space-y-1">
+                    <p className="text-[#8A8F98]">
+                      Aluno de origem:{' '}
+                      <strong className="text-white">
+                        {preview.expand?.student?.name || 'Não identificado'}
+                      </strong>
+                    </p>
+                    <p className="text-[#8A8F98]">
+                      Séries com exercícios:{' '}
+                      <strong className="text-secondary">
+                        {seriesCount.length > 0 ? seriesCount.join(', ') : 'Nenhuma'}
+                      </strong>
+                    </p>
+                    {preview.notes && <p className="text-[#8A8F98] italic">Obs: {preview.notes}</p>}
+                  </div>
+                )
+              })()}
+          </div>
+
+          <DialogFooter className="flex sm:justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setImportModalOpen(false)}
+              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              disabled={!selectedSheetToImport}
+              onClick={() => handleImportSheetAsBase(selectedSheetToImport)}
+              className="bg-primary hover:opacity-90 text-primary-foreground font-bold"
+            >
+              Aplicar Séries Desta Ficha
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

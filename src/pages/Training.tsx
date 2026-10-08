@@ -80,7 +80,7 @@ export default function Training() {
   // ID do registro de progresso em andamento na nuvem: { [studentId]: recordId }
   const [sessionRecordMap, setSessionRecordMap] = useState<Record<string, string>>({})
 
-  // Mobile carrossel tab ativa (índice 0, 1 ou 2)
+  // Mobile carrossel tab ativa (índice 0, 1, 2 ou 3)
   const [mobileActiveIndex, setMobileActiveIndex] = useState(0)
 
   // Modais
@@ -235,7 +235,7 @@ export default function Training() {
     loadSelectedSession()
   }, [studentIdsParam])
 
-  // Adicionar aluno à sessão (Máximo 3)
+  // Adicionar aluno à sessão (Máximo 4)
   const handleAddStudentToSession = (student: Student) => {
     if (selectedStudentIds.includes(student.id)) {
       setStudentSearch('')
@@ -243,10 +243,10 @@ export default function Training() {
       return
     }
 
-    if (selectedStudentIds.length >= 3) {
+    if (selectedStudentIds.length >= 4) {
       toast({
         title: 'Limite atingido',
-        description: 'Máximo de 3 alunos por sessão para garantir a melhor atenção.',
+        description: 'Máximo de 4 alunos por sessão para garantir a melhor atenção.',
         variant: 'destructive',
       })
       setStudentSearch('')
@@ -679,7 +679,7 @@ export default function Training() {
           {/* Alunos Selecionados (Chips) */}
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs uppercase tracking-wider text-[#8A8F98] font-bold mr-1 flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-primary" /> Sessão ({selectedStudents.length}/3):
+              <Users className="w-4 h-4 text-primary" /> Sessão ({selectedStudents.length}/4):
             </span>
 
             {selectedStudents.length === 0 ? (
@@ -776,7 +776,7 @@ export default function Training() {
                 Pesquise os alunos para iniciar a sessão
               </h2>
               <p className="text-sm text-[#8A8F98] max-w-sm mx-auto">
-                Selecione até 3 alunos simultâneos. As fichas abrirão lado a lado no tablet ou em
+                Selecione até 4 alunos simultâneos. As fichas abrirão lado a lado no tablet ou em
                 abas deslizáveis no celular.
               </p>
             </div>
@@ -804,8 +804,8 @@ export default function Training() {
       ) : (
         /* RENDERIZAÇÃO RESPONSIVA */
         <div className="flex-1 flex flex-col min-h-0">
-          {/* LAYOUT DESKTOP / TABLET (>= 1024px) — 3 COLUNAS LADO A LADO */}
-          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1 min-h-0">
+          {/* LAYOUT DESKTOP / TABLET (>= 1024px) — ATÉ 4 COLUNAS LADO A LADO */}
+          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2.5 flex-1 min-h-0">
             {selectedStudents.map((st) => {
               const sheet = sheetsMap[st.id] || null
               const activeSeries = activeSeriesMap[st.id] || 'A'
@@ -848,18 +848,18 @@ export default function Training() {
               )
             })}
 
-            {/* Espaços vazios até 3 colunas para manter proporção perfeita */}
-            {Array.from({ length: 3 - selectedStudents.length }).map((_, i) => (
+            {/* Espaços vazios até 4 colunas para manter proporção perfeita */}
+            {Array.from({ length: 4 - selectedStudents.length }).map((_, i) => (
               <div
                 key={`empty-col-${i}`}
-                className="hidden lg:flex flex-col items-center justify-center border-2 border-dashed border-[#2A2A2A] rounded-2xl p-6 text-center text-[#8A8F98] h-full min-h-0"
+                className="hidden lg:flex flex-col items-center justify-center border-2 border-dashed border-[#2A2A2A] rounded-2xl p-4 text-center text-[#8A8F98] h-full min-h-0"
               >
                 <Users className="w-8 h-8 opacity-30 mb-2" />
                 <p className="text-sm font-semibold text-white mb-1">
                   Espaço livre para mais um aluno
                 </p>
                 <p className="text-xs max-w-xs mb-3">
-                  Você pode acompanhar até 3 alunos simultâneos lado a lado em tempo real.
+                  Você pode acompanhar até 4 alunos simultâneos lado a lado em tempo real.
                 </p>
               </div>
             ))}

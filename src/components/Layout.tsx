@@ -180,36 +180,9 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* TOPBAR MOBILE (< 1024px) */}
+      {/* TOPBAR MOBILE REMOVIDA: logo e menu agora vivem na barra de rodapé fixa (< 1024px) */}
       <div className="flex flex-col flex-1 min-w-0 h-full overflow-hidden">
         <InstallPromptBanner />
-        <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-card/80 backdrop-blur-md border-b border-border z-20 shrink-0">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-9 w-9 rounded-lg bg-white border border-white/20 flex items-center justify-center p-0.5 shrink-0 overflow-hidden shadow-sm">
-              <img
-                src={appearance.logo_url || STUDIO_LOGO_SRC}
-                alt={appearance.studio_name || 'Logo'}
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
-            <div className="min-w-0 flex flex-col">
-              <span className="font-bold text-sm tracking-tight text-white truncate leading-tight">
-                {appearance.studio_name || 'Studio Bru Oliveira'}
-              </span>
-              <span className="text-[10px] text-secondary font-medium tracking-wider uppercase leading-none">
-                Personal &amp; Pilates
-              </span>
-            </div>
-          </div>
-
-          <button
-            onClick={() => setMobileMenuOpen(true)}
-            className="p-2 rounded-lg text-white hover:bg-[#2A2A2A] active:bg-[#333333] shrink-0"
-            aria-label="Abrir menu"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-        </header>
 
         {/* DRAWER MOBILE */}
         {mobileMenuOpen && (
@@ -309,7 +282,7 @@ export default function Layout() {
 
         {/* CONTEÚDO PRINCIPAL (scroll independente) */}
         <main
-          className={`flex-1 bg-background ${
+          className={`flex-1 bg-background main-bottom-safe ${
             location.pathname.startsWith('/treino')
               ? 'p-2 sm:p-2.5 lg:p-3 flex flex-col overflow-hidden'
               : 'p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden'
@@ -325,6 +298,93 @@ export default function Layout() {
             <Outlet />
           </div>
         </main>
+
+        {/* BARRA DE NAVEGAÇÃO INFERIOR FIXA — MOBILE/TABLET ESTREITO (< 1024px) */}
+        <nav
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#141414]/95 backdrop-blur-md border-t border-[#2A2A2A] flex items-center justify-around gap-1 px-2 pt-1.5"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.375rem)' }}
+          aria-label="Navegação principal"
+        >
+          {/* Logo / Marca do Studio (atalho para o Início) */}
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
+              location.pathname === '/' ? 'text-primary' : 'text-[#8A8F98]'
+            }`}
+            title={appearance.studio_name || 'Studio Bru Oliveira'}
+            aria-label={`Início — ${appearance.studio_name || 'Studio Bru Oliveira'}`}
+          >
+            <div className="h-7 w-7 rounded-md bg-white border border-white/20 flex items-center justify-center p-0.5 overflow-hidden shadow-sm">
+              <img
+                src={appearance.logo_url || STUDIO_LOGO_SRC}
+                alt={appearance.studio_name || 'Logo'}
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+            <span className="text-[9px] font-semibold tracking-wide leading-none">Início</span>
+          </button>
+
+          {/* Tela de Treino (destaque) */}
+          <NavLink
+            to="/treino"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
+                isActive || location.pathname.startsWith('/treino')
+                  ? 'text-primary'
+                  : 'text-[#8A8F98]'
+              }`
+            }
+            title="Tela de Treino"
+          >
+            <PlaySquare className="w-5 h-5" />
+            <span className="text-[9px] font-semibold tracking-wide leading-none">Treino</span>
+          </NavLink>
+
+          {/* Alunos */}
+          <NavLink
+            to="/alunos"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
+                isActive || location.pathname.startsWith('/alunos')
+                  ? 'text-primary'
+                  : 'text-[#8A8F98]'
+              }`
+            }
+            title="Alunos"
+          >
+            <Users className="w-5 h-5" />
+            <span className="text-[9px] font-semibold tracking-wide leading-none">Alunos</span>
+          </NavLink>
+
+          {/* Fichas de Treino */}
+          <NavLink
+            to="/treinos"
+            className={({ isActive }) =>
+              `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
+                isActive || location.pathname.startsWith('/treinos')
+                  ? 'text-primary'
+                  : 'text-[#8A8F98]'
+              }`
+            }
+            title="Fichas de Treino"
+          >
+            <ClipboardList className="w-5 h-5" />
+            <span className="text-[9px] font-semibold tracking-wide leading-none">Fichas</span>
+          </NavLink>
+
+          {/* Menu completo (hamburger) */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg text-[#8A8F98] active:text-white active:bg-[#2A2A2A]"
+            title="Abrir menu completo"
+            aria-label="Abrir menu"
+          >
+            <Menu className="w-5 h-5" />
+            <span className="text-[9px] font-semibold tracking-wide leading-none">Menu</span>
+          </button>
+        </nav>
       </div>
 
       {/* MODAL DE CONFIRMAÇÃO DE LOGOUT */}

@@ -46,8 +46,13 @@ export default function SheetList() {
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [selectedStudentForNew, setSelectedStudentForNew] = useState<string>('')
 
-  // Duplicação
+  // Duplicação simples (mesmo aluno)
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
+
+  // Cópia para outro aluno (Item 3)
+  const [copyModalSheet, setCopyModalSheet] = useState<TrainingSheet | null>(null)
+  const [copyTargetStudentId, setCopyTargetStudentId] = useState<string>('')
+  const [copyingToOther, setCopyingToOther] = useState(false)
 
   // Exclusão
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -140,6 +145,65 @@ export default function SheetList() {
       })
     } finally {
       setDuplicatingId(null)
+    }
+  }
+
+  const handleOpenCopyModal = (sheet: TrainingSheet) => {
+    setCopyModalSheet(sheet)
+    // Selecionar por padrão o primeiro aluno diferente do atual
+    const otherStudent = students.find((s) => s.id !== sheet.student)
+    setCopyTargetStudentId(otherStudent?.id || '')
+  }
+
+  const handleConfirmCopyToOtherStudent = async () => {
+    if (!copyModalSheet || !copyTargetStudentId) {
+      toast({
+        title: 'Selecione o aluno destino',
+        description: 'Escolha para qual aluno a ficha será copiada.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const sourceStudent =
+      copyModalSheet.expand?.student || students.find((s) => s.id === copyModalSheet.student)
+    const targetStudent = students.find((s) => s.id === copyTargetStudentId)
+
+    if (!targetStudent) {
+      toast({
+        title: 'Aluno destino não encontrado',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      setCopyingToOther(true)
+      const newTitle = copyModalSheet.title
+        ? `${copyModalSheet.title} (base: ${sourceStudent?.name || 'aluno'})`
+        : `Ficha de Treino - ${targetStudent.name}`
+
+      const duplicated = await trainingSheetsService.duplicate(
+        copyModalSheet.id,
+        targetStudent.id,
+        newTitle,
+      )
+
+      toast({
+        title: 'Ficha copiada com sucesso!',
+        description: `Nova ficha criada para ${targetStudent.name} a partir de ${sourceStudent?.name || 'outro aluno'}. Redirecionando para ajuste...`,
+      })
+
+      setCopyModalSheet(null)
+      navigate(`/fichas/${duplicated.id}/editar`)
+    } catch (err: unknown) {
+      toast({
+        title: 'Erro ao copiar ficha',
+        description: err instanceof Error ? err.message : 'Falha na cópia entre alunos',
+        variant: 'destructive',
+      })
+    } finally {
+      setCopyingToOther(false)
     }
   }
 
@@ -321,11 +385,11 @@ export default function SheetList() {
                     </Link>
 
                     <button
-                      onClick={() => handleDuplicate(sheet.id)}
-                      disabled={duplicatingId === sheet.id}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-primary hover:bg-[#2A2A2A] transition-colors"
-                      title="Duplicar ficha como base"
-                      aria-label={`Duplicar ficha de ${studentName}`}
+                      type="button"
+                      onClick={() => handleOpenCopyModal(sheet)}
+                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors"
+                      title="Copiar para outro aluno..."
+                      aria-label={`Copiar ficha de ${studentName} para outro aluno`}
                     >
                       <Copy className="w-4 h-4" />
                     </button>
@@ -352,6 +416,98 @@ export default function SheetList() {
           })}
         </div>
       )}
+
+      {/* Modal Copiar Ficha para Outro Aluno (Item 3) */}
+      <Dialog
+        open={Boolean(copyModalSheet)}
+        onOpenChange={(open) => !open && setCopyModalSheet(null)}
+      >
+        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <Copy className="w-5 h-5 text-secondary" /> Copiar ficha para outro aluno
+            </DialogTitle>
+            <DialogDescription className="text-[#8A8F98] text-sm">
+              Use esta ficha já estruturada como base para outro aluno. Todas as séries (A–E),
+              exercícios, séries/reps, cargas, descanso e observações serão copiados para uma nova
+              ficha independente, sem alterar o treino do aluno original.
+            </DialogDescription>
+          </DialogHeader>
+
+          {copyModalSheet && (
+            <div className="space-y-4 py-2">
+              {/* Origem */}
+              <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3 space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A8F98]">
+                  Ficha de Origem:
+                </span>
+                <p className="text-sm font-semibold text-white">
+                  {copyModalSheet.title || 'Ficha de Treino'}
+                </p>
+                <p className="text-xs text-secondary flex items-center gap-1 font-medium">
+                  <User className="w-3.5 h-3.5" /> Aluno de origem:{' '}
+                  <strong className="text-white">
+                    {copyModalSheet.expand?.student?.name ||
+                      students.find((s) => s.id === copyModalSheet.student)?.name ||
+                      'Aluno'}
+                  </strong>
+                </p>
+              </div>
+
+              {/* Destino */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-[#8A8F98]">
+                  Copiar para qual aluno? (Destino):
+                </label>
+                <select
+                  value={copyTargetStudentId}
+                  onChange={(e) => setCopyTargetStudentId(e.target.value)}
+                  className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Selecione o aluno destino...</option>
+                  {students
+                    .filter((st) => st.id !== copyModalSheet.student)
+                    .map((st) => (
+                      <option key={st.id} value={st.id}>
+                        {st.name} {st.phone ? `(${st.phone})` : ''}
+                      </option>
+                    ))}
+                </select>
+                <p className="text-[11px] text-[#8A8F98]">
+                  Ao confirmar, uma cópia nova será criada e você será levado à tela de edição para
+                  fazer os ajustes finos.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex sm:justify-end gap-2 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={copyingToOther}
+              onClick={() => setCopyModalSheet(null)}
+              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              disabled={copyingToOther || !copyTargetStudentId}
+              onClick={handleConfirmCopyToOtherStudent}
+              className="bg-primary hover:opacity-90 text-primary-foreground font-bold"
+            >
+              {copyingToOther ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Copiando...
+                </>
+              ) : (
+                'Confirmar e Criar Cópia'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal Selecionar Aluno para Nova Ficha */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>

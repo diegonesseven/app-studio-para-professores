@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import type { Student, SeriesKey, TrainingSheet, Exercise, ExerciseBlock } from '@/types'
 import { SERIES_KEYS } from '@/types'
 import {
@@ -97,6 +97,17 @@ export default function StudentTrainingColumn({
   const [deletingIdx, setDeletingIdx] = useState<number | null>(null)
   // Controle de notas expandidas por exercício
   const [expandedNotes, setExpandedNotes] = useState<Record<number, boolean>>({})
+
+  // Layout de 4 colunas simultâneas (Item 5): enxuga rótulos/paddings sem perder legibilidade
+  const [isCompactGrid, setIsCompactGrid] = useState(false)
+
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 1024px) and (max-width: 1535px)')
+    const update = () => setIsCompactGrid(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
 
   const toggleNote = (idx: number) => {
     setExpandedNotes((prev) => ({
@@ -340,7 +351,7 @@ export default function StudentTrainingColumn({
             return (
               <div
                 key={`${block.exercise_id}-${idx}`}
-                className={`p-3 sm:p-3.5 rounded-xl border transition-all ${
+                className={`${isCompactGrid ? 'p-2.5' : 'p-3 sm:p-3.5'} rounded-xl border transition-all ${
                   isEditingThis
                     ? 'bg-[#181C2E] border-primary ring-2 ring-primary/30 shadow-xl'
                     : isDone
@@ -608,41 +619,65 @@ export default function StudentTrainingColumn({
                   <div className="mt-2.5 pt-2.5 border-t border-[#262626]">
                     <div className="grid grid-cols-4 gap-2 text-center">
                       {/* Séries */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
+                      <div
+                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
+                      >
+                        <span
+                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
+                        >
                           Séries
                         </span>
-                        <span className="text-base sm:text-lg font-black text-white leading-tight">
+                        <span
+                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-white leading-tight`}
+                        >
                           {block.sets}x
                         </span>
                       </div>
 
                       {/* Repetições */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
+                      <div
+                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
+                      >
+                        <span
+                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
+                        >
                           Reps
                         </span>
-                        <span className="text-base sm:text-lg font-black text-white leading-tight truncate max-w-full px-0.5">
+                        <span
+                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-white leading-tight truncate max-w-full px-0.5`}
+                        >
                           {block.reps || '10'}
                         </span>
                       </div>
 
                       {/* Carga */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
+                      <div
+                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
+                      >
+                        <span
+                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
+                        >
                           Carga
                         </span>
-                        <span className="text-base sm:text-lg font-black text-primary leading-tight truncate max-w-full px-0.5">
+                        <span
+                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-primary leading-tight truncate max-w-full px-0.5`}
+                        >
                           {block.load || '—'}
                         </span>
                       </div>
 
                       {/* Descanso */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1.5 px-1.5 flex flex-col items-center justify-center min-h-[52px]">
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1">
+                      <div
+                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
+                      >
+                        <span
+                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
+                        >
                           Pausa
                         </span>
-                        <span className="text-base sm:text-lg font-black text-white leading-tight truncate max-w-full px-0.5">
+                        <span
+                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-white leading-tight truncate max-w-full px-0.5`}
+                        >
                           {block.time || '60s'}
                         </span>
                       </div>

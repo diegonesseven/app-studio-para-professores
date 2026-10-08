@@ -251,7 +251,16 @@ export default function StudentList() {
             return (
               <div
                 key={student.id}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/40 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group"
+                role="button"
+                tabIndex={0}
+                onClick={() => navigate(`/alunos/${student.id}/editar`)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    navigate(`/alunos/${student.id}/editar`)
+                  }
+                }}
+                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/60 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <div>
                   {/* Topo do Card */}
@@ -312,7 +321,10 @@ export default function StudentList() {
                 </div>
 
                 {/* Ações inferiores */}
-                <div className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2">
+                <div
+                  className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="flex items-center gap-1">
                     {/* Exportar PDF rápido do aluno */}
                     <button
@@ -331,6 +343,7 @@ export default function StudentList() {
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => setSelectedStudentForAnamnese(student)}
                       className="p-2 rounded-lg text-[#8A8F98] hover:text-primary hover:bg-[#2A2A2A] transition-colors"
                       title="Ver Anamnese"
@@ -339,10 +352,11 @@ export default function StudentList() {
                       <HeartPulse className="w-4 h-4" />
                     </button>
 
-                    <Link to={`/alunos/${student.id}/editar`}>
+                    <Link to={`/alunos/${student.id}/editar`} onClick={(e) => e.stopPropagation()}>
                       <button
+                        type="button"
                         className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
-                        title="Editar aluno"
+                        title="Editar cadastro do aluno"
                         aria-label={`Editar ${student.name}`}
                       >
                         <Edit2 className="w-4 h-4" />
@@ -350,6 +364,7 @@ export default function StudentList() {
                     </Link>
 
                     <button
+                      type="button"
                       onClick={() => {
                         setDeleteId(student.id)
                         setDeleteName(student.name)
@@ -364,6 +379,7 @@ export default function StudentList() {
 
                   {/* Iniciar Treino */}
                   <Button
+                    type="button"
                     onClick={() => navigate(`/treino?students=${student.id}`)}
                     className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
                   >

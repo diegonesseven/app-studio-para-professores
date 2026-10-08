@@ -183,4 +183,14 @@
   .animate-check-pop {
     animation: check-pop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   }
+
+  /* Rodapé de navegação mobile (Item 4): conteúdo não pode ficar encoberto pela barra fixa */
+  .main-bottom-safe {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5.5rem);
+  }
+  @media (min-width: 1024px) {
+    .main-bottom-safe {
+      padding-bottom: 0;
+    }
+  }
 }

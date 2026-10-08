@@ -59,16 +59,26 @@ export const trainingSheetsService = {
     return pb.collection('training_sheets').update<TrainingSheet>(id, payload)
   },
 
-  async duplicate(id: string, targetStudentId?: string): Promise<TrainingSheet> {
+  async duplicate(
+    id: string,
+    targetStudentId?: string,
+    customTitle?: string,
+  ): Promise<TrainingSheet> {
     const original = await this.getById(id)
     const newStudentId = targetStudentId || original.student
-    const title = original.title ? `${original.title} (cópia)` : 'Ficha de Treino (cópia)'
+    const title =
+      customTitle || (original.title ? `${original.title} (cópia)` : 'Ficha de Treino (cópia)')
+
+    // Clona em profundidade as séries para garantir isolamento completo entre alunos
+    const clonedSeries = original.series_data
+      ? JSON.parse(JSON.stringify(original.series_data))
+      : { A: [], B: [], C: [], D: [], E: [] }
 
     return pb.collection('training_sheets').create<TrainingSheet>({
       student: newStudentId,
       title: title,
       notes: original.notes || '',
-      series_data: original.series_data || { A: [], B: [], C: [], D: [], E: [] },
+      series_data: clonedSeries,
     })
   },
 
