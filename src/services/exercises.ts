@@ -144,6 +144,54 @@ export function getYoutubeThumbnail(id: string | null | undefined): string | nul
   return `https://img.youtube.com/vi/${id}/hqdefault.jpg`
 }
 
+export interface VideoDimensions {
+  width: number
+  height: number
+  aspectRatio: number // width / height
+  isPortrait: boolean
+}
+
+// Cache em memória para dimensões oEmbed de vídeos para evitar chamadas repetidas
+const vimeoDimensionsCache = new Map<string, VideoDimensions>()
+
+export async function fetchVimeoDimensions(
+  vimeoUrlOrId: string,
+  signal?: AbortSignal,
+): Promise<VideoDimensions | null> {
+  const id = extractVimeoId(vimeoUrlOrId)
+  if (!id) return null
+
+  if (vimeoDimensionsCache.has(id)) {
+    return vimeoDimensionsCache.get(id)!
+  }
+
+  try {
+    const oembedUrl = `https://vimeo.com/api/oembed.json?url=https%3A%2F%2Fvimeo.com%2F${id}`
+    const res = await fetch(oembedUrl, { signal })
+    if (!res.ok) return null
+    const data = await res.json()
+    if (
+      data &&
+      typeof data.width === 'number' &&
+      typeof data.height === 'number' &&
+      data.height > 0
+    ) {
+      const result: VideoDimensions = {
+        width: data.width,
+        height: data.height,
+        aspectRatio: data.width / data.height,
+        isPortrait: data.height > data.width,
+      }
+      vimeoDimensionsCache.set(id, result)
+      return result
+    }
+  } catch {
+    // Falha de rede, timeout ou abort — ignorar silenciosamente
+  }
+
+  return null
+}
+
 export const exercisesService = {
   async getAll(search?: string, muscleGroup?: string): Promise<Exercise[]> {
     const filters: string[] = []

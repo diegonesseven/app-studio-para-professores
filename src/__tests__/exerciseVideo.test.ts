@@ -4,6 +4,7 @@ import {
   extractVimeoId,
   parseVideoUrl,
   getYoutubeThumbnail,
+  fetchVimeoDimensions,
 } from '../services/exercises'
 
 describe('Suporte a Vídeos no Acervo: Vimeo, YouTube e Exercício sem Vídeo', () => {
@@ -28,6 +29,10 @@ describe('Suporte a Vídeos no Acervo: Vimeo, YouTube e Exercício sem Vídeo', 
       expect(extractVimeoId('https://vimeo.com/channels/staffpicks/891234567?param=true')).toBe(
         '891234567',
       )
+    })
+
+    it('deve extrair ID do Vimeo com link vimeo.com/1234203439 (exemplo do usuário Abdominal Borboleta)', () => {
+      expect(extractVimeoId('https://vimeo.com/1234203439')).toBe('1234203439')
     })
 
     it('deve retornar null para links do YouTube ou strings inválidas', () => {
@@ -121,6 +126,60 @@ describe('Suporte a Vídeos no Acervo: Vimeo, YouTube e Exercício sem Vídeo', 
       expect(getYoutubeThumbnail(null)).toBeNull()
       expect(getYoutubeThumbnail(undefined)).toBeNull()
       expect(getYoutubeThumbnail('')).toBeNull()
+    })
+  })
+
+  describe('fetchVimeoDimensions (oEmbed adaptativo)', () => {
+    it('deve retornar null para link ou ID inválido', async () => {
+      const res = await fetchVimeoDimensions('')
+      expect(res).toBeNull()
+    })
+
+    it('deve extrair dimensões e detectar formato portrait quando height > width', async () => {
+      // Mock de fetch para o teste
+      const originalFetch = globalThis.fetch
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => ({
+            width: 238,
+            height: 426,
+            title: 'ABDOMINAL BORBOLETA',
+          }),
+        }) as unknown as Response
+
+      try {
+        const dims = await fetchVimeoDimensions('https://vimeo.com/1234203439')
+        expect(dims).not.toBeNull()
+        expect(dims?.width).toBe(238)
+        expect(dims?.height).toBe(426)
+        expect(dims?.isPortrait).toBe(true)
+        expect(dims?.aspectRatio).toBeCloseTo(238 / 426, 3)
+      } finally {
+        globalThis.fetch = originalFetch
+      }
+    })
+
+    it('deve detectar formato horizontal quando width > height', async () => {
+      const originalFetch = globalThis.fetch
+      globalThis.fetch = async () =>
+        ({
+          ok: true,
+          json: async () => ({
+            width: 1920,
+            height: 1080,
+            title: 'Treino de Costas',
+          }),
+        }) as unknown as Response
+
+      try {
+        const dims = await fetchVimeoDimensions('https://vimeo.com/999888777')
+        expect(dims).not.toBeNull()
+        expect(dims?.isPortrait).toBe(false)
+        expect(dims?.aspectRatio).toBeCloseTo(16 / 9, 2)
+      } finally {
+        globalThis.fetch = originalFetch
+      }
     })
   })
 
