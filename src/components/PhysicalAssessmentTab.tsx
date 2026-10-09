@@ -63,15 +63,19 @@ interface PhysicalAssessmentTabProps {
   studentId: string
   studentName?: string
   studentBirthdate?: string
+  initialAssessments?: PhysicalAssessment[]
 }
 
 export function PhysicalAssessmentTab({
   studentId,
   studentName,
   studentBirthdate,
+  initialAssessments,
 }: PhysicalAssessmentTabProps) {
-  const [assessments, setAssessments] = useState<PhysicalAssessment[]>([])
-  const [loading, setLoading] = useState(true)
+  const [assessments, setAssessments] = useState<PhysicalAssessment[]>(
+    () => initialAssessments || [],
+  )
+  const [loading, setLoading] = useState(() => !initialAssessments)
   const [referenceModalOpen, setReferenceModalOpen] = useState(false)
 
   // ID da avaliação atualmente selecionada para visualização/edição
@@ -138,8 +142,21 @@ export function PhysicalAssessmentTab({
   }, [studentId])
 
   useEffect(() => {
+    if (initialAssessments && initialAssessments.length >= 0) {
+      const sorted = [...initialAssessments].sort((a, b) =>
+        (a.date || '').localeCompare(b.date || ''),
+      )
+      setAssessments(sorted)
+      setLoading(false)
+      if (sorted.length > 0) {
+        setSelectedAssessmentId((prev) =>
+          prev && sorted.some((a) => a.id === prev) ? prev : sorted[sorted.length - 1].id,
+        )
+      }
+      return
+    }
     loadAssessments()
-  }, [loadAssessments])
+  }, [loadAssessments, initialAssessments])
 
   // Inscrição Realtime no PocketBase para sincronizar avaliações físicas em tempo real
   useEffect(() => {

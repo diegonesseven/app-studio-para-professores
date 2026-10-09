@@ -62,6 +62,11 @@ export default function StudentForm() {
   const navigate = useNavigate()
   const isEditing = Boolean(id)
 
+  // Estado de carregamento e gravação
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
   // Navegação entre abas no topo do cadastro
   const [activeMainTab, setActiveMainTab] = useState<'cadastro' | 'avaliacao'>('cadastro')
 
@@ -117,14 +122,108 @@ export default function StudentForm() {
   const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
   const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
 
-      if (isMounted) {
+  // Avaliações físicas pré-carregadas para evitar requisição duplicada em PhysicalAssessmentTab
+  const [initialAssessments, setInitialAssessments] = useState<PhysicalAssessment[]>([])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const fetchStudentDataWithRetry = async () => {
+      if (!id) return
+      setLoading(true)
+
+      try {
+        // Dispara requisições usando a fila de concorrência e retry automático em HTTP 429
+        const [st, history, sheets, exList, assessmentsList] = await Promise.all([
+          studentsService.getById(id),
+          workoutProgressService.getAll(id, 50),
+          trainingSheetsService.getHistoryByStudent(id),
+          exercisesService.getAll(),
+          physicalAssessmentsService.getByStudent(id),
+        ])
+
+        if (!isMounted) return
+
+        setName(st.name)
+        setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
+        setPhone(st.phone ? maskPhone(st.phone) : '')
+        if (st.photo) {
+          setPhotoPreview(pb.files.getURL(st as any, st.photo))
+        } else {
+          setPhotoPreview(null)
+        }
+        setRemovePhoto(false)
+        setGeneralObservations(st.general_observations || '')
+        setRestrictions(st.restrictions || '')
+
+        // Fotos da anamnese
+        setExistingAnamnesisPhotos(st.anamnesis_photos || [])
+
+        // Dados estruturados da nova anamnese ou mapeamento/preservação dos dados legados
+        const anData = st.anamnesis_data || {}
+        setTreinouPersonalAntes(anData.treinou_personal_antes || '')
+        setProfissao(anData.profissao || '')
+
+        if (anData.objetivos && anData.objetivos.length > 0) {
+          setObjetivosSelecionados(anData.objetivos)
+        } else if (st.goals && st.goals.length > 0) {
+          setObjetivosSelecionados(st.goals as string[])
+        }
+
+        setEnfaseMusculatura(anData.enfase_musculatura || '')
+        setPraticouExercicio(anData.praticou_exercicio || '')
+        setPraticouExercicioQuais(anData.praticou_exercicio_quais || '')
+        setTempoSemPraticar(anData.tempo_sem_praticar || '')
+        setRestricaoExercicio(anData.restricao_exercicio || (st.restrictions ? 'SIM' : ''))
+        setRestricaoExercicioQuais(anData.restricao_exercicio_quais || '')
+
+        setDoencasSelecionadas(anData.possui_doenca || [])
+        setDoencasOutros(anData.possui_doenca_outros || '')
+
+        setPossuiLesao(anData.possui_lesao || st.injuries || '')
+
+        setDoresCorpo(anData.dores_corpo || '')
+        setDoresCorpoQuais(anData.dores_corpo_quais || '')
+        setFazDieta(anData.faz_dieta || '')
+        setFazNutricionista(anData.faz_nutricionista || '')
+        setUsoSubstancias(anData.uso_substancias || [])
+
+        // Campos legados preservados
+        setLegacyHealthHistory(st.health_history || '')
+        setLegacySurgeries(st.surgeries || '')
+        setLegacyTeacherObs(st.teacher_observations || '')
+
+        setAllStudentSheets(sheets)
+        setStudentHistory(history)
+        setInitialAssessments(assessmentsList)
+
+        const map: Record<string, Exercise> = {}
+        exList.forEach((e) => {
+          map[e.id] = e
+        })
+        setExercisesMap(map)
+
+        if (
+          st.restrictions ||
+          st.anamnesis_data ||
+          st.injuries ||
+          st.health_history ||
+          (st.anamnesis_photos && st.anamnesis_photos.length > 0)
+        ) {
+          setAnamneseOpen(true)
+        }
+      } catch (err: unknown) {
+        if (!isMounted) return
         toast({
           title: 'Erro ao carregar aluno',
-          description: lastError instanceof Error ? lastError.message : 'Não encontrado',
+          description: err instanceof Error ? err.message : 'Não encontrado',
           variant: 'destructive',
         })
         navigate('/alunos')
-        setLoading(false)
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
     }
 
@@ -133,7 +232,19 @@ export default function StudentForm() {
     return () => {
       isMounted = false
     }
-  }, [id, navigate])
+=======
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+=======
+<<<<<<< SEARCH
+=======
+          setName(st.name)
+=======
 =======
           setName(st.name)
           setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
@@ -884,11 +995,8 @@ export default function StudentForm() {
 
     fetchStudentDataWithRetry()
 
-    return () => {
-      isMounted = false
-    }
-  }, [id, navigate])
-
+          setName(st.name)
+=======
   const toggleObjetivo = (item: string) => {
 =======
       if (isMounted) {
@@ -1910,7 +2018,12 @@ export default function StudentForm() {
       {/* SEÇÃO DA ABA DE AVALIAÇÃO FÍSICA */}
       {activeMainTab === 'avaliacao' &&
         (isEditing && id ? (
-          <PhysicalAssessmentTab studentId={id} studentName={name} studentBirthdate={birthdate} />
+          <PhysicalAssessmentTab
+            studentId={id}
+            studentName={name}
+            studentBirthdate={birthdate}
+            initialAssessments={initialAssessments}
+          />
         ) : (
           <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl p-8 text-center space-y-3">
             <Activity className="w-12 h-12 text-primary/40 mx-auto" />

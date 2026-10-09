@@ -1,6 +1,7 @@
 import pb from '@/lib/pocketbase/client'
 import type { TrainingSheet, SeriesData } from '@/types'
 import { sanitizeText } from '@/lib/validation'
+import { queuedRequest } from '@/lib/requestQueue'
 
 // Cache leve em memória para fichas ativas indexadas por studentId
 // (usado para mitigar rajadas de requisições simultâneas)
@@ -27,10 +28,12 @@ export const trainingSheetsService = {
       return activeSheetsCache.allSheets
     }
 
-    const records = await pb.collection('training_sheets').getFullList<TrainingSheet>({
-      sort: '-updated',
-      expand: 'student',
-    })
+    const records = await queuedRequest(() =>
+      pb.collection('training_sheets').getFullList<TrainingSheet>({
+        sort: '-updated',
+        expand: 'student',
+      }),
+    )
 
     const map = new Map<string, TrainingSheet>()
     // Itera ordenado por created desc ou updated desc para priorizar mais recentes não-arquivadas
@@ -85,9 +88,11 @@ export const trainingSheetsService = {
   },
 
   async getById(id: string): Promise<TrainingSheet> {
-    return pb.collection('training_sheets').getOne<TrainingSheet>(id, {
-      expand: 'student',
-    })
+    return queuedRequest(() =>
+      pb.collection('training_sheets').getOne<TrainingSheet>(id, {
+        expand: 'student',
+      }),
+    )
   },
 
   async getByStudent(studentId: string): Promise<TrainingSheet | null> {
@@ -98,19 +103,23 @@ export const trainingSheetsService = {
 
     try {
       // Prioriza a ficha ativa mais recente (não arquivada)
-      const records = await pb.collection('training_sheets').getFullList<TrainingSheet>({
-        filter: `student = "${studentId}" && is_archived != true`,
-        sort: '-created',
-        expand: 'student',
-      })
+      const records = await queuedRequest(() =>
+        pb.collection('training_sheets').getFullList<TrainingSheet>({
+          filter: `student = "${studentId}" && is_archived != true`,
+          sort: '-created',
+          expand: 'student',
+        }),
+      )
       if (records.length > 0) return records[0]
 
       // Fallback para qualquer ficha caso não haja distinção
-      const fallback = await pb.collection('training_sheets').getFullList<TrainingSheet>({
-        filter: `student = "${studentId}"`,
-        sort: '-created',
-        expand: 'student',
-      })
+      const fallback = await queuedRequest(() =>
+        pb.collection('training_sheets').getFullList<TrainingSheet>({
+          filter: `student = "${studentId}"`,
+          sort: '-created',
+          expand: 'student',
+        }),
+      )
       return fallback[0] || null
     } catch {
       return null
@@ -122,11 +131,13 @@ export const trainingSheetsService = {
    */
   async getHistoryByStudent(studentId: string): Promise<TrainingSheet[]> {
     try {
-      return await pb.collection('training_sheets').getFullList<TrainingSheet>({
-        filter: `student = "${studentId}"`,
-        sort: '-created',
-        expand: 'student',
-      })
+      return await queuedRequest(() =>
+        pb.collection('training_sheets').getFullList<TrainingSheet>({
+          filter: `student = "${studentId}"`,
+          sort: '-created',
+          expand: 'student',
+        }),
+      )
     } catch {
       return []
     }
@@ -241,7 +252,7 @@ export const trainingSheetsService = {
   },
 
   async count(): Promise<number> {
-    const res = await pb.collection('training_sheets').getList(1, 1)
+    const res = await queuedRequest(() => pb.collection('training_sheets').getList(1, 1))
     return res.totalItems
   },
 }

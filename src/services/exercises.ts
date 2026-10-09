@@ -1,5 +1,6 @@
 import pb from '@/lib/pocketbase/client'
 import type { Exercise, MuscleGroup } from '@/types'
+import { queuedRequest } from '@/lib/requestQueue'
 
 /**
  * Extrai o ID do vídeo do YouTube a partir de múltiplos formatos:
@@ -192,24 +193,68 @@ export async function fetchVimeoDimensions(
   return null
 }
 
+// Cache em memória para o acervo de exercícios com TTL de 5 minutos
+interface ExercisesCache {
+  timestamp: number
+  exercises: Exercise[]
+}
+
+let exercisesCache: ExercisesCache | null = null
+const EXERCISES_CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutos
+
 export const exercisesService = {
-  async getAll(search?: string, muscleGroup?: string): Promise<Exercise[]> {
-    const filters: string[] = []
-    if (search && search.trim()) {
-      filters.push(`name ~ "${search.trim()}"`)
-    }
-    if (muscleGroup && muscleGroup !== 'all') {
-      filters.push(`muscle_group = "${muscleGroup}"`)
+  clearCache() {
+    exercisesCache = null
+  },
+
+  /**
+   * Obtém exercícios com cache em memória (TTL 5 min) e filtragem local quando possível.
+   * Evita baixar todos os centenas de exercícios a cada abertura de tela.
+   */
+  async getAll(
+    search?: string,
+    muscleGroup?: string,
+    options?: { forceRefresh?: boolean },
+  ): Promise<Exercise[]> {
+    const now = Date.now()
+    let allExercises: Exercise[] | null = null
+
+    if (
+      !options?.forceRefresh &&
+      exercisesCache &&
+      now - exercisesCache.timestamp < EXERCISES_CACHE_TTL_MS
+    ) {
+      allExercises = exercisesCache.exercises
+    } else {
+      allExercises = await queuedRequest(() =>
+        pb.collection('exercises').getFullList<Exercise>({
+          sort: 'name',
+        }),
+      )
+      exercisesCache = {
+        timestamp: now,
+        exercises: allExercises,
+      }
     }
 
-    return pb.collection('exercises').getFullList<Exercise>({
-      sort: 'name',
-      filter: filters.length ? filters.join(' && ') : undefined,
-    })
+    let filtered = allExercises
+    if (search && search.trim()) {
+      const s = search.trim().toLowerCase()
+      filtered = filtered.filter((e) => (e.name || '').toLowerCase().includes(s))
+    }
+    if (muscleGroup && muscleGroup !== 'all') {
+      filtered = filtered.filter((e) => e.muscle_group === muscleGroup)
+    }
+
+    return filtered
   },
 
   async getById(id: string): Promise<Exercise> {
-    return pb.collection('exercises').getOne<Exercise>(id)
+    if (exercisesCache) {
+      const cached = exercisesCache.exercises.find((e) => e.id === id)
+      if (cached) return cached
+    }
+    return queuedRequest(() => pb.collection('exercises').getOne<Exercise>(id))
   },
 
   async create(data: {
@@ -224,12 +269,16 @@ export const exercisesService = {
     const video_id = parsed?.id || undefined
     const thumbnail_url = parsed?.thumbnailUrl || undefined
 
-    return pb.collection('exercises').create<Exercise>({
-      ...data,
-      youtube_url: rawUrl || undefined,
-      youtube_id: video_id,
-      thumbnail_url,
-    })
+    const created = await queuedRequest(() =>
+      pb.collection('exercises').create<Exercise>({
+        ...data,
+        youtube_url: rawUrl || undefined,
+        youtube_id: video_id,
+        thumbnail_url,
+      }),
+    )
+    this.clearCache()
+    return created
   },
 
   async update(
@@ -256,22 +305,35 @@ export const exercisesService = {
       }
     }
 
-    return pb.collection('exercises').update<Exercise>(id, payload)
+    const updated = await queuedRequest(() =>
+      pb.collection('exercises').update<Exercise>(id, payload),
+    )
+    this.clearCache()
+    return updated
   },
 
   /**
    * Atualização rápida do agrupamento muscular de um exercício
    */
   async updateMuscleGroup(id: string, muscle_group: MuscleGroup): Promise<Exercise> {
-    return pb.collection('exercises').update<Exercise>(id, { muscle_group })
+    const updated = await queuedRequest(() =>
+      pb.collection('exercises').update<Exercise>(id, { muscle_group }),
+    )
+    this.clearCache()
+    return updated
   },
 
   async delete(id: string): Promise<boolean> {
-    return pb.collection('exercises').delete(id)
+    const res = await queuedRequest(() => pb.collection('exercises').delete(id))
+    this.clearCache()
+    return res
   },
 
   async count(): Promise<number> {
-    const res = await pb.collection('exercises').getList(1, 1)
+    if (exercisesCache) {
+      return exercisesCache.exercises.length
+    }
+    const res = await queuedRequest(() => pb.collection('exercises').getList(1, 1))
     return res.totalItems
   },
 }

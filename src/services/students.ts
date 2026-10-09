@@ -1,6 +1,7 @@
 import pb from '@/lib/pocketbase/client'
 import type { Student } from '@/types'
 import { sanitizeText } from '@/lib/validation'
+import { queuedRequest } from '@/lib/requestQueue'
 
 export const studentsService = {
   async getAll(search?: string, sort = 'name'): Promise<Student[]> {
@@ -9,22 +10,25 @@ export const studentsService = {
       filters.push(`name ~ "${search.trim()}"`)
     }
 
-    const records = await pb.collection('students').getFullList<Student>({
-      sort: sort,
-      filter: filters.length ? filters.join(' && ') : undefined,
-    })
-    return records
+    return queuedRequest(() =>
+      pb.collection('students').getFullList<Student>({
+        sort: sort,
+        filter: filters.length ? filters.join(' && ') : undefined,
+      }),
+    )
   },
 
   async getRecent(limit = 5): Promise<Student[]> {
-    const records = await pb.collection('students').getList<Student>(1, limit, {
-      sort: '-updated',
-    })
+    const records = await queuedRequest(() =>
+      pb.collection('students').getList<Student>(1, limit, {
+        sort: '-updated',
+      }),
+    )
     return records.items
   },
 
   async getById(id: string): Promise<Student> {
-    return pb.collection('students').getOne<Student>(id)
+    return queuedRequest(() => pb.collection('students').getOne<Student>(id))
   },
 
   async create(data: Partial<Student>, options?: { photoFile?: File | null }): Promise<Student> {
@@ -116,11 +120,11 @@ export const studentsService = {
   },
 
   async delete(id: string): Promise<boolean> {
-    return pb.collection('students').delete(id)
+    return queuedRequest(() => pb.collection('students').delete(id))
   },
 
   async count(): Promise<number> {
-    const res = await pb.collection('students').getList(1, 1)
+    const res = await queuedRequest(() => pb.collection('students').getList(1, 1))
     return res.totalItems
   },
 

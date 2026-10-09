@@ -1,5 +1,6 @@
 import pb from '@/lib/pocketbase/client'
 import { type PhysicalAssessment, type PhysicalAssessmentData } from '@/types'
+import { queuedRequest } from '@/lib/requestQueue'
 
 export interface CreateAssessmentDTO {
   student: string
@@ -21,12 +22,13 @@ export const physicalAssessmentsService = {
   async getByStudent(studentId: string): Promise<PhysicalAssessment[]> {
     if (!studentId) return []
     try {
-      const records = await pb.collection('physical_assessments').getFullList<PhysicalAssessment>({
-        filter: `student = "${studentId}"`,
-        sort: 'date,created',
-        requestKey: null,
-      })
-      return records
+      return await queuedRequest(() =>
+        pb.collection('physical_assessments').getFullList<PhysicalAssessment>({
+          filter: `student = "${studentId}"`,
+          sort: 'date,created',
+          requestKey: null,
+        }),
+      )
     } catch (err) {
       console.error('Erro ao buscar avaliações físicas do aluno:', err)
       return []
@@ -37,9 +39,11 @@ export const physicalAssessmentsService = {
    * Busca uma avaliação física específica
    */
   async getById(id: string): Promise<PhysicalAssessment> {
-    return pb.collection('physical_assessments').getOne<PhysicalAssessment>(id, {
-      requestKey: null,
-    })
+    return queuedRequest(() =>
+      pb.collection('physical_assessments').getOne<PhysicalAssessment>(id, {
+        requestKey: null,
+      }),
+    )
   },
 
   /**

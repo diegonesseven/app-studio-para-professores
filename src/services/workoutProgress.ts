@@ -1,5 +1,6 @@
 import pb from '@/lib/pocketbase/client'
 import type { WorkoutProgress, SeriesKey, ExerciseBlock } from '@/types'
+import { queuedRequest } from '@/lib/requestQueue'
 
 // Cache leve em memória para sessões recentes por aluno
 let latestProgressCache: {
@@ -71,21 +72,25 @@ export const workoutProgressService = {
       filters.push(`student = "${studentId}"`)
     }
 
-    return pb.collection('workout_progress').getFullList<WorkoutProgress>({
-      filter: filters.length ? filters.join(' && ') : undefined,
-      sort: '-completed_at',
-      expand: 'student,training_sheet,teacher',
-      batch: limit,
-    })
+    return queuedRequest(() =>
+      pb.collection('workout_progress').getFullList<WorkoutProgress>({
+        filter: filters.length ? filters.join(' && ') : undefined,
+        sort: '-completed_at',
+        expand: 'student,training_sheet,teacher',
+        batch: limit,
+      }),
+    )
   },
 
   async countCompletedSessions(studentId: string, sheetId: string): Promise<number> {
     try {
-      const res = await pb.collection('workout_progress').getList(1, 1, {
-        filter: `student = "${studentId}" && training_sheet = "${sheetId}" && is_completed = true`,
-      })
+      const res = await queuedRequest(() =>
+        pb.collection('workout_progress').getList(1, 1, {
+          filter: `student = "${studentId}" && training_sheet = "${sheetId}" && is_completed = true`,
+        }),
+      )
       return res.totalItems
-    } catch (_) {
+    } catch {
       return 0
     }
   },
@@ -96,17 +101,19 @@ export const workoutProgressService = {
     }
 
     try {
-      const records = await pb.collection('workout_progress').getList<WorkoutProgress>(1, 1, {
-        filter: `student = "${studentId}"`,
-        sort: '-completed_at',
-        expand: 'teacher,training_sheet',
-      })
+      const records = await queuedRequest(() =>
+        pb.collection('workout_progress').getList<WorkoutProgress>(1, 1, {
+          filter: `student = "${studentId}"`,
+          sort: '-completed_at',
+          expand: 'teacher,training_sheet',
+        }),
+      )
       const found = records.items.length ? records.items[0] : null
       if (latestProgressCache && found) {
         latestProgressCache.map.set(studentId, found)
       }
       return found
-    } catch (_) {
+    } catch {
       return null
     }
   },
