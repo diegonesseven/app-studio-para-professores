@@ -1045,11 +1045,15 @@ export default function Training() {
 
   return (
     <div className="flex flex-col flex-1 min-h-0 max-w-full space-y-2.5 sm:space-y-3 animate-fade-in h-full">
-      {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS */}
-      <div className="bg-card/60 border border-border rounded-2xl p-2.5 sm:p-3 shadow-md shrink-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+      {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS (compacta no modo multi-ficha) */}
+      <div
+        className={`bg-card/60 border border-border rounded-2xl shadow-md shrink-0 transition-all ${
+          selectedStudents.length > 1 ? 'p-2 sm:p-2.5' : 'p-2.5 sm:p-3'
+        }`}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3">
           {/* Alunos Selecionados (Chips) */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             <span className="text-xs uppercase tracking-wider text-[#8A8F98] font-bold mr-1 flex items-center gap-1.5">
               <Users className="w-4 h-4 text-primary" /> Sessão ({selectedStudents.length}/4):
             </span>
@@ -1176,8 +1180,18 @@ export default function Training() {
       ) : (
         /* RENDERIZAÇÃO RESPONSIVA */
         <div className="flex-1 flex flex-col min-h-0">
-          {/* LAYOUT DESKTOP / TABLET (>= 1024px) — ATÉ 4 COLUNAS LADO A LADO */}
-          <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-2.5 flex-1 min-h-0">
+          {/* LAYOUT DESKTOP / TABLET (>= 1024px) — RESPONSIVO AO Nº REAL DE ALUNOS NA SESSÃO */}
+          <div
+            className={`hidden lg:grid gap-2.5 flex-1 min-h-0 ${
+              selectedStudents.length === 1
+                ? 'grid-cols-1 max-w-3xl mx-auto w-full'
+                : selectedStudents.length === 2
+                  ? 'grid-cols-2'
+                  : selectedStudents.length === 3
+                    ? 'grid-cols-3'
+                    : 'grid-cols-2 xl:grid-cols-4'
+            }`}
+          >
             {selectedStudents.map((st) => {
               const sheet = sheetsMap[st.id] || null
               const activeSeries = activeSeriesMap[st.id] || 'A'
@@ -1237,22 +1251,6 @@ export default function Training() {
                 </div>
               )
             })}
-
-            {/* Espaços vazios até 4 colunas para manter proporção perfeita */}
-            {Array.from({ length: 4 - selectedStudents.length }).map((_, i) => (
-              <div
-                key={`empty-col-${i}`}
-                className="hidden lg:flex flex-col items-center justify-center border-2 border-dashed border-[#2A2A2A] rounded-2xl p-4 text-center text-[#8A8F98] h-full min-h-0"
-              >
-                <Users className="w-8 h-8 opacity-30 mb-2" />
-                <p className="text-sm font-semibold text-white mb-1">
-                  Espaço livre para mais um aluno
-                </p>
-                <p className="text-xs max-w-xs mb-3">
-                  Você pode acompanhar até 4 alunos simultâneos lado a lado em tempo real.
-                </p>
-              </div>
-            ))}
           </div>
 
           {/* LAYOUT MOBILE & TABLET PORTRAIT (< 1024px) — ABAS E CARROSSEL */}

@@ -21,7 +21,7 @@ export function OmronReferenceModal({ open, onOpenChange }: OmronReferenceModalP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-3xl max-h-[90vh] flex flex-col p-6">
+      <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-3xl max-h-[85vh] overflow-y-auto flex flex-col p-6">
         <DialogHeader className="border-b border-[#252B3E] pb-4">
           <div className="flex items-center gap-2">
             <div className="px-2.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/40 font-black text-xs tracking-wider">

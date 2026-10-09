@@ -248,14 +248,21 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
                   Possui alguma doença?
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {an.possui_doenca.map((d) => (
-                    <Badge
-                      key={d}
-                      className="bg-red-500/15 text-red-300 border border-red-500/30 text-xs px-2.5 py-0.5 font-medium"
-                    >
-                      (x) {d}
-                    </Badge>
-                  ))}
+                  {an.possui_doenca.map((d) => {
+                    const isNao = d.toLowerCase() === 'não' || d.toLowerCase() === 'nao'
+                    return (
+                      <Badge
+                        key={d}
+                        className={`text-xs px-2.5 py-0.5 font-medium ${
+                          isNao
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                            : 'bg-red-500/15 text-red-300 border border-red-500/30'
+                        }`}
+                      >
+                        (x) {d}
+                      </Badge>
+                    )
+                  })}
                 </div>
                 {an.possui_doenca_outros && (
                   <p className="text-xs text-[#9CA5B8] pt-1">
@@ -322,14 +329,21 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
                   Faz uso de:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
-                  {an.uso_substancias.map((sub) => (
-                    <Badge
-                      key={sub}
-                      className="bg-[#2A2A2A] text-white border border-[#3A3A3A] text-xs px-2.5 py-0.5 font-medium"
-                    >
-                      (x) {sub}
-                    </Badge>
-                  ))}
+                  {an.uso_substancias.map((sub) => {
+                    const isNao = sub.toLowerCase() === 'não' || sub.toLowerCase() === 'nao'
+                    return (
+                      <Badge
+                        key={sub}
+                        className={`text-xs px-2.5 py-0.5 font-medium ${
+                          isNao
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                            : 'bg-[#2A2A2A] text-white border border-[#3A3A3A]'
+                        }`}
+                      >
+                        (x) {sub}
+                      </Badge>
+                    )
+                  })}
                 </div>
               </div>
             )}

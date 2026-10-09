@@ -220,15 +220,31 @@ export default function StudentForm() {
   }
 
   const toggleDoenca = (item: string) => {
-    setDoencasSelecionadas((prev) =>
-      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
-    )
+    setDoencasSelecionadas((prev) => {
+      if (item === 'Não') {
+        // Clicar em NÃO: se já tem 'Não', desseleciona; senão limpa todas as outras e marca ['Não']
+        return prev.includes('Não') ? [] : ['Não']
+      }
+      // Clicar em qualquer doença: remove 'Não' e faz toggle do item
+      const withoutNao = prev.filter((x) => x !== 'Não')
+      return withoutNao.includes(item)
+        ? withoutNao.filter((x) => x !== item)
+        : [...withoutNao, item]
+    })
   }
 
   const toggleUsoSubstancia = (item: string) => {
-    setUsoSubstancias((prev) =>
-      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
-    )
+    setUsoSubstancias((prev) => {
+      if (item === 'Não') {
+        // Clicar em NÃO: se já tem 'Não', desseleciona; senão limpa todas as outras e marca ['Não']
+        return prev.includes('Não') ? [] : ['Não']
+      }
+      // Clicar em Álcool/Tabaco: remove 'Não' e faz toggle do item
+      const withoutNao = prev.filter((x) => x !== 'Não')
+      return withoutNao.includes(item)
+        ? withoutNao.filter((x) => x !== item)
+        : [...withoutNao, item]
+    })
   }
 
   const handleAnamnesisPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1342,14 +1358,15 @@ export default function StudentForm() {
                     )}
                   </div>
 
-                  {/* 8. Possui alguma doença? ( ) Diabetes ( ) Hipertensão ( ) Outros */}
+                  {/* 8. Possui alguma doença? ( ) Não ( ) Diabetes ( ) Hipertensão ( ) Outros */}
                   <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
                     <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
                       Possui alguma doença?
                     </Label>
-                    <div className="flex items-center gap-4 flex-wrap">
-                      {['Diabetes', 'Hipertensão', 'Outros'].map((d) => {
+                    <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
+                      {['Não', 'Diabetes', 'Hipertensão', 'Outros'].map((d) => {
                         const isSel = doencasSelecionadas.includes(d)
+                        const isNao = d === 'Não'
                         return (
                           <button
                             type="button"
@@ -1357,14 +1374,18 @@ export default function StudentForm() {
                             onClick={() => toggleDoenca(d)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-2 transition-all ${
                               isSel
-                                ? 'bg-primary/20 border-primary text-secondary font-bold'
+                                ? isNao
+                                  ? 'bg-emerald-600/25 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-500/20'
+                                  : 'bg-primary/20 border-primary text-secondary font-bold'
                                 : 'bg-[#181C2E] border-[#252B3E] text-[#9CA5B8] hover:text-white'
                             }`}
                           >
                             <span
                               className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
                                 isSel
-                                  ? 'bg-primary border-primary text-primary-foreground'
+                                  ? isNao
+                                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                                    : 'bg-primary border-primary text-primary-foreground'
                                   : 'border-[#4A5578]'
                               }`}
                             >
@@ -1503,14 +1524,15 @@ export default function StudentForm() {
                     </div>
                   </div>
 
-                  {/* 13. Faz uso de ( ) Álcool ( ) Tabaco */}
+                  {/* 13. Faz uso de ( ) Não ( ) Álcool ( ) Tabaco */}
                   <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
                     <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
                       Faz uso de
                     </Label>
-                    <div className="flex items-center gap-4">
-                      {['Álcool', 'Tabaco'].map((sub) => {
+                    <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
+                      {['Não', 'Álcool', 'Tabaco'].map((sub) => {
                         const isSel = usoSubstancias.includes(sub)
+                        const isNao = sub === 'Não'
                         return (
                           <button
                             type="button"
@@ -1518,14 +1540,18 @@ export default function StudentForm() {
                             onClick={() => toggleUsoSubstancia(sub)}
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-2 transition-all ${
                               isSel
-                                ? 'bg-primary/20 border-primary text-secondary font-bold'
+                                ? isNao
+                                  ? 'bg-emerald-600/25 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-500/20'
+                                  : 'bg-primary/20 border-primary text-secondary font-bold'
                                 : 'bg-[#181C2E] border-[#252B3E] text-[#9CA5B8] hover:text-white'
                             }`}
                           >
                             <span
                               className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${
                                 isSel
-                                  ? 'bg-primary border-primary text-primary-foreground'
+                                  ? isNao
+                                    ? 'bg-emerald-600 border-emerald-500 text-white'
+                                    : 'bg-primary border-primary text-primary-foreground'
                                   : 'border-[#4A5578]'
                               }`}
                             >

@@ -632,6 +632,6 @@ export async function shareOrDownloadAssessmentImage(
     }
   }
 
-  // Fallback: download direto do arquivo PNG
+  // Fallback: download direto do arquivo PNG (desktop e navegadores sem suporte a files no share)
   return triggerDirectDownload()
 }

@@ -227,13 +227,13 @@ export default function StudentTrainingColumn({
   return (
     <div className="flex flex-col h-full min-h-0 bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
       {/* HEADER DO ALUNO - otimizado verticalmente */}
-      <div className="p-3 sm:p-3.5 bg-card/60 border-b border-border shrink-0">
+      <div className="p-2 sm:p-2.5 bg-card/60 border-b border-border shrink-0">
         <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <button
               type="button"
               onClick={onEditStudent}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#2A2A2A] border-2 border-primary/40 hover:border-primary text-primary font-black text-sm flex items-center justify-center shrink-0 overflow-hidden transition-all hover:scale-105"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#2A2A2A] border-2 border-primary/40 hover:border-primary text-primary font-black text-xs sm:text-sm flex items-center justify-center shrink-0 overflow-hidden transition-all hover:scale-105"
               title={`Ver cadastro de ${student.name} na aba Alunos`}
               aria-label={`Ver cadastro de ${student.name} na aba Alunos`}
             >
@@ -255,11 +255,11 @@ export default function StudentTrainingColumn({
                 title={`Ver cadastro de ${student.name} na aba Alunos`}
                 aria-label={`Ver cadastro de ${student.name} na aba Alunos`}
               >
-                <h2 className="text-base sm:text-lg font-black text-white group-hover/name:text-primary transition-colors leading-tight truncate underline-offset-2 hover:underline">
+                <h2 className="text-sm sm:text-base font-black text-white group-hover/name:text-primary transition-colors leading-tight break-words underline-offset-2 hover:underline line-clamp-2">
                   {student.name}
                 </h2>
               </button>
-              <span className="text-[11px] sm:text-xs text-[#9CA3AF] truncate block font-medium">
+              <span className="text-[10px] sm:text-[11px] text-[#9CA3AF] truncate block font-medium">
                 {student.experience_level || 'Personal'} •{' '}
                 <strong className="text-white font-bold">
                   {completedCount}/{totalCount}
@@ -313,12 +313,12 @@ export default function StudentTrainingColumn({
 
         {/* Badges de Início da Ficha (com botão de edição rápida) e Sessões Concluídas */}
         {sheet && (
-          <div className="flex items-center gap-1.5 flex-wrap mt-2">
+          <div className="flex items-center gap-1.5 flex-wrap mt-1.5">
             <div className="flex items-center gap-1">
-              <Badge className="bg-[#181C2E] text-[#9CA5B8] border border-[#2B324D] text-[10px] px-2 py-0.5 font-medium flex items-center gap-1">
+              <Badge className="bg-[#181C2E] text-[#9CA5B8] border border-[#2B324D] text-[10px] px-1.5 py-0.5 font-medium flex items-center gap-1">
                 <Calendar className="w-3 h-3 text-primary" />
                 <span>
-                  Início da ficha:{' '}
+                  Início:{' '}
                   <strong className="text-white">
                     {parseAndFormatDate(sheet.start_date || sheet.created, 'Recente')}
                   </strong>
@@ -328,7 +328,7 @@ export default function StudentTrainingColumn({
                 <button
                   type="button"
                   onClick={() => onEditStartDate(sheet)}
-                  className="p-1 rounded text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E] transition-colors"
+                  className="p-0.5 rounded text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E] transition-colors"
                   title="Alterar data de início da ficha"
                   aria-label="Alterar data de início da ficha"
                 >
@@ -338,11 +338,10 @@ export default function StudentTrainingColumn({
             </div>
 
             {completedSessionsCount !== undefined && (
-              <Badge className="bg-secondary/15 text-white border border-secondary/35 text-[10px] px-2 py-0.5 font-semibold flex items-center gap-1">
+              <Badge className="bg-secondary/15 text-white border border-secondary/35 text-[10px] px-1.5 py-0.5 font-semibold flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3 text-secondary" />
                 <span>
-                  Sessões concluídas:{' '}
-                  <strong className="text-secondary">{completedSessionsCount}</strong>
+                  Sessões: <strong className="text-secondary">{completedSessionsCount}</strong>
                 </span>
               </Badge>
             )}
@@ -351,14 +350,14 @@ export default function StudentTrainingColumn({
 
         {/* Alerta de Restrição rápida se existir (compacto) */}
         {student.restrictions && (
-          <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-amber-950/40 border border-amber-800/60 flex items-start gap-1.5 text-[11px] sm:text-xs text-amber-200 font-medium leading-tight">
-            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400 mt-0.5" />
+          <div className="mt-1.5 px-2 py-1 rounded-lg bg-amber-950/40 border border-amber-800/60 flex items-start gap-1.5 text-[10px] sm:text-[11px] text-amber-200 font-medium leading-tight">
+            <AlertTriangle className="w-3 h-3 shrink-0 text-amber-400 mt-0.5" />
             <span className="break-words line-clamp-2">{student.restrictions}</span>
           </div>
         )}
 
         {/* Seletor de Séries A, B, C, D, E + Atalho de Adicionar Exercício na série */}
-        <div className="flex items-center gap-1 sm:gap-1.5 mt-2.5 pt-2 border-t border-[#252525]">
+        <div className="flex items-center gap-1 sm:gap-1.5 mt-2 pt-1.5 border-t border-[#252525]">
           <div className="flex-1 flex items-center gap-1">
             {(() => {
               // Exibe apenas as séries que a ficha realmente possui (ou pelo menos Série A se vazia)
@@ -400,19 +399,23 @@ export default function StudentTrainingColumn({
         </div>
       </div>
 
-      {/* LISTA DE EXERCÍCIOS DA SÉRIE - cards compactos para caber por inteiro na dobra */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-2.5 sm:p-3 space-y-2.5">
+      {/* LISTA DE EXERCÍCIOS DA SÉRIE - rolagem interna por ficha sem travar coluna */}
+      <div className="flex-1 min-h-[140px] overflow-y-auto p-2 sm:p-2.5 space-y-2">
         {!sheet ? (
-          <div className="py-12 text-center text-sm text-[#8A8F98] px-4 space-y-2">
-            <ClipboardList className="w-10 h-10 opacity-40 mx-auto" />
-            <p className="font-semibold text-white text-base">Nenhuma ficha vinculada</p>
-            <p>Monte uma ficha para este aluno na aba &quot;Fichas de Treino&quot;.</p>
+          <div className="py-10 text-center text-sm text-[#8A8F98] px-4 space-y-2">
+            <ClipboardList className="w-9 h-9 opacity-40 mx-auto" />
+            <p className="font-semibold text-white text-sm sm:text-base">Nenhuma ficha vinculada</p>
+            <p className="text-xs">
+              Monte uma ficha para este aluno na aba &quot;Fichas de Treino&quot;.
+            </p>
           </div>
         ) : currentExercises.length === 0 ? (
-          <div className="py-12 text-center text-sm text-[#8A8F98] px-4 space-y-2">
-            <ClipboardList className="w-10 h-10 opacity-40 mx-auto" />
-            <p className="font-semibold text-white text-base">Série {activeSeries} vazia</p>
-            <p>Selecione outra série ou edite a ficha do aluno.</p>
+          <div className="py-10 text-center text-sm text-[#8A8F98] px-4 space-y-2">
+            <ClipboardList className="w-9 h-9 opacity-40 mx-auto" />
+            <p className="font-semibold text-white text-sm sm:text-base">
+              Série {activeSeries} vazia
+            </p>
+            <p className="text-xs">Selecione outra série ou edite a ficha do aluno.</p>
           </div>
         ) : (
           currentExercises.map((block, idx) => {
@@ -428,7 +431,7 @@ export default function StudentTrainingColumn({
             return (
               <div
                 key={`${block.exercise_id}-${idx}`}
-                className={`${isCompactGrid ? 'p-2.5' : 'p-3 sm:p-3.5'} rounded-xl border transition-all ${
+                className={`min-h-[120px] p-2.5 sm:p-3 rounded-xl border flex flex-col justify-between transition-all ${
                   isEditingThis
                     ? 'bg-[#181C2E] border-primary ring-2 ring-primary/30 shadow-xl'
                     : isDone
@@ -501,7 +504,7 @@ export default function StudentTrainingColumn({
 
                       <h3
                         onClick={() => ex && onOpenVideo(ex)}
-                        className={`text-base sm:text-lg font-black leading-snug break-words transition-colors cursor-pointer ${
+                        className={`text-sm sm:text-base font-black leading-snug break-words transition-colors cursor-pointer ${
                           isDone
                             ? 'line-through text-emerald-200/60'
                             : isInProgress
@@ -752,69 +755,45 @@ export default function StudentTrainingColumn({
                     </div>
                   </div>
                 ) : (
-                  /* Modo de Visualização: 4 colunas horizontais ampliadas em uma linha única para alta legibilidade */
-                  <div className="mt-2.5 pt-2.5 border-t border-[#262626]">
-                    <div className="grid grid-cols-4 gap-2 text-center">
+                  /* Modo de Visualização: 4 colunas horizontais com min-h-[56px] e tipografia adaptativa */
+                  <div className="mt-2 pt-2 border-t border-[#262626]">
+                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
                       {/* Séries */}
-                      <div
-                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
-                      >
-                        <span
-                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
-                        >
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1 px-1 flex flex-col items-center justify-center min-h-[56px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
                           Séries
                         </span>
-                        <span
-                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-white leading-tight`}
-                        >
+                        <span className="text-xs sm:text-sm md:text-base font-black text-white leading-tight">
                           {block.sets}x
                         </span>
                       </div>
 
                       {/* Repetições */}
-                      <div
-                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
-                      >
-                        <span
-                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
-                        >
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1 px-1 flex flex-col items-center justify-center min-h-[56px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
                           Reps
                         </span>
-                        <span
-                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-white leading-tight truncate max-w-full px-0.5`}
-                        >
+                        <span className="text-xs sm:text-sm md:text-base font-black text-white leading-tight break-words max-w-full px-0.5">
                           {block.reps || '10'}
                         </span>
                       </div>
 
                       {/* Carga */}
-                      <div
-                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
-                      >
-                        <span
-                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
-                        >
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1 px-1 flex flex-col items-center justify-center min-h-[56px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
                           Carga
                         </span>
-                        <span
-                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-primary leading-tight truncate max-w-full px-0.5`}
-                        >
+                        <span className="text-xs sm:text-sm md:text-base font-black text-primary leading-tight break-words max-w-full px-0.5">
                           {block.load || '—'}
                         </span>
                       </div>
 
                       {/* Descanso */}
-                      <div
-                        className={`bg-[#1A1A1A] border border-[#282828] rounded-xl ${isCompactGrid ? 'py-1' : 'py-1.5'} px-1 flex flex-col items-center justify-center ${isCompactGrid ? 'min-h-[44px]' : 'min-h-[52px]'}`}
-                      >
-                        <span
-                          className={`${isCompactGrid ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'} uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-1`}
-                        >
+                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-xl py-1 px-1 flex flex-col items-center justify-center min-h-[56px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
                           Pausa
                         </span>
-                        <span
-                          className={`${isCompactGrid ? 'text-base' : 'text-base sm:text-lg'} font-black text-white leading-tight truncate max-w-full px-0.5`}
-                        >
+                        <span className="text-xs sm:text-sm md:text-base font-black text-white leading-tight break-words max-w-full px-0.5">
                           {block.time || '60s'}
                         </span>
                       </div>
@@ -847,17 +826,17 @@ export default function StudentTrainingColumn({
       </div>
 
       {/* FOOTER DA COLUNA: Conclusão da Série e Ficha (mais compacto) */}
-      <div className="p-2.5 sm:p-3 bg-card/60 border-t border-border space-y-1.5 shrink-0">
+      <div className="p-2 sm:p-2.5 bg-card/60 border-t border-border space-y-1 shrink-0">
         <Button
           onClick={onCompleteSeries}
           disabled={!sheet || currentExercises.length === 0}
-          className={`w-full min-h-[42px] h-10 text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-1.5 rounded-xl shadow-md ${
+          className={`w-full min-h-[38px] h-9 text-xs font-black transition-all flex items-center justify-center gap-1.5 rounded-xl shadow-md ${
             isSeriesAllDone
               ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
               : 'bg-primary hover:opacity-90 text-primary-foreground shadow-primary/25'
           }`}
         >
-          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
           <span>
             {isSeriesAllDone
               ? `Finalizar Série ${activeSeries} (Pronta)`
@@ -870,7 +849,7 @@ export default function StudentTrainingColumn({
             type="button"
             onClick={onCompleteSheet}
             disabled={!sheet}
-            className="text-left text-[11px] sm:text-xs text-[#8A8F98] hover:text-white py-1 transition-colors font-semibold"
+            className="text-left text-[10px] sm:text-[11px] text-[#8A8F98] hover:text-white py-0.5 transition-colors font-semibold"
           >
             Marcar toda a ficha como concluída
           </button>
