@@ -112,7 +112,7 @@ describe('Cadastro e Ficha de Treino da aluna CARLA RODRIGUES', () => {
     expect(seriesData?.C?.[7].load).toBe('')
   })
 
-  it('deve registrar exatamente 20 sessões concluídas no contador de histórico', async () => {
+  it('deve registrar exatamente 29 sessões concluídas no contador de histórico', async () => {
     const students = await studentsService.getAll()
     const carla = students.find((s) => s.name.toUpperCase().includes('CARLA RODRIGUES'))
     expect(carla).toBeDefined()
@@ -121,11 +121,11 @@ describe('Cadastro e Ficha de Treino da aluna CARLA RODRIGUES', () => {
     expect(sheet).toBeDefined()
 
     const count = await workoutProgressService.countCompletedSessions(carla!.id, sheet!.id)
-    expect(count).toBe(20)
+    expect(count).toBe(29)
 
     // Verificar se as sessões estão distribuídas em A, B, C
     const sessions = await workoutProgressService.getAll(carla!.id, 50)
-    expect(sessions.length).toBeGreaterThanOrEqual(20)
+    expect(sessions.length).toBeGreaterThanOrEqual(29)
     const seriesA = sessions.filter((s) => s.series_completed === 'A')
     const seriesB = sessions.filter((s) => s.series_completed === 'B')
     const seriesC = sessions.filter((s) => s.series_completed === 'C')

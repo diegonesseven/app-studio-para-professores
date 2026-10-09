@@ -110,22 +110,25 @@ describe('Cadastro e Fichas de Treino: LORRAYNE CAMPANHARO e LUCIA DE FARIAS', (
       expect(exA1?.toLowerCase()).toContain('sumô 2 tempos')
     })
 
-    it('deve registrar exatamente 14 sessões concluídas no histórico na sequência A,B,C,A,B,C,A,B,C,A,B,C,A,B', async () => {
+    it('deve registrar exatamente 17 sessões concluídas no histórico na sequência A,B,C,A,B,C,A,B,C,A,B,C,A,B,C,A,B', async () => {
       const students = await studentsService.getAll()
       const lorrayne = students.find((s) => s.name.toUpperCase().includes('LORRAYNE CAMPANHARO'))
       const sheet = await trainingSheetsService.getByStudent(lorrayne!.id)
 
       const count = await workoutProgressService.countCompletedSessions(lorrayne!.id, sheet!.id)
-      expect(count).toBe(14)
+      expect(count).toBe(17)
 
       const sessions = await workoutProgressService.getAll(lorrayne!.id, 50)
-      expect(sessions).toHaveLength(14)
+      expect(sessions).toHaveLength(17)
 
       // As sessões retornadas do getAll são ordenadas decrescentes por completed_at, ou verificar a sequência invertida
       const chronological = [...sessions].sort(
         (a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime(),
       )
       const expectedSequence = [
+        'A',
+        'B',
+        'C',
         'A',
         'B',
         'C',
