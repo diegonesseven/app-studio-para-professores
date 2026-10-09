@@ -282,7 +282,7 @@ export default function Layout() {
 
         {/* CONTEÚDO PRINCIPAL (scroll independente) */}
         <main
-          className={`flex-1 bg-background main-bottom-safe ${
+          className={`flex-1 min-h-0 bg-background main-bottom-safe ${
             location.pathname === '/treino' || location.pathname.startsWith('/treino?')
               ? 'p-2 sm:p-2.5 lg:p-3 flex flex-col overflow-hidden'
               : 'p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden'
@@ -330,7 +330,9 @@ export default function Layout() {
             to="/treino"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
-                isActive || location.pathname === '/treino' || location.pathname.startsWith('/treino?')
+                isActive ||
+                location.pathname === '/treino' ||
+                location.pathname.startsWith('/treino?')
                   ? 'text-primary'
                   : 'text-[#8A8F98]'
               }`

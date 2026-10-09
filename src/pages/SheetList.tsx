@@ -16,9 +16,9 @@ import {
   Loader2,
   AlertCircle,
   Share2,
-  Printer,
   Sparkles,
 } from 'lucide-react'
+import { SERIES_KEYS } from '@/types'
 import { exercisesService } from '@/services/exercises'
 import { templateSheetsStorage } from '@/services/templateSheets'
 import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
@@ -56,6 +56,9 @@ export default function SheetList() {
 
   // Duplicação simples (mesmo aluno)
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null)
+
+  // Visualização/Inspeção de Modelo
+  const [viewingTemplateSheet, setViewingTemplateSheet] = useState<TrainingSheet | null>(null)
 
   // Cópia para outro aluno (Item 3)
   const [copyModalSheet, setCopyModalSheet] = useState<TrainingSheet | null>(null)
@@ -291,7 +294,7 @@ export default function SheetList() {
   const studentCount = sheets.filter((s) => !s.is_template && s.student).length
 
   return (
-    <div className="space-y-6 animate-fade-in pb-12">
+    <div className="space-y-6 animate-fade-in pb-20">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -445,9 +448,28 @@ export default function SheetList() {
             return (
               <div
                 key={sheet.id}
-                className={`border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group ${
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (isTemplate) {
+                    setViewingTemplateSheet(sheet)
+                  } else {
+                    navigate(`/fichas/${sheet.id}/editar`)
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    if (isTemplate) {
+                      setViewingTemplateSheet(sheet)
+                    } else {
+                      navigate(`/fichas/${sheet.id}/editar`)
+                    }
+                  }
+                }}
+                className={`border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary ${
                   isTemplate
-                    ? 'bg-gradient-to-br from-[#1A1813] to-[#141414] border-amber-500/40 hover:border-amber-400 shadow-md shadow-amber-950/20'
+                    ? 'bg-gradient-to-br from-[#1A1813] to-[#141414] border-amber-500/40 hover:border-amber-400 shadow-md shadow-amber-950/20 focus:ring-amber-400'
                     : 'bg-[#181C2E] border-[#252B3E] hover:border-primary/50'
                 }`}
               >
@@ -538,20 +560,24 @@ export default function SheetList() {
 
                 {/* Ações */}
                 <div className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
-                      onClick={() => handleExportSheet(sheet)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleExportSheet(sheet)
+                      }}
+                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors cursor-pointer"
                       title="Exportar / Compartilhar Ficha (PDF/Impressão)"
                       aria-label={`Exportar ficha de ${studentName}`}
                     >
                       <Share2 className="w-4 h-4" />
                     </button>
 
-                    <Link to={`/fichas/${sheet.id}/editar`}>
+                    <Link to={`/fichas/${sheet.id}/editar`} onClick={(e) => e.stopPropagation()}>
                       <button
-                        className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
+                        type="button"
+                        className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors cursor-pointer"
                         title="Editar ficha"
                         aria-label={`Editar ficha de ${studentName}`}
                       >
@@ -562,8 +588,11 @@ export default function SheetList() {
                     {/* Botão Copiar / Vincular Aluno */}
                     <button
                       type="button"
-                      onClick={() => handleOpenCopyModal(sheet)}
-                      className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold ${
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleOpenCopyModal(sheet)
+                      }}
+                      className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold cursor-pointer ${
                         isTemplate
                           ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-black'
                           : 'text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A]'
@@ -581,8 +610,12 @@ export default function SheetList() {
 
                     {!sheet.id.startsWith('modelo-') || sheet.id.startsWith('modelo-custom-') ? (
                       <button
-                        onClick={() => setDeleteId(sheet.id)}
-                        className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setDeleteId(sheet.id)
+                        }}
+                        className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors cursor-pointer"
                         title="Excluir ficha"
                         aria-label={`Excluir ficha de ${studentName}`}
                       >
@@ -593,15 +626,23 @@ export default function SheetList() {
 
                   {sheet.student ? (
                     <Button
-                      onClick={() => navigate(`/treino?students=${sheet.student}`)}
-                      className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        navigate(`/treino?students=${sheet.student}`)
+                      }}
+                      className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
                     >
                       <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Treinar Agora
                     </Button>
                   ) : (
                     <Button
-                      onClick={() => handleOpenCopyModal(sheet)}
-                      className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleOpenCopyModal(sheet)
+                      }}
+                      className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold h-9 px-3.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
                     >
                       <Copy className="w-3.5 h-3.5" /> Vincular Aluno
                     </Button>
@@ -612,6 +653,135 @@ export default function SheetList() {
           })}
         </div>
       )}
+
+      {/* Modal Visualização / Inspeção de Ficha Modelo */}
+      <Dialog
+        open={Boolean(viewingTemplateSheet)}
+        onOpenChange={(open) => !open && setViewingTemplateSheet(null)}
+      >
+        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="border-b border-[#252B3E] pb-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className="bg-amber-500 text-black font-extrabold text-[11px] px-2.5 py-0.5 tracking-wider shadow-sm flex items-center gap-1">
+                <Sparkles className="w-3 h-3" />
+                MODELO
+              </Badge>
+              {viewingTemplateSheet?.template_level && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-500/40 text-amber-300 text-[10px] font-semibold bg-amber-950/30"
+                >
+                  {viewingTemplateSheet.template_level}
+                </Badge>
+              )}
+              {viewingTemplateSheet?.template_gender && (
+                <Badge
+                  variant="outline"
+                  className="border-amber-500/40 text-amber-200 text-[10px] font-semibold bg-amber-950/30"
+                >
+                  {viewingTemplateSheet.template_gender}
+                </Badge>
+              )}
+            </div>
+            <DialogTitle className="text-lg font-bold text-white mt-1">
+              {viewingTemplateSheet?.title || 'Ficha Modelo'}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-[#9CA5B8]">
+              {viewingTemplateSheet?.notes ||
+                'Estrutura pré-definida com séries, repetições e exercícios selecionados.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-3 overflow-y-auto space-y-4 flex-1 pr-1">
+            {SERIES_KEYS.map((k) => {
+              const blocks = viewingTemplateSheet?.series_data?.[k] || []
+              if (blocks.length === 0) return null
+
+              return (
+                <div key={k} className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-md bg-amber-500 text-black font-black text-xs flex items-center justify-center">
+                      {k}
+                    </span>
+                    <span className="font-bold text-sm text-white">Série {k}</span>
+                    <span className="text-xs text-[#9CA5B8]">({blocks.length} exercícios)</span>
+                  </div>
+
+                  <div className="space-y-1.5 pl-2">
+                    {blocks.map((b, i) => {
+                      const ex = exercisesMap[b.exercise_id]
+                      return (
+                        <div
+                          key={i}
+                          className="p-2.5 rounded-lg bg-[#121522] border border-[#252B3E] flex items-center justify-between text-xs gap-2"
+                        >
+                          <div className="min-w-0">
+                            <span className="font-bold text-white block truncate">
+                              #{i + 1} {ex?.name || 'Exercício'}
+                            </span>
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              {ex?.muscle_group || 'Geral'} {b.notes ? `• ${b.notes}` : ''}
+                            </span>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="text-amber-300 font-bold block">
+                              {b.sets}x {b.reps || '12'}
+                            </span>
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              {b.load ? `Carga: ${b.load}` : 'Carga padrão'}
+                              {b.time ? ` • ${b.time}` : ''}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <DialogFooter className="border-t border-[#252B3E] pt-3 flex sm:justify-between items-center gap-2">
+            <div className="flex items-center gap-2">
+              {viewingTemplateSheet && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleExportSheet(viewingTemplateSheet)}
+                  className="border-amber-500/40 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 font-bold text-xs h-9 px-3 flex items-center gap-1.5"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-amber-400" /> Exportar PDF
+                </Button>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setViewingTemplateSheet(null)}
+                className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white text-xs h-9"
+              >
+                Fechar
+              </Button>
+              {viewingTemplateSheet && (
+                <Button
+                  type="button"
+                  onClick={() => {
+                    const templateToCopy = viewingTemplateSheet
+                    setViewingTemplateSheet(null)
+                    handleOpenCopyModal(templateToCopy)
+                  }}
+                  className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                >
+                  <Copy className="w-3.5 h-3.5" /> Copiar / Usar Modelo
+                </Button>
+              )}
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Modal Copiar Ficha para Outro Aluno (Item 3) */}
       <Dialog
