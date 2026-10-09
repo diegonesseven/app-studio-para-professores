@@ -111,6 +111,22 @@ export default function StudentForm() {
   // Preservação de dados antigos para não perder histórico anterior
   const [legacyHealthHistory, setLegacyHealthHistory] = useState('')
   const [legacySurgeries, setLegacySurgeries] = useState('')
+=======
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+=======
+  // Histórico de Fichas Anteriores do aluno (Item 4)
+  const [allStudentSheets, setAllStudentSheets] = useState<TrainingSheet[]>([])
+  const [viewingArchivedSheet, setViewingArchivedSheet] = useState<TrainingSheet | null>(null)
+
+  // Histórico de treinos do aluno com o professor
+  const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+  const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+=======
+<<<<<<< SEARCH
+=======
+=======
   const [legacyTeacherObs, setLegacyTeacherObs] = useState('')
 
   // Histórico de Fichas Anteriores do aluno (Item 4)
@@ -121,29 +137,64 @@ export default function StudentForm() {
   const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
   const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
   const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+=======
+=======
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+=======
+  // Histórico de Fichas Anteriores do aluno (Item 4)
+  const [allStudentSheets, setAllStudentSheets] = useState<TrainingSheet[]>([])
+  const [viewingArchivedSheet, setViewingArchivedSheet] = useState<TrainingSheet | null>(null)
 
-  // Avaliações físicas pré-carregadas para evitar requisição duplicada em PhysicalAssessmentTab
-  const [initialAssessments, setInitialAssessments] = useState<PhysicalAssessment[]>([])
+  // Histórico de treinos do aluno com o professor
+  const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+  const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+=======
+<<<<<<< SEARCH
+=======
+=======
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+          const map: Record<string, Exercise> = {}
+          exList.forEach((e) => {
+            map[e.id] = e
+          })
+          setExercisesMap(map)
 
+          if (
+            st.restrictions ||
+            st.anamnesis_data ||
+            st.injuries ||
+            st.health_history ||
+            (st.anamnesis_photos && st.anamnesis_photos.length > 0)
+          ) {
+            setAnamneseOpen(true)
+          }
+        })
+        .catch((err) => {
+          toast({
+            title: 'Erro ao carregar aluno',
+            description: err instanceof Error ? err.message : 'Não encontrado',
+            variant: 'destructive',
+          })
+          navigate('/alunos')
+        })
+        .finally(() => setLoading(false))
+    }
+  }, [id, navigate])
+=======
   useEffect(() => {
-    let isMounted = true
+    if (!id) return
 
-    const fetchStudentDataWithRetry = async () => {
-      if (!id) return
-      setLoading(true)
-
-      try {
-        // Dispara requisições usando a fila de concorrência e retry automático em HTTP 429
-        const [st, history, sheets, exList, assessmentsList] = await Promise.all([
-          studentsService.getById(id),
-          workoutProgressService.getAll(id, 50),
-          trainingSheetsService.getHistoryByStudent(id),
-          exercisesService.getAll(),
-          physicalAssessmentsService.getByStudent(id),
-        ])
-
-        if (!isMounted) return
-
+    setLoading(true)
+    Promise.all([
+      studentsService.getById(id),
+      workoutProgressService.getAll(id, 50),
+      trainingSheetsService.getHistoryByStudent(id),
+      exercisesService.getAll(),
+    ])
+      .then(([st, history, sheets, exList]) => {
         setName(st.name)
         setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
         setPhone(st.phone ? maskPhone(st.phone) : '')
@@ -164,6 +215,7 @@ export default function StudentForm() {
         setTreinouPersonalAntes(anData.treinou_personal_antes || '')
         setProfissao(anData.profissao || '')
 
+        // Se já tem objetivos estruturados usa eles; se não, mapeia dos goals legados
         if (anData.objetivos && anData.objetivos.length > 0) {
           setObjetivosSelecionados(anData.objetivos)
         } else if (st.goals && st.goals.length > 0) {
@@ -180,6 +232,7 @@ export default function StudentForm() {
         setDoencasSelecionadas(anData.possui_doenca || [])
         setDoencasOutros(anData.possui_doenca_outros || '')
 
+        // Lesão: se não estiver na anData, usa o campo legacy injuries
         setPossuiLesao(anData.possui_lesao || st.injuries || '')
 
         setDoresCorpo(anData.dores_corpo || '')
@@ -195,8 +248,6 @@ export default function StudentForm() {
 
         setAllStudentSheets(sheets)
         setStudentHistory(history)
-        setInitialAssessments(assessmentsList)
-
         const map: Record<string, Exercise> = {}
         exList.forEach((e) => {
           map[e.id] = e
@@ -212,26 +263,17 @@ export default function StudentForm() {
         ) {
           setAnamneseOpen(true)
         }
-      } catch (err: unknown) {
-        if (!isMounted) return
+      })
+      .catch((err) => {
         toast({
           title: 'Erro ao carregar aluno',
           description: err instanceof Error ? err.message : 'Não encontrado',
           variant: 'destructive',
         })
         navigate('/alunos')
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
-      }
-    }
-
-    fetchStudentDataWithRetry()
-
-    return () => {
-      isMounted = false
-    }
+      })
+      .finally(() => setLoading(false))
+  }, [id, navigate])
 =======
           setName(st.name)
 =======
