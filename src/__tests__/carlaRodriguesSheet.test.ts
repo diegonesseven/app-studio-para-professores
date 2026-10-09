@@ -48,6 +48,70 @@ describe('Cadastro e Ficha de Treino da aluna CARLA RODRIGUES', () => {
     expect(seriesData?.A?.[1].reps).toBe('10')
   })
 
+  it('deve conter as cargas corretas da planilha oficial em cada item das séries A, B e C', async () => {
+    const students = await studentsService.getAll()
+    const carla = students.find((s) => s.name.toUpperCase().includes('CARLA RODRIGUES'))
+    expect(carla).toBeDefined()
+
+    const sheet = await trainingSheetsService.getByStudent(carla!.id)
+    expect(sheet).toBeDefined()
+    const seriesData = sheet?.series_data
+
+    // Série A:
+    // 1. Extensora Curtinho: 2
+    // 2. Supino Reto Conjugado Halter: 5
+    // 3. Flexão de Quadril N/AB Can.: 5
+    // 4. Elevação Frontal Unilateral Halter: 4
+    // 5. Flexão de Quadril 180º Polia: 2
+    // 6. Tríceps Testa Simult. Solo Barra H: 4
+    // 7. Adução em "V" Can.: 5 kg
+    // 8. Alongamentos Revezar: ""
+    expect(seriesData?.A?.[0].load).toBe('2')
+    expect(seriesData?.A?.[1].load).toBe('5')
+    expect(seriesData?.A?.[2].load).toBe('5')
+    expect(seriesData?.A?.[3].load).toBe('4')
+    expect(seriesData?.A?.[4].load).toBe('2')
+    expect(seriesData?.A?.[5].load).toBe('4')
+    expect(seriesData?.A?.[6].load).toBe('5 kg')
+    expect(seriesData?.A?.[7].load).toBe('')
+
+    // Série B:
+    // 1. Flexora Simult.: 5
+    // 2. Remada Curvada Pronado Aberto (Halter): "" (em branco na tabela)
+    // 3. Stiff Smith: 15
+    // 4. Pulley Frente Fechado Peg Sup. (Barra): 5
+    // 5. Panturrilha Smith: 20
+    // 6. Rosca Concentrada Halter: 6
+    // 7. Pêndulo: 8
+    // 8. Alongamentos Revezar: ""
+    expect(seriesData?.B?.[0].load).toBe('5')
+    expect(seriesData?.B?.[1].load).toBe('')
+    expect(seriesData?.B?.[2].load).toBe('15')
+    expect(seriesData?.B?.[3].load).toBe('5')
+    expect(seriesData?.B?.[4].load).toBe('20')
+    expect(seriesData?.B?.[5].load).toBe('6')
+    expect(seriesData?.B?.[6].load).toBe('8')
+    expect(seriesData?.B?.[7].load).toBe('')
+
+    // Série C:
+    // 1. Abdutora Inclinada: 6
+    // 2. Tríceps Testa Polia Barra Step: 4
+    // 3. Levantamento Terra Sumô: 10
+    // 4. Tríceps Unilateral Polia: 2
+    // 5. Abdução Polia Atrás: 2
+    // 6. Glúteo 180º Polia: 3
+    // 7. Remada Alta Polia Barra: 3
+    // 8. Alongamentos Revezar: ""
+    expect(seriesData?.C?.[0].load).toBe('6')
+    expect(seriesData?.C?.[1].load).toBe('4')
+    expect(seriesData?.C?.[2].load).toBe('10')
+    expect(seriesData?.C?.[3].load).toBe('2')
+    expect(seriesData?.C?.[4].load).toBe('2')
+    expect(seriesData?.C?.[5].load).toBe('3')
+    expect(seriesData?.C?.[6].load).toBe('3')
+    expect(seriesData?.C?.[7].load).toBe('')
+  })
+
   it('deve registrar exatamente 20 sessões concluídas no contador de histórico', async () => {
     const students = await studentsService.getAll()
     const carla = students.find((s) => s.name.toUpperCase().includes('CARLA RODRIGUES'))

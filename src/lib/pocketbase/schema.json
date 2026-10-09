@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-09T01:43:24.667Z",
+  "generatedAt": "2026-10-09T01:53:08.802Z",
   "collections": [
     {
       "name": "users",
@@ -29,29 +29,21 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "role",
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "admin",
-            "professor"
-          ]
+          "selectValues": ["admin", "professor"]
         }
       ],
       "indexes": [
@@ -136,11 +128,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "Iniciante",
-            "Intermediário",
-            "Avançado"
-          ]
+          "selectValues": ["Iniciante", "Intermediário", "Avançado"]
         },
         {
           "name": "teacher_observations",
@@ -160,19 +148,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "photo",
@@ -256,19 +239,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": [
@@ -317,19 +295,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "start_date",
@@ -344,9 +317,7 @@
           "system": false
         }
       ],
-      "indexes": [
-        "CREATE INDEX idx_training_sheets_student ON training_sheets (student)"
-      ]
+      "indexes": ["CREATE INDEX idx_training_sheets_student ON training_sheets (student)"]
     },
     {
       "name": "workout_progress",
@@ -378,13 +349,7 @@
           "type": "select",
           "required": true,
           "system": false,
-          "selectValues": [
-            "A",
-            "B",
-            "C",
-            "D",
-            "E"
-          ]
+          "selectValues": ["A", "B", "C", "D", "E"]
         },
         {
           "name": "completed_at",
@@ -409,19 +374,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "teacher",
@@ -512,19 +472,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         },
         {
           "name": "logo_file",
@@ -533,9 +488,7 @@
           "system": false
         }
       ],
-      "indexes": [
-        "CREATE UNIQUE INDEX idx_app_settings_key ON app_settings (key)"
-      ]
+      "indexes": ["CREATE UNIQUE INDEX idx_app_settings_key ON app_settings (key)"]
     },
     {
       "name": "physical_assessments",
@@ -566,10 +519,7 @@
           "type": "select",
           "required": false,
           "system": false,
-          "selectValues": [
-            "M",
-            "F"
-          ]
+          "selectValues": ["M", "F"]
         },
         {
           "name": "data",
@@ -582,19 +532,14 @@
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate"
-          ]
+          "autodateTriggers": ["onCreate"]
         },
         {
           "name": "updated",
           "type": "autodate",
           "required": false,
           "system": false,
-          "autodateTriggers": [
-            "onCreate",
-            "onUpdate"
-          ]
+          "autodateTriggers": ["onCreate", "onUpdate"]
         }
       ],
       "indexes": [
