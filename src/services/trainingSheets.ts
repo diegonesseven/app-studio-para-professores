@@ -70,19 +70,22 @@ export const trainingSheetsService = {
     }
   },
   async create(data: {
-    student: string
+    student?: string
     title?: string
     notes?: string
     series_data: SeriesData
     start_date?: string
     is_archived?: boolean
   }): Promise<TrainingSheet> {
-    const payload = {
+    const payload: Record<string, unknown> = {
       ...data,
       title: data.title ? sanitizeText(data.title) : undefined,
       notes: data.notes ? sanitizeText(data.notes) : undefined,
       start_date: data.start_date || new Date().toISOString(),
       is_archived: data.is_archived ?? false,
+    }
+    if (!data.student) {
+      delete payload.student
     }
     return pb.collection('training_sheets').create<TrainingSheet>(payload)
   },
@@ -114,9 +117,19 @@ export const trainingSheetsService = {
     id: string,
     targetStudentId?: string,
     customTitle?: string,
+    fallbackSheet?: TrainingSheet,
   ): Promise<TrainingSheet> {
-    const original = await this.getById(id)
-    const newStudentId = targetStudentId || original.student
+    let original: TrainingSheet
+    try {
+      original = await this.getById(id)
+    } catch {
+      if (fallbackSheet) {
+        original = fallbackSheet
+      } else {
+        throw new Error('Ficha original não encontrada para cópia')
+      }
+    }
+    const newStudentId = targetStudentId || original.student || ''
     const title =
       customTitle || (original.title ? `${original.title} (cópia)` : 'Ficha de Treino (cópia)')
 
@@ -125,12 +138,18 @@ export const trainingSheetsService = {
       ? JSON.parse(JSON.stringify(original.series_data))
       : { A: [], B: [], C: [], D: [], E: [] }
 
-    return pb.collection('training_sheets').create<TrainingSheet>({
-      student: newStudentId,
-      title: title,
+    const payload: Record<string, unknown> = {
+      title,
       notes: original.notes || '',
       series_data: clonedSeries,
-    })
+      start_date: new Date().toISOString(),
+      is_archived: false,
+    }
+    if (newStudentId) {
+      payload.student = newStudentId
+    }
+
+    return pb.collection('training_sheets').create<TrainingSheet>(payload)
   },
 
   async delete(id: string): Promise<boolean> {

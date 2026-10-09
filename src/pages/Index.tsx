@@ -5,6 +5,7 @@ import { studentsService } from '@/services/students'
 import { exercisesService } from '@/services/exercises'
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { workoutProgressService } from '@/services/workoutProgress'
+import { getAvailableSeriesKeys, getNextSeriesKey } from '@/lib/seriesCycle'
 import type { Student, SeriesKey } from '@/types'
 import {
   Users,
@@ -77,17 +78,19 @@ export default function Index() {
           setSelectedStudentForSheet(allSt[0].id)
         }
 
-        // Buscar próxima série dos 5 alunos recentes
+        // Buscar próxima série dos 5 alunos recentes respeitando as séries que a ficha realmente possui
         const map: Record<string, SeriesKey> = {}
         await Promise.all(
           recSt.map(async (st) => {
-            const latest = await workoutProgressService.getLatestByStudent(st.id)
+            const [latest, sheet] = await Promise.all([
+              workoutProgressService.getLatestByStudent(st.id),
+              trainingSheetsService.getByStudent(st.id),
+            ])
+            const availableKeys = getAvailableSeriesKeys(sheet?.series_data)
             if (latest) {
-              const keys: SeriesKey[] = ['A', 'B', 'C', 'D', 'E']
-              const idx = keys.indexOf(latest.series_completed)
-              map[st.id] = keys[(idx + 1) % keys.length]
+              map[st.id] = getNextSeriesKey(latest.series_completed, availableKeys)
             } else {
-              map[st.id] = 'A'
+              map[st.id] = availableKeys[0] || 'A'
             }
           }),
         )
@@ -279,43 +282,58 @@ export default function Index() {
         </div>
       </div>
 
-      {/* STATS ROW (Estatísticas do Studio Bru Oliveira) */}
+      {/* STATS ROW (Estatísticas do Studio Bru Oliveira - Clicáveis) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate('/alunos')}
+          className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] hover:border-primary/60 hover:bg-[#1E1E1E] transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between text-left group cursor-pointer"
+          aria-label="Ver Alunos Ativos"
+        >
           <div>
-            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold group-hover:text-primary transition-colors">
               Alunos Ativos
             </span>
             <div className="text-3xl font-extrabold text-white mt-1">{totalStudents}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
             <Users className="w-5 h-5" />
           </div>
-        </div>
+        </button>
 
-        <div className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate('/treinos')}
+          className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] hover:border-emerald-400/60 hover:bg-[#1E1E1E] transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between text-left group cursor-pointer"
+          aria-label="Ver Fichas Montadas"
+        >
           <div>
-            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold group-hover:text-emerald-400 transition-colors">
               Fichas Montadas
             </span>
             <div className="text-3xl font-extrabold text-white mt-1">{totalSheets}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-emerald-400 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
             <ClipboardList className="w-5 h-5" />
           </div>
-        </div>
+        </button>
 
-        <div className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => navigate('/acervo')}
+          className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] hover:border-primary/60 hover:bg-[#1E1E1E] transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between text-left group cursor-pointer"
+          aria-label="Ver Exercícios no Acervo"
+        >
           <div>
-            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold group-hover:text-primary transition-colors">
               Exercícios no Acervo
             </span>
             <div className="text-3xl font-extrabold text-white mt-1">{totalExercises}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
             <Dumbbell className="w-5 h-5" />
           </div>
-        </div>
+        </button>
       </div>
 
       {/* STUDENT QUICK LIST (Últimos alunos com chevron e próxima série) */}

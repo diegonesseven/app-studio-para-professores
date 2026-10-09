@@ -17,12 +17,15 @@ import {
   AlertCircle,
   Share2,
   Printer,
+  Sparkles,
 } from 'lucide-react'
 import { exercisesService } from '@/services/exercises'
+import { templateSheetsStorage } from '@/services/templateSheets'
 import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
@@ -41,6 +44,11 @@ export default function SheetList() {
   const [exercisesMap, setExercisesMap] = useState<Record<string, any>>({})
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+
+  // Abas de visualização e filtros de modelos
+  const [viewTab, setViewTab] = useState<'all' | 'templates' | 'students'>('all')
+  const [levelFilter, setLevelFilter] = useState<string>('all')
+  const [genderFilter, setGenderFilter] = useState<string>('all')
 
   // Modal para selecionar aluno antes de criar nova ficha
   const [createModalOpen, setCreateModalOpen] = useState(false)
@@ -66,7 +74,8 @@ export default function SheetList() {
         studentsService.getAll(),
         exercisesService.getAll(),
       ])
-      setSheets(sheetsData)
+      const templates = templateSheetsStorage.getAllTemplates()
+      setSheets([...templates, ...sheetsData])
       setStudents(studentsData)
 
       const map: Record<string, any> = {}
@@ -92,18 +101,17 @@ export default function SheetList() {
   // Exportação/Compartilhamento em PDF de uma ficha da lista
   const handleExportSheet = async (sheet: TrainingSheet) => {
     const student = sheet.expand?.student || students.find((s) => s.id === sheet.student)
-    if (!student) {
-      toast({
-        title: 'Aluno não encontrado',
-        description: 'Não foi possível localizar os dados do aluno para o PDF.',
-        variant: 'destructive',
-      })
-      return
+    const exportStudent: Student = student || {
+      id: 'modelo',
+      name: sheet.title || 'Ficha Modelo',
+      experience_level: (sheet.template_level as any) || 'Iniciante',
+      created: '',
+      updated: '',
     }
 
     try {
       const res = await shareOrExportSheet({
-        student,
+        student: exportStudent,
         sheet,
         exercisesMap,
         studioName: appearance.studio_name,
@@ -118,7 +126,7 @@ export default function SheetList() {
       }
     } catch {
       openSheetPrintWindow({
-        student,
+        student: exportStudent,
         sheet,
         exercisesMap,
         studioName: appearance.studio_name,
@@ -150,9 +158,9 @@ export default function SheetList() {
 
   const handleOpenCopyModal = (sheet: TrainingSheet) => {
     setCopyModalSheet(sheet)
-    // Selecionar por padrão o primeiro aluno diferente do atual
-    const otherStudent = students.find((s) => s.id !== sheet.student)
-    setCopyTargetStudentId(otherStudent?.id || '')
+    // Selecionar por padrão o primeiro aluno diferente do atual (ou o primeiro da lista se for modelo)
+    const target = students.find((s) => s.id !== sheet.student) || students[0]
+    setCopyTargetStudentId(target?.id || '')
   }
 
   const handleConfirmCopyToOtherStudent = async () => {
@@ -179,19 +187,22 @@ export default function SheetList() {
 
     try {
       setCopyingToOther(true)
-      const newTitle = copyModalSheet.title
-        ? `${copyModalSheet.title} (base: ${sourceStudent?.name || 'aluno'})`
-        : `Ficha de Treino - ${targetStudent.name}`
+      const isTemplate = copyModalSheet.is_template || !copyModalSheet.student
+      const baseName = isTemplate
+        ? copyModalSheet.title || 'Modelo'
+        : sourceStudent?.name || 'aluno'
+      const newTitle = `Ficha - ${targetStudent.name} (${baseName})`
 
       const duplicated = await trainingSheetsService.duplicate(
         copyModalSheet.id,
         targetStudent.id,
         newTitle,
+        copyModalSheet,
       )
 
       toast({
         title: 'Ficha copiada com sucesso!',
-        description: `Nova ficha criada para ${targetStudent.name} a partir de ${sourceStudent?.name || 'outro aluno'}. Redirecionando para ajuste...`,
+        description: `Nova ficha criada e vinculada a ${targetStudent.name}. Redirecionando para edição...`,
       })
 
       setCopyModalSheet(null)
@@ -199,7 +210,7 @@ export default function SheetList() {
     } catch (err: unknown) {
       toast({
         title: 'Erro ao copiar ficha',
-        description: err instanceof Error ? err.message : 'Falha na cópia entre alunos',
+        description: err instanceof Error ? err.message : 'Falha na cópia da ficha',
         variant: 'destructive',
       })
     } finally {
@@ -211,11 +222,20 @@ export default function SheetList() {
     if (!deleteId) return
     try {
       setDeleting(true)
-      await trainingSheetsService.delete(deleteId)
-      toast({
-        title: 'Ficha excluída',
-        description: 'A ficha de treino foi removida.',
-      })
+      const isTemplate = deleteId.startsWith('modelo-')
+      if (isTemplate) {
+        templateSheetsStorage.deleteCustomTemplate(deleteId)
+        toast({
+          title: 'Modelo removido',
+          description: 'A ficha modelo personalizada foi removida.',
+        })
+      } else {
+        await trainingSheetsService.delete(deleteId)
+        toast({
+          title: 'Ficha excluída',
+          description: 'A ficha de treino foi removida.',
+        })
+      }
       setDeleteId(null)
       loadData()
     } catch (err: unknown) {
@@ -231,11 +251,8 @@ export default function SheetList() {
 
   const handleStartNewSheet = () => {
     if (!selectedStudentForNew) {
-      toast({
-        title: 'Selecione um aluno',
-        description: 'Escolha para qual aluno a ficha será montada.',
-        variant: 'destructive',
-      })
+      setCreateModalOpen(false)
+      navigate('/fichas/nova')
       return
     }
     setCreateModalOpen(false)
@@ -244,11 +261,34 @@ export default function SheetList() {
 
   // Filtragem
   const filteredSheets = sheets.filter((sheet) => {
+    const isTemplate = Boolean(sheet.is_template || !sheet.student)
+
+    if (viewTab === 'templates' && !isTemplate) return false
+    if (viewTab === 'students' && isTemplate) return false
+
+    if (isTemplate) {
+      if (levelFilter !== 'all' && sheet.template_level !== levelFilter) return false
+      if (genderFilter !== 'all' && sheet.template_gender !== genderFilter) return false
+    }
+
     const sName = sheet.expand?.student?.name || ''
     const title = sheet.title || ''
+    const lvl = sheet.template_level || ''
+    const gen = sheet.template_gender || ''
     const term = search.toLowerCase()
-    return sName.toLowerCase().includes(term) || title.toLowerCase().includes(term)
+
+    if (!term) return true
+
+    return (
+      sName.toLowerCase().includes(term) ||
+      title.toLowerCase().includes(term) ||
+      lvl.toLowerCase().includes(term) ||
+      gen.toLowerCase().includes(term)
+    )
   })
+
+  const templateCount = sheets.filter((s) => s.is_template || !s.student).length
+  const studentCount = sheets.filter((s) => !s.is_template && s.student).length
 
   return (
     <div className="space-y-6 animate-fade-in pb-12">
@@ -263,21 +303,100 @@ export default function SheetList() {
           </p>
         </div>
 
-        <Button
-          onClick={() => {
-            setSelectedStudentForNew(students[0]?.id || '')
-            setCreateModalOpen(true)
-          }}
-          className="bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11 px-5 shadow-md flex items-center gap-2"
-        >
-          <Plus className="w-4 h-4" /> Nova Ficha
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => navigate('/fichas/nova')}
+            className="bg-amber-500 hover:bg-amber-400 text-black font-bold h-11 px-4 shadow-md flex items-center gap-2"
+          >
+            <Sparkles className="w-4 h-4" /> Criar Ficha Modelo
+          </Button>
+
+          <Button
+            onClick={() => {
+              setSelectedStudentForNew(students[0]?.id || '')
+              setCreateModalOpen(true)
+            }}
+            className="bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11 px-5 shadow-md flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Nova Ficha para Aluno
+          </Button>
+        </div>
+      </div>
+
+      {/* Abas e Filtros de Fichas Modelo vs Fichas de Aluno */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 p-1 bg-[#141414] border border-[#2A2A2A] rounded-xl">
+          <button
+            type="button"
+            onClick={() => setViewTab('all')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewTab === 'all'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-[#8A8F98] hover:text-white'
+            }`}
+          >
+            Todas ({sheets.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewTab('templates')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              viewTab === 'templates'
+                ? 'bg-amber-500 text-black shadow-sm font-extrabold'
+                : 'text-amber-400/80 hover:text-amber-300'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Fichas Modelo ({templateCount})</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewTab('students')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              viewTab === 'students'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'text-[#8A8F98] hover:text-white'
+            }`}
+          >
+            Fichas de Alunos ({studentCount})
+          </button>
+        </div>
+
+        {viewTab === 'templates' && (
+          <div className="flex items-center gap-2">
+            <select
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-[#181C2E] border border-amber-600/40 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="all">Todos os Níveis</option>
+              <option value="Iniciante">Iniciante</option>
+              <option value="Intermediário">Intermediário</option>
+              <option value="Avançado">Avançado</option>
+            </select>
+
+            <select
+              value={genderFilter}
+              onChange={(e) => setGenderFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-[#181C2E] border border-amber-600/40 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="all">Todos os Gêneros</option>
+              <option value="Feminino">Feminino</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Unissex">Unissex</option>
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Busca */}
       <div className="relative">
         <Input
-          placeholder="Pesquisar ficha por aluno ou título..."
+          placeholder={
+            viewTab === 'templates'
+              ? 'Buscar fichas modelo por nível, gênero ou objetivo...'
+              : 'Pesquisar ficha por aluno, modelo ou título...'
+          }
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="bg-[#181C2E] border-[#252B3E] text-white placeholder:text-[#9CA5B8] h-12 pl-11 pr-4 focus-visible:ring-primary"
@@ -314,7 +433,10 @@ export default function SheetList() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredSheets.map((sheet) => {
-            const studentName = sheet.expand?.student?.name || 'Aluno não vinculado'
+            const isTemplate = Boolean(sheet.is_template || !sheet.student)
+            const studentName =
+              sheet.expand?.student?.name ||
+              (isTemplate ? 'Ficha Modelo Pré-Programada' : 'Aluno não vinculado')
             const updatedDate = new Date(sheet.updated || sheet.created).toLocaleDateString('pt-BR')
             const seriesKeys = Object.keys(sheet.series_data || {}).filter(
               (k) => (sheet.series_data as Record<string, unknown[]>)?.[k]?.length > 0,
@@ -323,19 +445,68 @@ export default function SheetList() {
             return (
               <div
                 key={sheet.id}
-                className="bg-[#181C2E] border border-[#252B3E] hover:border-primary/50 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group"
+                className={`border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group ${
+                  isTemplate
+                    ? 'bg-gradient-to-br from-[#1A1813] to-[#141414] border-amber-500/40 hover:border-amber-400 shadow-md shadow-amber-950/20'
+                    : 'bg-[#181C2E] border-[#252B3E] hover:border-primary/50'
+                }`}
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="text-xs uppercase tracking-wider text-secondary font-bold flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5" /> {studentName}
-                    </span>
-                    <span className="text-[11px] text-[#9CA5B8] flex items-center gap-1">
+                    {isTemplate ? (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <Badge className="bg-amber-500 text-black font-extrabold text-[11px] px-2.5 py-0.5 tracking-wider shadow-sm flex items-center gap-1">
+                          <Sparkles className="w-3 h-3" />
+                          MODELO
+                        </Badge>
+                        {sheet.template_level && (
+                          <Badge
+                            variant="outline"
+                            className="border-amber-500/40 text-amber-300 text-[10px] font-semibold bg-amber-950/30"
+                          >
+                            {sheet.template_level}
+                          </Badge>
+                        )}
+                        {sheet.template_gender && (
+                          <Badge
+                            variant="outline"
+                            className="border-amber-500/40 text-amber-200 text-[10px] font-semibold bg-amber-950/30"
+                          >
+                            {sheet.template_gender}
+                          </Badge>
+                        )}
+                      </div>
+                    ) : sheet.student && sheet.expand?.student ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(
+                            `/alunos?studentId=${sheet.student}&search=${encodeURIComponent(studentName)}`,
+                          )
+                        }}
+                        className="text-xs uppercase tracking-wider text-secondary hover:text-white font-bold flex items-center gap-1.5 hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
+                        title={`Abrir cadastro completo de ${studentName} na aba Alunos`}
+                      >
+                        <User className="w-3.5 h-3.5 text-primary" /> {studentName}
+                      </button>
+                    ) : (
+                      <span className="text-xs uppercase tracking-wider text-secondary font-bold flex items-center gap-1.5">
+                        <User className="w-3.5 h-3.5" /> {studentName}
+                      </span>
+                    )}
+                    <span className="text-[11px] text-[#9CA5B8] flex items-center gap-1 shrink-0">
                       <Calendar className="w-3 h-3" /> {updatedDate}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold text-white group-hover:text-secondary transition-colors mb-2 line-clamp-1">
+                  <h3
+                    className={`text-base font-bold transition-colors mb-2 line-clamp-1 ${
+                      isTemplate
+                        ? 'text-white group-hover:text-amber-300'
+                        : 'text-white group-hover:text-secondary'
+                    }`}
+                  >
                     {sheet.title || 'Ficha de Treino Personalizada'}
                   </h3>
 
@@ -350,7 +521,11 @@ export default function SheetList() {
                       seriesKeys.map((s) => (
                         <span
                           key={s}
-                          className="w-5 h-5 rounded-md bg-[#2A2A2A] text-white text-[11px] font-bold flex items-center justify-center"
+                          className={`w-5 h-5 rounded-md text-[11px] font-bold flex items-center justify-center ${
+                            isTemplate
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              : 'bg-[#2A2A2A] text-white'
+                          }`}
                         >
                           {s}
                         </span>
@@ -384,32 +559,53 @@ export default function SheetList() {
                       </button>
                     </Link>
 
+                    {/* Botão Copiar / Vincular Aluno */}
                     <button
                       type="button"
                       onClick={() => handleOpenCopyModal(sheet)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors"
-                      title="Copiar para outro aluno..."
-                      aria-label={`Copiar ficha de ${studentName} para outro aluno`}
+                      className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold ${
+                        isTemplate
+                          ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-black'
+                          : 'text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A]'
+                      }`}
+                      title={
+                        isTemplate
+                          ? 'Copiar ficha modelo e vincular a um aluno'
+                          : 'Copiar ficha para outro aluno...'
+                      }
+                      aria-label={`Copiar ficha de ${studentName}`}
                     >
                       <Copy className="w-4 h-4" />
+                      {isTemplate && <span className="text-[11px]">Usar Modelo</span>}
                     </button>
 
-                    <button
-                      onClick={() => setDeleteId(sheet.id)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
-                      title="Excluir ficha"
-                      aria-label={`Excluir ficha de ${studentName}`}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {!sheet.id.startsWith('modelo-') || sheet.id.startsWith('modelo-custom-') ? (
+                      <button
+                        onClick={() => setDeleteId(sheet.id)}
+                        className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
+                        title="Excluir ficha"
+                        aria-label={`Excluir ficha de ${studentName}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    ) : null}
                   </div>
 
-                  <Button
-                    onClick={() => navigate(`/treino?students=${sheet.student}`)}
-                    className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
-                  >
-                    <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Treinar Agora
-                  </Button>
+                  {sheet.student ? (
+                    <Button
+                      onClick={() => navigate(`/treino?students=${sheet.student}`)}
+                      className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                    >
+                      <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Treinar Agora
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => handleOpenCopyModal(sheet)}
+                      className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Copy className="w-3.5 h-3.5" /> Vincular Aluno
+                    </Button>
+                  )}
                 </div>
               </div>
             )
@@ -441,15 +637,25 @@ export default function SheetList() {
                 <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A8F98]">
                   Ficha de Origem:
                 </span>
-                <p className="text-sm font-semibold text-white">
-                  {copyModalSheet.title || 'Ficha de Treino'}
-                </p>
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-white">
+                    {copyModalSheet.title || 'Ficha de Treino'}
+                  </p>
+                  {(copyModalSheet.is_template || !copyModalSheet.student) && (
+                    <Badge className="bg-amber-500 text-black text-[10px] font-extrabold">
+                      {copyModalSheet.template_level || 'Modelo'} •{' '}
+                      {copyModalSheet.template_gender || 'Geral'}
+                    </Badge>
+                  )}
+                </div>
                 <p className="text-xs text-secondary flex items-center gap-1 font-medium">
-                  <User className="w-3.5 h-3.5" /> Aluno de origem:{' '}
+                  <User className="w-3.5 h-3.5" /> Origem:{' '}
                   <strong className="text-white">
-                    {copyModalSheet.expand?.student?.name ||
-                      students.find((s) => s.id === copyModalSheet.student)?.name ||
-                      'Aluno'}
+                    {copyModalSheet.is_template || !copyModalSheet.student
+                      ? 'Ficha Modelo Pré-Programada'
+                      : copyModalSheet.expand?.student?.name ||
+                        students.find((s) => s.id === copyModalSheet.student)?.name ||
+                        'Aluno'}
                   </strong>
                 </p>
               </div>
@@ -515,23 +721,43 @@ export default function SheetList() {
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-white">Nova Ficha de Treino</DialogTitle>
             <DialogDescription className="text-[#8A8F98] text-sm">
-              Selecione o aluno do Studio Bru Oliveira para o qual deseja montar o planejamento de
-              séries:
+              Selecione o aluno do Studio Bru Oliveira para o qual deseja montar a ficha, ou opte
+              por criar uma Ficha Modelo sem aluno:
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-3 space-y-2">
-            <select
-              value={selectedStudentForNew}
-              onChange={(e) => setSelectedStudentForNew(e.target.value)}
-              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {students.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.name} {st.phone ? `(${st.phone})` : ''}
-                </option>
-              ))}
-            </select>
+          <div className="py-3 space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-[#8A8F98] uppercase tracking-wider">
+                Vincular Aluno:
+              </label>
+              <select
+                value={selectedStudentForNew}
+                onChange={(e) => setSelectedStudentForNew(e.target.value)}
+                className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {students.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    {st.name} {st.phone ? `(${st.phone})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="pt-2 border-t border-[#2A2A2A]">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setCreateModalOpen(false)
+                  navigate('/fichas/nova')
+                }}
+                className="w-full border-amber-500/40 text-amber-300 hover:bg-amber-500/10 font-semibold text-xs h-10"
+              >
+                <Sparkles className="w-3.5 h-3.5 mr-2" />
+                Criar como Ficha Modelo (sem aluno vinculado)
+              </Button>
+            </div>
           </div>
 
           <DialogFooter className="flex sm:justify-end gap-2 pt-2">
@@ -548,7 +774,7 @@ export default function SheetList() {
               onClick={handleStartNewSheet}
               className="bg-primary hover:opacity-90 text-primary-foreground font-bold"
             >
-              Continuar para Montagem
+              Continuar com Aluno
             </Button>
           </DialogFooter>
         </DialogContent>

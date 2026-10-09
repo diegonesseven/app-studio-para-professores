@@ -137,11 +137,14 @@ export type SeriesData = {
   [key in SeriesKey]?: ExerciseBlock[]
 }
 
+export type TemplateLevel = 'Iniciante' | 'Intermediário' | 'Avançado'
+export type TemplateGender = 'Masculino' | 'Feminino' | 'Unissex'
+
 export interface TrainingSheet {
   id: string
   collectionId: string
   collectionName: string
-  student: string
+  student?: string
   expand?: {
     student?: Student
   }
@@ -150,6 +153,9 @@ export interface TrainingSheet {
   series_data?: SeriesData
   start_date?: string
   is_archived?: boolean
+  is_template?: boolean
+  template_level?: TemplateLevel
+  template_gender?: TemplateGender
   created: string
   updated: string
 }

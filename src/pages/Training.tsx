@@ -8,6 +8,7 @@ import { useRealtime } from '@/hooks/use-realtime'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import { safeDateToISO } from '@/lib/dateUtils'
+import { getAvailableSeriesKeys, getNextSeriesKey } from '@/lib/seriesCycle'
 import type {
   Student,
   TrainingSheet,
@@ -204,8 +205,9 @@ export default function Training() {
 
             // Descobre o último registro do aluno no backend
             const latest = await workoutProgressService.getLatestByStudent(st.id)
+            const availableKeys = getAvailableSeriesKeys(sheet?.series_data)
 
-            let seriesToOpen: SeriesKey = newSeriesMap[st.id] || 'A'
+            let seriesToOpen: SeriesKey = newSeriesMap[st.id] || availableKeys[0] || 'A'
             let initialCompleted: Record<number, boolean> = {}
             let initialInProgress: Record<number, boolean> = {}
 
@@ -219,7 +221,7 @@ export default function Training() {
                 latest.is_completed === false ||
                 (totalEx > 0 && savedIndices.length < totalEx && latest.is_completed !== true)
 
-              if (hasUnfinishedExercises) {
+              if (hasUnfinishedExercises && availableKeys.includes(latest.series_completed)) {
                 // CONTINUIDADE: mantém a mesma série aberta no ponto onde parou!
                 seriesToOpen = latest.series_completed
                 savedIndices.forEach((i) => {
@@ -230,11 +232,13 @@ export default function Training() {
                 })
                 newSessionRecords[st.id] = latest.id
               } else {
-                // Série 100% concluída: avança para a próxima série
-                const keys: SeriesKey[] = ['A', 'B', 'C', 'D', 'E']
-                const idx = keys.indexOf(latest.series_completed)
-                seriesToOpen = keys[(idx + 1) % keys.length]
+                // Série 100% concluída: avança para a próxima série respeitando as séries reais da ficha
+                // Ao terminar a última série disponível, recomeça na série A
+                seriesToOpen = getNextSeriesKey(latest.series_completed, availableKeys)
               }
+            } else if (!availableKeys.includes(seriesToOpen)) {
+              // Se a série atual não existe na ficha, garante a primeira disponível (A)
+              seriesToOpen = availableKeys[0] || 'A'
             }
 
             newSeriesMap[st.id] = seriesToOpen
@@ -641,10 +645,10 @@ export default function Training() {
         notes: `Concluído em aula pelo Studio Bru Oliveira`,
       })
 
-      // Calcular próxima série
-      const keys: SeriesKey[] = ['A', 'B', 'C', 'D', 'E']
-      const currentIdx = keys.indexOf(currentSeries)
-      const nextKey = keys[(currentIdx + 1) % keys.length]
+      // Calcular próxima série respeitando as séries que a ficha realmente possui
+      // Ao terminar a última série disponível (ex: terminou B em ficha A/B), volta para a série A
+      const availableKeys = getAvailableSeriesKeys(sheet.series_data)
+      const nextKey = getNextSeriesKey(currentSeries, availableKeys)
 
       // Abrir modal de confirmação "Série X concluída! Marcar a próxima?"
       setAdvanceDialog({

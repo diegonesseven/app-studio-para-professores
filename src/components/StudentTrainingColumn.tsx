@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import type { Student, SeriesKey, TrainingSheet, Exercise, ExerciseBlock } from '@/types'
 import { SERIES_KEYS } from '@/types'
+import { getAvailableSeriesKeys, getNextSeriesKey } from '@/lib/seriesCycle'
 import {
   HeartPulse,
   Edit2,
@@ -91,7 +92,12 @@ export default function StudentTrainingColumn({
   completedSessionsCount,
   onEditStartDate,
 }: StudentTrainingColumnProps) {
-  const currentExercises: ExerciseBlock[] = sheet?.series_data?.[activeSeries] || []
+  const availableKeys = getAvailableSeriesKeys(sheet?.series_data)
+  // Garante que a série ativa pertença às séries disponíveis da ficha
+  const effectiveActiveSeries = availableKeys.includes(activeSeries)
+    ? activeSeries
+    : availableKeys[0] || 'A'
+  const currentExercises: ExerciseBlock[] = sheet?.series_data?.[effectiveActiveSeries] || []
   const totalCount = currentExercises.length
   const completedCount = currentExercises.filter((_, idx) => completedExercises[idx]).length
   const isSeriesAllDone = totalCount > 0 && completedCount === totalCount
@@ -224,7 +230,13 @@ export default function StudentTrainingColumn({
       <div className="p-3 sm:p-3.5 bg-card/60 border-b border-border shrink-0">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#2A2A2A] border-2 border-primary/40 text-primary font-black text-sm flex items-center justify-center shrink-0 overflow-hidden">
+            <button
+              type="button"
+              onClick={onEditStudent}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#2A2A2A] border-2 border-primary/40 hover:border-primary text-primary font-black text-sm flex items-center justify-center shrink-0 overflow-hidden transition-all hover:scale-105"
+              title={`Ver cadastro de ${student.name} na aba Alunos`}
+              aria-label={`Ver cadastro de ${student.name} na aba Alunos`}
+            >
               {student.photo ? (
                 <img
                   src={pb.files.getURL(student as any, student.photo)}
@@ -234,14 +246,19 @@ export default function StudentTrainingColumn({
               ) : (
                 initials
               )}
-            </div>
+            </button>
             <div className="min-w-0">
-              <h2
-                className="text-base sm:text-lg font-black text-white leading-tight truncate"
-                title={student.name}
+              <button
+                type="button"
+                onClick={onEditStudent}
+                className="text-left group/name block max-w-full"
+                title={`Ver cadastro de ${student.name} na aba Alunos`}
+                aria-label={`Ver cadastro de ${student.name} na aba Alunos`}
               >
-                {student.name}
-              </h2>
+                <h2 className="text-base sm:text-lg font-black text-white group-hover/name:text-primary transition-colors leading-tight truncate underline-offset-2 hover:underline">
+                  {student.name}
+                </h2>
+              </button>
               <span className="text-[11px] sm:text-xs text-[#9CA3AF] truncate block font-medium">
                 {student.experience_level || 'Personal'} •{' '}
                 <strong className="text-white font-bold">
@@ -343,27 +360,28 @@ export default function StudentTrainingColumn({
         {/* Seletor de Séries A, B, C, D, E + Atalho de Adicionar Exercício na série */}
         <div className="flex items-center gap-1 sm:gap-1.5 mt-2.5 pt-2 border-t border-[#252525]">
           <div className="flex-1 flex items-center gap-1">
-            {SERIES_KEYS.map((key) => {
-              const hasItems = (sheet?.series_data?.[key]?.length || 0) > 0
-              const isCurrent = activeSeries === key
+            {(() => {
+              // Exibe apenas as séries que a ficha realmente possui (ou pelo menos Série A se vazia)
+              const availableKeys = getAvailableSeriesKeys(sheet?.series_data)
+              return availableKeys.map((key) => {
+                const isCurrent = activeSeries === key
 
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => onSelectSeries(key)}
-                  className={`flex-1 min-h-[36px] py-1 px-1 rounded-lg text-xs font-black transition-all relative ${
-                    isCurrent
-                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25 ring-1 ring-primary/40'
-                      : hasItems
-                        ? 'bg-[#252B3E] text-white hover:bg-[#30374e]'
-                        : 'bg-[#121522] text-[#9CA5B8] hover:text-white opacity-60'
-                  }`}
-                >
-                  <span>Série {key}</span>
-                </button>
-              )
-            })}
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => onSelectSeries(key)}
+                    className={`flex-1 min-h-[36px] py-1 px-1 rounded-lg text-xs font-black transition-all relative ${
+                      isCurrent
+                        ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25 ring-1 ring-primary/40'
+                        : 'bg-[#252B3E] text-white hover:bg-[#30374e]'
+                    }`}
+                  >
+                    <span>Série {key}</span>
+                  </button>
+                )
+              })
+            })()}
           </div>
 
           {/* Botão rápido para adicionar exercício na série ativa sem sair da aula */}

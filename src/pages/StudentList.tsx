@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { studentsService } from '@/services/students'
 import { workoutProgressService } from '@/services/workoutProgress'
+import { getAvailableSeriesKeys, getNextSeriesKey } from '@/lib/seriesCycle'
 import type { Student, SeriesKey } from '@/types'
 import {
   Users,
@@ -40,12 +42,17 @@ import { toast } from '@/hooks/use-toast'
 
 export default function StudentList() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const initialStudentId = searchParams.get('studentId') || ''
+  const initialSearch = searchParams.get('search') || ''
+
   const { appearance } = useTheme()
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(initialSearch)
   const [sortBy, setSortBy] = useState<'name' | '-updated'>('name')
   const [nextSeriesMap, setNextSeriesMap] = useState<Record<string, SeriesKey>>({})
+  const [highlightedStudentId, setHighlightedStudentId] = useState<string>(initialStudentId)
 
   // Anamnese Modal
   const [selectedStudentForAnamnese, setSelectedStudentForAnamnese] = useState<Student | null>(null)
@@ -62,18 +69,19 @@ export default function StudentList() {
       const data = await studentsService.getAll(search, sortBy)
       setStudents(data)
 
-      // Descobrir última série concluída para determinar a próxima
+      // Descobrir última série concluída respeitando as séries reais da ficha
       const map: Record<string, SeriesKey> = {}
       await Promise.all(
         data.map(async (st) => {
-          const latest = await workoutProgressService.getLatestByStudent(st.id)
+          const [latest, sheet] = await Promise.all([
+            workoutProgressService.getLatestByStudent(st.id),
+            trainingSheetsService.getByStudent(st.id),
+          ])
+          const available = getAvailableSeriesKeys(sheet?.series_data)
           if (latest) {
-            const seriesOrder: SeriesKey[] = ['A', 'B', 'C', 'D', 'E']
-            const idx = seriesOrder.indexOf(latest.series_completed)
-            const nextIdx = (idx + 1) % seriesOrder.length
-            map[st.id] = seriesOrder[nextIdx]
+            map[st.id] = getNextSeriesKey(latest.series_completed, available)
           } else {
-            map[st.id] = 'A'
+            map[st.id] = available[0] || 'A'
           }
         }),
       )
@@ -92,6 +100,17 @@ export default function StudentList() {
   useEffect(() => {
     loadData()
   }, [search, sortBy])
+
+  // Scroll e destaque suave para o aluno vindo de parâmetro de URL (ex: clique na ficha)
+  useEffect(() => {
+    if (initialStudentId && !loading && students.length > 0) {
+      setHighlightedStudentId(initialStudentId)
+      const element = document.getElementById(`student-card-${initialStudentId}`)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [initialStudentId, loading, students])
 
   // Exportar/Baixar ficha do aluno diretamente da lista de alunos
   const handleExportStudentSheet = async (student: Student) => {
@@ -249,9 +268,12 @@ export default function StudentList() {
               .map((n) => n[0].toUpperCase())
               .join('')
 
+            const isHighlighted = highlightedStudentId === student.id
+
             return (
               <div
                 key={student.id}
+                id={`student-card-${student.id}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => navigate(`/alunos/${student.id}/editar`)}
@@ -261,7 +283,11 @@ export default function StudentList() {
                     navigate(`/alunos/${student.id}/editar`)
                   }
                 }}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/60 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary"
+                className={`rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary ${
+                  isHighlighted
+                    ? 'bg-[#222222] border-2 border-primary ring-4 ring-primary/20 shadow-2xl scale-[1.01]'
+                    : 'bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/60'
+                }`}
               >
                 <div>
                   {/* Topo do Card */}

@@ -3,6 +3,7 @@ import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom'
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { studentsService } from '@/services/students'
 import { exercisesService } from '@/services/exercises'
+import { templateSheetsStorage } from '@/services/templateSheets'
 import { sanitizeText } from '@/lib/validation'
 import { safeDateToISO, parseAndFormatDate } from '@/lib/dateUtils'
 import type {
@@ -12,6 +13,8 @@ import type {
   SeriesKey,
   ExerciseBlock,
   SeriesData,
+  TemplateLevel,
+  TemplateGender,
 } from '@/types'
 import { SERIES_KEYS } from '@/types'
 import ExercisePickerModal from '@/components/ExercisePickerModal'
@@ -65,6 +68,10 @@ export default function SheetForm() {
   const navigate = useNavigate()
 
   const [student, setStudent] = useState<Student | null>(null)
+  const [allStudents, setAllStudents] = useState<Student[]>([])
+  const [isTemplateMode, setIsTemplateMode] = useState<boolean>(!queryStudentId && !id)
+  const [templateLevel, setTemplateLevel] = useState<TemplateLevel>('Iniciante')
+  const [templateGender, setTemplateGender] = useState<TemplateGender>('Feminino')
   const [title, setTitle] = useState('')
   const [notes, setNotes] = useState('')
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0])
@@ -106,10 +113,11 @@ export default function SheetForm() {
     async function init() {
       try {
         setLoading(true)
-        // 1. Carregar acervo de exercícios e fichas existentes para eventual importação
-        const [exList, allSheets] = await Promise.all([
+        // 1. Carregar acervo de exercícios, fichas existentes e alunos cadastrados
+        const [exList, allSheets, allSt] = await Promise.all([
           exercisesService.getAll(),
           trainingSheetsService.getAll(),
+          studentsService.getAll(),
         ])
         const map: Record<string, Exercise> = {}
         exList.forEach((e) => {
@@ -117,46 +125,61 @@ export default function SheetForm() {
         })
         setExercisesMap(map)
         setAvailableSheets(allSheets)
+        setAllStudents(allSt)
 
         if (id) {
-          // Edição de ficha existente
-          const sheet = await trainingSheetsService.getById(id)
-          setTitle(sheet.title || '')
-          setNotes(sheet.notes || '')
-          setSheetCreated(sheet.created || '')
-          if (sheet.start_date) {
-            setStartDate(sheet.start_date.split('T')[0])
-          } else if (sheet.created) {
-            setStartDate(sheet.created.split('T')[0])
+          // Edição de ficha existente (pode ser do backend ou modelo local)
+          let sheet: TrainingSheet | undefined
+          try {
+            sheet = await trainingSheetsService.getById(id)
+          } catch {
+            sheet = templateSheetsStorage.getTemplateById(id)
           }
 
-          const initialSeries: SeriesData = {
-            A: sheet.series_data?.A || [],
-            B: sheet.series_data?.B || [],
-            C: sheet.series_data?.C || [],
-            D: sheet.series_data?.D || [],
-            E: sheet.series_data?.E || [],
+          if (sheet) {
+            setTitle(sheet.title || '')
+            setNotes(sheet.notes || '')
+            setSheetCreated(sheet.created || '')
+            if (sheet.start_date) {
+              setStartDate(sheet.start_date.split('T')[0])
+            } else if (sheet.created) {
+              setStartDate(sheet.created.split('T')[0])
+            }
+
+            const initialSeries: SeriesData = {
+              A: sheet.series_data?.A || [],
+              B: sheet.series_data?.B || [],
+              C: sheet.series_data?.C || [],
+              D: sheet.series_data?.D || [],
+              E: sheet.series_data?.E || [],
+            }
+            setSeriesData(initialSeries)
+
+            if (sheet.is_template || !sheet.student) {
+              setIsTemplateMode(true)
+              setTemplateLevel(sheet.template_level || 'Iniciante')
+              setTemplateGender(sheet.template_gender || 'Feminino')
+            } else {
+              setIsTemplateMode(false)
+              const countSessions = await workoutProgressService.countCompletedSessions(
+                sheet.student,
+                sheet.id,
+              )
+              setCompletedSessionsCount(countSessions)
+              const st = await studentsService.getById(sheet.student)
+              setStudent(st)
+            }
           }
-          setSeriesData(initialSeries)
-
-          // Carregar contagem de sessões concluídas desta ficha
-          const countSessions = await workoutProgressService.countCompletedSessions(
-            sheet.student,
-            sheet.id,
-          )
-          setCompletedSessionsCount(countSessions)
-
-          // Carregar aluno vinculado
-          const st = await studentsService.getById(sheet.student)
-          setStudent(st)
         } else if (queryStudentId) {
-          // Criação com query param de aluno
+          // Criação com aluno vinculado
           const st = await studentsService.getById(queryStudentId)
           setStudent(st)
+          setIsTemplateMode(false)
           setTitle(`Ficha de Treino - ${st.name}`)
         } else {
-          // Se não tem aluno, redireciona para a lista
-          navigate('/treinos')
+          // Criação de ficha modelo sem aluno
+          setIsTemplateMode(true)
+          setTitle('Ficha Modelo - Treino Base')
         }
       } catch (err: unknown) {
         toast({
@@ -293,15 +316,6 @@ export default function SheetForm() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!student) {
-      toast({
-        title: 'Aluno não identificado',
-        description: 'Vincule um aluno para salvar a ficha.',
-        variant: 'destructive',
-      })
-      return
-    }
-
     setSaving(true)
     try {
       // Sanitizar dados das séries contra injeção maliciosa de scripts
@@ -320,6 +334,36 @@ export default function SheetForm() {
 
       const parsedStartDate = startDate ? safeDateToISO(startDate) : new Date().toISOString()
 
+      if (isTemplateMode || !student) {
+        // Salva ficha modelo (armazenamento de modelos pré-programados)
+        const templateId = id || `modelo-custom-${Date.now()}`
+        const modelObj: TrainingSheet = {
+          id: templateId,
+          collectionId: 'templates',
+          collectionName: 'training_sheets',
+          student: '',
+          title: sanitizeText(title) || `Ficha Modelo - ${templateLevel} (${templateGender})`,
+          notes: sanitizeText(notes),
+          series_data: cleanedSeriesData,
+          start_date: parsedStartDate,
+          is_template: true,
+          template_level: templateLevel,
+          template_gender: templateGender,
+          is_archived: false,
+          created: sheetCreated || new Date().toISOString(),
+          updated: new Date().toISOString(),
+        }
+
+        templateSheetsStorage.saveCustomTemplate(modelObj)
+        toast({
+          title: 'Ficha Modelo salva com sucesso!',
+          description: `Disponível na lista com a etiqueta Modelo (${templateLevel} • ${templateGender}).`,
+        })
+        navigate('/treinos')
+        return
+      }
+
+      // Ficha com aluno vinculado (salva no banco de dados sem alterar schema)
       const payload = {
         student: student.id,
         title: sanitizeText(title) || `Ficha de Treino - ${student.name}`,
@@ -335,7 +379,7 @@ export default function SheetForm() {
           description: 'Alterações registradas no Studio Bru Oliveira.',
         })
       } else {
-        // Ao criar uma ficha nova para o aluno, arquiva as anteriores para histórico (Requisito 4)
+        // Ao criar uma ficha nova para o aluno, arquiva as anteriores para histórico
         await trainingSheetsService.archivePreviousSheets(student.id)
         await trainingSheetsService.create({
           ...payload,
@@ -383,8 +427,24 @@ export default function SheetForm() {
               <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                 Ficha de Treino
               </span>
-              {student && (
-                <Badge className="bg-[#2A2A2A] text-white border-0 text-xs">{student.name}</Badge>
+              {student ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate(
+                      `/alunos?studentId=${student.id}&search=${encodeURIComponent(student.name)}`,
+                    )
+                  }
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#2A2A2A] hover:bg-primary/20 text-white hover:text-primary border border-transparent hover:border-primary/40 text-xs font-semibold transition-all cursor-pointer group"
+                  title={`Abrir cadastro completo de ${student.name} na aba Alunos`}
+                >
+                  <User className="w-3 h-3 text-primary" />
+                  <span className="underline-offset-2 group-hover:underline">{student.name}</span>
+                </button>
+              ) : (
+                <Badge className="bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs">
+                  Ficha Modelo
+                </Badge>
               )}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-white truncate">
@@ -490,6 +550,115 @@ export default function SheetForm() {
           </div>
         )}
 
+        {/* Escolha do tipo: Ficha com Aluno ou Ficha Modelo */}
+        <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#8A8F98]">
+              Vínculo da Ficha:
+            </span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsTemplateMode(false)
+                  if (!student && allStudents.length > 0) {
+                    setStudent(allStudents[0])
+                    setTitle(`Ficha de Treino - ${allStudents[0].name}`)
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  !isTemplateMode
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'bg-[#222222] text-[#8A8F98] hover:text-white'
+                }`}
+              >
+                Vincular a Aluno
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsTemplateMode(true)
+                  setStudent(null)
+                  if (!title || title.startsWith('Ficha de Treino')) {
+                    setTitle(`Ficha Modelo - ${templateLevel} (${templateGender})`)
+                  }
+                }}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  isTemplateMode
+                    ? 'bg-amber-500 text-black shadow-sm'
+                    : 'bg-[#222222] text-[#8A8F98] hover:text-white'
+                }`}
+              >
+                Ficha Modelo (Sem Aluno)
+              </button>
+            </div>
+          </div>
+
+          {!isTemplateMode && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#8A8F98] font-medium shrink-0">Aluno:</span>
+              <select
+                value={student?.id || ''}
+                onChange={(e) => {
+                  const st = allStudents.find((s) => s.id === e.target.value) || null
+                  setStudent(st)
+                  if (st) setTitle(`Ficha de Treino - ${st.name}`)
+                }}
+                className="h-9 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-2 text-xs focus:ring-1 focus:ring-primary"
+              >
+                {allStudents.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+
+        {/* Parâmetros da Ficha Modelo (Nível e Gênero) */}
+        {isTemplateMode && (
+          <div className="p-3 bg-amber-950/20 border border-amber-800/40 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in">
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+                Nível de Experiência do Modelo
+              </Label>
+              <select
+                value={templateLevel}
+                onChange={(e) => {
+                  const lvl = e.target.value as TemplateLevel
+                  setTemplateLevel(lvl)
+                  setTitle(`Ficha Modelo - ${lvl} (${templateGender})`)
+                }}
+                className="w-full h-10 bg-[#121212] border border-amber-800/50 text-white rounded-md px-3 text-xs focus:ring-1 focus:ring-amber-400"
+              >
+                <option value="Iniciante">Iniciante</option>
+                <option value="Intermediário">Intermediário</option>
+                <option value="Avançado">Avançado</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <Label className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+                Gênero / Público Alvo
+              </Label>
+              <select
+                value={templateGender}
+                onChange={(e) => {
+                  const gen = e.target.value as TemplateGender
+                  setTemplateGender(gen)
+                  setTitle(`Ficha Modelo - ${templateLevel} (${gen})`)
+                }}
+                className="w-full h-10 bg-[#121212] border border-amber-800/50 text-white rounded-md px-3 text-xs focus:ring-1 focus:ring-amber-400"
+              >
+                <option value="Feminino">Feminino</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Unissex">Unissex</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-1.5 md:col-span-1">
             <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
@@ -533,31 +702,38 @@ export default function SheetForm() {
       <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
         <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-3 gap-2 overflow-x-auto">
           <div className="flex items-center gap-1.5">
-            {SERIES_KEYS.map((key) => {
-              const count = seriesData[key]?.length || 0
-              const isActive = activeTab === key
-              return (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => setActiveTab(key)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
-                    isActive
-                      ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                      : 'bg-[#141414] text-[#8A8F98] hover:text-white border border-[#2A2A2A]'
-                  }`}
-                >
-                  <span>Série {key}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
-                      isActive ? 'bg-black/20 text-white' : 'bg-[#2A2A2A] text-[#8A8F98]'
+            {(() => {
+              // Na edição ou montagem de ficha: se for ficha existente já com séries específicas (ex: só A e B),
+              // mostramos as séries disponíveis que ela possui ou todas as 5 se for criação nova.
+              // Para garantir que o professor consiga adicionar exercícios nas séries desejadas e navegar entre as existentes:
+              const activeKeysWithData = SERIES_KEYS.filter((k) => (seriesData[k] || []).length > 0)
+              // Mostra pelo menos as séries com conteúdo mais as sequenciais necessárias, ou todas
+              return SERIES_KEYS.map((key) => {
+                const count = seriesData[key]?.length || 0
+                const isActive = activeTab === key
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setActiveTab(key)}
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+                        : 'bg-[#141414] text-[#8A8F98] hover:text-white border border-[#2A2A2A]'
                     }`}
                   >
-                    {count}
-                  </span>
-                </button>
-              )
-            })}
+                    <span>Série {key}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
+                        isActive ? 'bg-black/20 text-white' : 'bg-[#2A2A2A] text-[#8A8F98]'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                )
+              })
+            })()}
           </div>
 
           <Button
