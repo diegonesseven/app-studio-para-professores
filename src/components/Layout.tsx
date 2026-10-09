@@ -283,14 +283,14 @@ export default function Layout() {
         {/* CONTEÚDO PRINCIPAL (scroll independente) */}
         <main
           className={`flex-1 bg-background main-bottom-safe ${
-            location.pathname.startsWith('/treino')
+            location.pathname === '/treino' || location.pathname.startsWith('/treino?')
               ? 'p-2 sm:p-2.5 lg:p-3 flex flex-col overflow-hidden'
               : 'p-4 sm:p-6 lg:p-8 overflow-y-auto overflow-x-hidden'
           }`}
         >
           <div
             className={`mx-auto w-full ${
-              location.pathname.startsWith('/treino')
+              location.pathname === '/treino' || location.pathname.startsWith('/treino?')
                 ? 'max-w-[1800px] flex-1 flex flex-col min-h-0 h-full overflow-hidden'
                 : 'max-w-7xl'
             }`}
@@ -330,7 +330,7 @@ export default function Layout() {
             to="/treino"
             className={({ isActive }) =>
               `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
-                isActive || location.pathname.startsWith('/treino')
+                isActive || location.pathname === '/treino' || location.pathname.startsWith('/treino?')
                   ? 'text-primary'
                   : 'text-[#8A8F98]'
               }`
