@@ -108,9 +108,483 @@ export default function StudentForm() {
   const [newPhotoFiles, setNewPhotoFiles] = useState<File[]>([])
   const [previewEnlargedPhoto, setPreviewEnlargedPhoto] = useState<string | null>(null)
 
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+=======
+  // Histórico de Fichas Anteriores do aluno (Item 4)
+  const [allStudentSheets, setAllStudentSheets] = useState<TrainingSheet[]>([])
+  const [viewingArchivedSheet, setViewingArchivedSheet] = useState<TrainingSheet | null>(null)
+
+  // Histórico de treinos do aluno com o professor
+  const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+  const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+=======
+<<<<<<< SEARCH
+=======
+=======
+  const [legacyTeacherObs, setLegacyTeacherObs] = useState('')
+
+  // Histórico de Fichas Anteriores do aluno (Item 4)
+  const [allStudentSheets, setAllStudentSheets] = useState<TrainingSheet[]>([])
+  const [viewingArchivedSheet, setViewingArchivedSheet] = useState<TrainingSheet | null>(null)
+
+  // Histórico de treinos do aluno com o professor
+  const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+  const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+=======
+=======
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+=======
+  // Histórico de Fichas Anteriores do aluno (Item 4)
+  const [allStudentSheets, setAllStudentSheets] = useState<TrainingSheet[]>([])
+  const [viewingArchivedSheet, setViewingArchivedSheet] = useState<TrainingSheet | null>(null)
+
+  // Histórico de treinos do aluno com o professor
+  const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+  const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+=======
+<<<<<<< SEARCH
+=======
+=======
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+          const map: Record<string, Exercise> = {}
+          exList.forEach((e) => {
+            map[e.id] = e
+          })
+          setExercisesMap(map)
+
+          if (
+            st.restrictions ||
+            st.anamnesis_data ||
+            st.injuries ||
+            st.health_history ||
+            (st.anamnesis_photos && st.anamnesis_photos.length > 0)
+          ) {
+            setAnamneseOpen(true)
+          }
+        })
+        .catch((err) => {
+          toast({
+            title: 'Erro ao carregar aluno',
+            description: err instanceof Error ? err.message : 'Não encontrado',
+            variant: 'destructive',
+          })
+          navigate('/alunos')
+        })
+        .finally(() => setLoading(false))
+    }
+  }, [id, navigate])
+=======
+  useEffect(() => {
+    if (!id) return
+
+    setLoading(true)
+    Promise.all([
+      studentsService.getById(id),
+      workoutProgressService.getAll(id, 50),
+      trainingSheetsService.getHistoryByStudent(id),
+      exercisesService.getAll(),
+    ])
+      .then(([st, history, sheets, exList]) => {
+        setName(st.name)
+        setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
+        setPhone(st.phone ? maskPhone(st.phone) : '')
+        if (st.photo) {
+          setPhotoPreview(pb.files.getURL(st as any, st.photo))
+        } else {
+          setPhotoPreview(null)
+        }
+        setRemovePhoto(false)
+        setGeneralObservations(st.general_observations || '')
+        setRestrictions(st.restrictions || '')
+
+        // Fotos da anamnese
+        setExistingAnamnesisPhotos(st.anamnesis_photos || [])
+
+        // Dados estruturados da nova anamnese ou mapeamento/preservação dos dados legados
+        const anData = st.anamnesis_data || {}
+        setTreinouPersonalAntes(anData.treinou_personal_antes || '')
+        setProfissao(anData.profissao || '')
+
+        // Se já tem objetivos estruturados usa eles; se não, mapeia dos goals legados
+        if (anData.objetivos && anData.objetivos.length > 0) {
+          setObjetivosSelecionados(anData.objetivos)
+        } else if (st.goals && st.goals.length > 0) {
+          setObjetivosSelecionados(st.goals as string[])
+        }
+
+        setEnfaseMusculatura(anData.enfase_musculatura || '')
+        setPraticouExercicio(anData.praticou_exercicio || '')
+        setPraticouExercicioQuais(anData.praticou_exercicio_quais || '')
+        setTempoSemPraticar(anData.tempo_sem_praticar || '')
+        setRestricaoExercicio(anData.restricao_exercicio || (st.restrictions ? 'SIM' : ''))
+        setRestricaoExercicioQuais(anData.restricao_exercicio_quais || '')
+
+        setDoencasSelecionadas(anData.possui_doenca || [])
+        setDoencasOutros(anData.possui_doenca_outros || '')
+
+        // Lesão: se não estiver na anData, usa o campo legacy injuries
+        setPossuiLesao(anData.possui_lesao || st.injuries || '')
+
+        setDoresCorpo(anData.dores_corpo || '')
+        setDoresCorpoQuais(anData.dores_corpo_quais || '')
+        setFazDieta(anData.faz_dieta || '')
+        setFazNutricionista(anData.faz_nutricionista || '')
+        setUsoSubstancias(anData.uso_substancias || [])
+
+        // Campos legados preservados
+        setLegacyHealthHistory(st.health_history || '')
+        setLegacySurgeries(st.surgeries || '')
+        setLegacyTeacherObs(st.teacher_observations || '')
+
+        setAllStudentSheets(sheets)
+        setStudentHistory(history)
+        const map: Record<string, Exercise> = {}
+        exList.forEach((e) => {
+          map[e.id] = e
+        })
+        setExercisesMap(map)
+
+        if (
+          st.restrictions ||
+          st.anamnesis_data ||
+          st.injuries ||
+          st.health_history ||
+          (st.anamnesis_photos && st.anamnesis_photos.length > 0)
+        ) {
+          setAnamneseOpen(true)
+        }
+      })
+      .catch((err) => {
+        toast({
+          title: 'Erro ao carregar aluno',
+          description: err instanceof Error ? err.message : 'Não encontrado',
+          variant: 'destructive',
+        })
+        navigate('/alunos')
+      })
+      .finally(() => setLoading(false))
+  }, [id, navigate])
+=======
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+=======
+<<<<<<< SEARCH
+=======
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+          setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
+          setPhone(st.phone ? maskPhone(st.phone) : '')
+          if (st.photo) {
+            setPhotoPreview(pb.files.getURL(st as any, st.photo))
+          } else {
+            setPhotoPreview(null)
+          }
+          setRemovePhoto(false)
+          setGeneralObservations(st.general_observations || '')
+          setRestrictions(st.restrictions || '')
+
+          // Fotos da anamnese
+          setExistingAnamnesisPhotos(st.anamnesis_photos || [])
+
+          // Dados estruturados da nova anamnese ou mapeamento/preservação dos dados legados
+          const anData = st.anamnesis_data || {}
+          setTreinouPersonalAntes(anData.treinou_personal_antes || '')
+          setProfissao(anData.profissao || '')
+
+          // Se já tem objetivos estruturados usa eles; se não, mapeia dos goals legados
+          if (anData.objetivos && anData.objetivos.length > 0) {
+            setObjetivosSelecionados(anData.objetivos)
+          } else if (st.goals && st.goals.length > 0) {
+            setObjetivosSelecionados(st.goals as string[])
+          }
+
+          setEnfaseMusculatura(anData.enfase_musculatura || '')
+          setPraticouExercicio(anData.praticou_exercicio || '')
+          setPraticouExercicioQuais(anData.praticou_exercicio_quais || '')
+          setTempoSemPraticar(anData.tempo_sem_praticar || '')
+          setRestricaoExercicio(anData.restricao_exercicio || (st.restrictions ? 'SIM' : ''))
+          setRestricaoExercicioQuais(anData.restricao_exercicio_quais || '')
+
+          setDoencasSelecionadas(anData.possui_doenca || [])
+          setDoencasOutros(anData.possui_doenca_outros || '')
+
+          // Lesão: se não estiver na anData, usa o campo legacy injuries
+          setPossuiLesao(anData.possui_lesao || st.injuries || '')
+
+          setDoresCorpo(anData.dores_corpo || '')
+          setDoresCorpoQuais(anData.dores_corpo_quais || '')
+          setFazDieta(anData.faz_dieta || '')
+          setFazNutricionista(anData.faz_nutricionista || '')
+          setUsoSubstancias(anData.uso_substancias || [])
+
+          // Campos legados preservados
+          setLegacyHealthHistory(st.health_history || '')
+          setLegacySurgeries(st.surgeries || '')
+          setLegacyTeacherObs(st.teacher_observations || '')
+
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+          const map: Record<string, Exercise> = {}
+          exList.forEach((e) => {
+            map[e.id] = e
+          })
+          setExercisesMap(map)
+
+          if (
+            st.restrictions ||
+            st.anamnesis_data ||
+            st.injuries ||
+            st.health_history ||
+            (st.anamnesis_photos && st.anamnesis_photos.length > 0)
+          ) {
+            setAnamneseOpen(true)
+          }
+        })
+        .catch((err) => {
+          toast({
+            title: 'Erro ao carregar aluno',
+            description: err instanceof Error ? err.message : 'Não encontrado',
+            variant: 'destructive',
+          })
+          navigate('/alunos')
+        })
+        .finally(() => setLoading(false))
+    }
+  }, [id, navigate])
+=======
+          lastError = err
+          const errMsg = err instanceof Error ? err.message : String(err)
+          const is429 = errMsg.includes('429') || errMsg.toLowerCase().includes('too many requests')
+          if (is429 && attempt < maxRetries) {
+            await new Promise((res) => setTimeout(res, 600 * attempt))
+            continue
+          }
+          break
+        }
+      }
+
+      if (isMounted) {
+        toast({
+          title: 'Erro ao carregar aluno',
+          description: lastError instanceof Error ? lastError.message : 'Não encontrado',
+          variant: 'destructive',
+        })
+        navigate('/alunos')
+        setLoading(false)
+      }
+    }
+
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+=======
+<<<<<<< SEARCH
+=======
+          setName(st.name)
+=======
+=======
+          setName(st.name)
+          setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
+          setPhone(st.phone ? maskPhone(st.phone) : '')
+          if (st.photo) {
+            setPhotoPreview(pb.files.getURL(st as any, st.photo))
+          } else {
+            setPhotoPreview(null)
+          }
+          setRemovePhoto(false)
+          setGeneralObservations(st.general_observations || '')
+          setRestrictions(st.restrictions || '')
+
+          // Fotos da anamnese
+          setExistingAnamnesisPhotos(st.anamnesis_photos || [])
+
+          // Dados estruturados da nova anamnese ou mapeamento/preservação dos dados legados
+          const anData = st.anamnesis_data || {}
+          setTreinouPersonalAntes(anData.treinou_personal_antes || '')
+          setProfissao(anData.profissao || '')
+
+          // Se já tem objetivos estruturados usa eles; se não, mapeia dos goals legados
+          if (anData.objetivos && anData.objetivos.length > 0) {
+            setObjetivosSelecionados(anData.objetivos)
+          } else if (st.goals && st.goals.length > 0) {
+            setObjetivosSelecionados(st.goals as string[])
+          }
+
+          setEnfaseMusculatura(anData.enfase_musculatura || '')
+          setPraticouExercicio(anData.praticou_exercicio || '')
+          setPraticouExercicioQuais(anData.praticou_exercicio_quais || '')
+          setTempoSemPraticar(anData.tempo_sem_praticar || '')
+          setRestricaoExercicio(anData.restricao_exercicio || (st.restrictions ? 'SIM' : ''))
+          setRestricaoExercicioQuais(anData.restricao_exercicio_quais || '')
+
+          setDoencasSelecionadas(anData.possui_doenca || [])
+          setDoencasOutros(anData.possui_doenca_outros || '')
+
+          // Lesão: se não estiver na anData, usa o campo legacy injuries
+          setPossuiLesao(anData.possui_lesao || st.injuries || '')
+
+          setDoresCorpo(anData.dores_corpo || '')
+          setDoresCorpoQuais(anData.dores_corpo_quais || '')
+          setFazDieta(anData.faz_dieta || '')
+          setFazNutricionista(anData.faz_nutricionista || '')
+          setUsoSubstancias(anData.uso_substancias || [])
+
+          // Campos legados preservados
+          setLegacyHealthHistory(st.health_history || '')
+          setLegacySurgeries(st.surgeries || '')
+          setLegacyTeacherObs(st.teacher_observations || '')
+
+          setAllStudentSheets(sheets)
+          setStudentHistory(history)
+          const map: Record<string, Exercise> = {}
+          exList.forEach((e) => {
+            map[e.id] = e
+          })
+          setExercisesMap(map)
+
+          if (
+            st.restrictions ||
+            st.anamnesis_data ||
+            st.injuries ||
+            st.health_history ||
+            (st.anamnesis_photos && st.anamnesis_photos.length > 0)
+          ) {
+            setAnamneseOpen(true)
+          }
+        })
+        .catch((err) => {
+          toast({
+            title: 'Erro ao carregar aluno',
+            description: err instanceof Error ? err.message : 'Não encontrado',
+            variant: 'destructive',
+          })
+          navigate('/alunos')
+        })
+        .finally(() => setLoading(false))
+    }
+  }, [id, navigate])
+=======
+          lastError = err
+          const errMsg = err instanceof Error ? err.message : String(err)
+          const is429 = errMsg.includes('429') || errMsg.toLowerCase().includes('too many requests')
+          if (is429 && attempt < maxRetries) {
+            await new Promise((res) => setTimeout(res, 600 * attempt))
+            continue
+          }
+=======
   // Preservação de dados antigos para não perder histórico anterior
   const [legacyHealthHistory, setLegacyHealthHistory] = useState('')
   const [legacySurgeries, setLegacySurgeries] = useState('')
+  const [legacyTeacherObs, setLegacyTeacherObs] = useState('')
+
+  // Histórico de Fichas Anteriores do aluno (Item 4)
+  const [allStudentSheets, setAllStudentSheets] = useState<TrainingSheet[]>([])
+  const [viewingArchivedSheet, setViewingArchivedSheet] = useState<TrainingSheet | null>(null)
+
+  // Histórico de treinos do aluno com o professor
+  const [studentHistory, setStudentHistory] = useState<WorkoutProgress[]>([])
+  const [exercisesMap, setExercisesMap] = useState<Record<string, Exercise>>({})
+  const [selectedHistorySession, setSelectedHistorySession] = useState<WorkoutProgress | null>(null)
+
+  useEffect(() => {
+    if (!id) return
+
+    setLoading(true)
+    Promise.all([
+      studentsService.getById(id),
+      workoutProgressService.getAll(id, 50),
+      trainingSheetsService.getHistoryByStudent(id),
+      exercisesService.getAll(),
+    ])
+      .then(([st, history, sheets, exList]) => {
+        setName(st.name)
+        setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
+        setPhone(st.phone ? maskPhone(st.phone) : '')
+        if (st.photo) {
+          setPhotoPreview(pb.files.getURL(st as any, st.photo))
+        } else {
+          setPhotoPreview(null)
+        }
+        setRemovePhoto(false)
+        setGeneralObservations(st.general_observations || '')
+        setRestrictions(st.restrictions || '')
+        setExistingAnamnesisPhotos(st.anamnesis_photos || [])
+
+        const anData = st.anamnesis_data || {}
+        setTreinouPersonalAntes(anData.treinou_personal_antes || '')
+        setProfissao(anData.profissao || '')
+
+        if (anData.objetivos && anData.objetivos.length > 0) {
+          setObjetivosSelecionados(anData.objetivos)
+        } else if (st.goals && st.goals.length > 0) {
+          setObjetivosSelecionados(st.goals as string[])
+        }
+
+        setEnfaseMusculatura(anData.enfase_musculatura || '')
+        setPraticouExercicio(anData.praticou_exercicio || '')
+        setPraticouExercicioQuais(anData.praticou_exercicio_quais || '')
+        setTempoSemPraticar(anData.tempo_sem_praticar || '')
+        setRestricaoExercicio(anData.restricao_exercicio || (st.restrictions ? 'SIM' : ''))
+        setRestricaoExercicioQuais(anData.restricao_exercicio_quais || '')
+
+        setDoencasSelecionadas(anData.possui_doenca || [])
+        setDoencasOutros(anData.possui_doenca_outros || '')
+        setPossuiLesao(anData.possui_lesao || st.injuries || '')
+        setDoresCorpo(anData.dores_corpo || '')
+        setDoresCorpoQuais(anData.dores_corpo_quais || '')
+        setFazDieta(anData.faz_dieta || '')
+        setFazNutricionista(anData.faz_nutricionista || '')
+        setUsoSubstancias(anData.uso_substancias || [])
+
+        setLegacyHealthHistory(st.health_history || '')
+        setLegacySurgeries(st.surgeries || '')
+        setLegacyTeacherObs(st.teacher_observations || '')
+
+        setAllStudentSheets(sheets)
+        setStudentHistory(history)
+        const map: Record<string, Exercise> = {}
+        exList.forEach((e) => {
+          map[e.id] = e
+        })
+        setExercisesMap(map)
+
+        if (
+          st.restrictions ||
+          st.anamnesis_data ||
+          st.injuries ||
+          st.health_history ||
+          (st.anamnesis_photos && st.anamnesis_photos.length > 0)
+        ) {
+          setAnamneseOpen(true)
+        }
+      })
+      .catch((err) => {
+        toast({
+          title: 'Erro ao carregar aluno',
+          description: err instanceof Error ? err.message : 'Não encontrado',
+          variant: 'destructive',
+        })
+        navigate('/alunos')
+      })
+      .finally(() => setLoading(false))
+  }, [id, navigate])
 =======
           setAllStudentSheets(sheets)
           setStudentHistory(history)
