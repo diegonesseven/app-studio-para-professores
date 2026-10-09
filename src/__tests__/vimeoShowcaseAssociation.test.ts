@@ -7,8 +7,8 @@ describe('Validação do Acervo pós-associação Vimeo', () => {
       sort: 'name',
     })
 
-    // Deve haver 317 exercícios no acervo (137 originais + 180 novos da vitrine Vimeo)
-    expect(list.length).toBe(317)
+    // Deve haver 325 exercícios no acervo (137 antigos deduplicados + 180 criados inicialmente + 8 novos dos casos duvidosos)
+    expect(list.length).toBe(325)
 
     // Validar ausência de nomes duplicados (case/accent insensitive)
     const norm = (s: string) =>
@@ -33,7 +33,66 @@ describe('Validação do Acervo pós-associação Vimeo', () => {
 
     // Validar que os exercícios vinculados possuem URLs válidas do Vimeo
     const withVideo = list.filter((e) => Boolean(e.youtube_url))
-    expect(withVideo.length).toBe(225) // 45 vinculados existentes + 180 novos
+    // 237 vídeos da showcase Vimeo 100% associados
+    expect(withVideo.length).toBe(237)
+
+    // Validar decisões específicas dos 12 vídeos
+    const exMap = new Map(list.map((e) => [e.name, e]))
+
+    // 1. Sumô existe, com vídeo 1234205223, e "Sumô Halter" foi unificado/removido
+    expect(exMap.has('Sumô')).toBe(true)
+    expect(exMap.get('Sumô')?.youtube_id).toBe('1234205223')
+    expect(exMap.has('Sumô Halter')).toBe(false)
+
+    // 2. Levantamento Terra existe como exercício próprio (não mesclado com Terra Smith)
+    expect(exMap.has('Levantamento Terra')).toBe(true)
+    expect(exMap.get('Levantamento Terra')?.youtube_id).toBe('1234204657')
+    expect(exMap.has('Levantamento Terra Smith')).toBe(true)
+
+    // 3. Extensora Simultanea existe com vídeo 1234204314 (antiga "Extensora")
+    expect(exMap.has('Extensora Simultanea')).toBe(true)
+    expect(exMap.get('Extensora Simultanea')?.youtube_id).toBe('1234204314')
+
+    // 4. Leg Simultaneo existe com vídeo 1234204621 (antigo "Leg Press 45º")
+    expect(exMap.has('Leg Simultaneo')).toBe(true)
+    expect(exMap.get('Leg Simultaneo')?.youtube_id).toBe('1234204621')
+
+    // 5. Supino Reto Barra-Halter existe separado com vídeo 1234205243
+    expect(exMap.has('Supino Reto Barra-Halter')).toBe(true)
+    expect(exMap.get('Supino Reto Barra-Halter')?.youtube_id).toBe('1234205243')
+    expect(exMap.has('Supino Reto Conjugado Halter')).toBe(true)
+
+    // 6. Pulley Corda existe separado (Costas) com vídeo 1234204860
+    expect(exMap.has('Pulley Corda')).toBe(true)
+    expect(exMap.get('Pulley Corda')?.youtube_id).toBe('1234204860')
+    expect(exMap.get('Pulley Corda')?.muscle_group).toBe('Costas')
+    expect(exMap.has('Pull Down Corda')).toBe(true)
+
+    // 7. Tríceps Testa Simultâneo Halter existe separado com vídeo 1234205419
+    expect(exMap.has('Tríceps Testa Simultâneo Halter')).toBe(true)
+    expect(exMap.get('Tríceps Testa Simultâneo Halter')?.youtube_id).toBe('1234205419')
+
+    // 8. Panturrilha Smith Unilateral existe separado com vídeo 1234204730
+    expect(exMap.has('Panturrilha Smith Unilateral')).toBe(true)
+    expect(exMap.get('Panturrilha Smith Unilateral')?.youtube_id).toBe('1234204730')
+    expect(exMap.has('Panturrilha Smith')).toBe(true)
+
+    // 9. Panturrilha Sentado Curtinho possui o vídeo de máquina sentada 1234204702
+    expect(exMap.has('Panturrilha Sentado Curtinho')).toBe(true)
+    expect(exMap.get('Panturrilha Sentado Curtinho')?.youtube_id).toBe('1234204702')
+
+    // 10. Panturrilha Livre Simultâneo existe separado com vídeo 1234204697
+    expect(exMap.has('Panturrilha Livre Simultâneo')).toBe(true)
+    expect(exMap.get('Panturrilha Livre Simultâneo')?.youtube_id).toBe('1234204697')
+
+    // 11. Abdução em V Caneleira existe separado com vídeo 1234203672
+    expect(exMap.has('Abdução em V Caneleira')).toBe(true)
+    expect(exMap.get('Abdução em V Caneleira')?.youtube_id).toBe('1234203672')
+    expect(exMap.has('Adução em "V" Can.')).toBe(true)
+
+    // 12. Flexão de Quadril 180º Em Pé (Caneleira) existe separado com vídeo 1234204404
+    expect(exMap.has('Flexão de Quadril 180º Em Pé (Caneleira)')).toBe(true)
+    expect(exMap.get('Flexão de Quadril 180º Em Pé (Caneleira)')?.youtube_id).toBe('1234204404')
 
     for (const ex of withVideo) {
       expect(ex.youtube_url).toMatch(/^https:\/\/vimeo\.com\/\d+$/)
