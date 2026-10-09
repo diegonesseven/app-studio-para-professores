@@ -39,7 +39,7 @@ export default function VideoModal({
           platform: 'vimeo' as const,
           id: vimeo,
           originalUrl: `https://vimeo.com/${vimeo}`,
-          embedUrl: `https://player.vimeo.com/video/${vimeo}?autoplay=0`,
+          embedUrl: `https://player.vimeo.com/video/${vimeo}?autoplay=0&muted=1`,
           thumbnailUrl: null,
         }
       }
@@ -50,7 +50,7 @@ export default function VideoModal({
           platform: 'youtube' as const,
           id: yt,
           originalUrl: `https://www.youtube.com/watch?v=${yt}`,
-          embedUrl: `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&modestbranding=1`,
+          embedUrl: `https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&mute=1&rel=0&modestbranding=1`,
           thumbnailUrl: `https://img.youtube.com/vi/${yt}/hqdefault.jpg`,
         }
       }

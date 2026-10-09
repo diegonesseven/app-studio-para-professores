@@ -116,7 +116,7 @@ export function parseVideoUrl(urlOrId: string | null | undefined): ParsedVideoIn
       platform: 'vimeo',
       id: vimeoId,
       originalUrl: trimmed.startsWith('http') ? trimmed : `https://vimeo.com/${vimeoId}`,
-      embedUrl: `https://player.vimeo.com/video/${vimeoId}?autoplay=0`,
+      embedUrl: `https://player.vimeo.com/video/${vimeoId}?autoplay=0&muted=1`,
       thumbnailUrl: null, // Vimeo precisa de requisição oEmbed ou SVG fallback
     }
   }
@@ -128,7 +128,7 @@ export function parseVideoUrl(urlOrId: string | null | undefined): ParsedVideoIn
       platform: 'youtube',
       id: ytId,
       originalUrl: trimmed.startsWith('http') ? trimmed : `https://www.youtube.com/watch?v=${ytId}`,
-      embedUrl: `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&rel=0&modestbranding=1`,
       thumbnailUrl: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
     }
   }

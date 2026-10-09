@@ -75,26 +75,29 @@ describe('Suporte a Vídeos no Acervo: Vimeo, YouTube e Exercício sem Vídeo', 
   })
 
   describe('parseVideoUrl', () => {
-    it('deve detectar plataforma Vimeo e montar embedUrl com autoplay=0', () => {
+    it('deve detectar plataforma Vimeo e montar embedUrl com autoplay=0 e muted=1 por padrão', () => {
       const parsed = parseVideoUrl('https://vimeo.com/123456789')
       expect(parsed.platform).toBe('vimeo')
       expect(parsed.id).toBe('123456789')
-      expect(parsed.embedUrl).toBe('https://player.vimeo.com/video/123456789?autoplay=0')
+      expect(parsed.embedUrl).toBe('https://player.vimeo.com/video/123456789?autoplay=0&muted=1')
+      expect(parsed.embedUrl).toContain('muted=1')
       expect(parsed.originalUrl).toBe('https://vimeo.com/123456789')
     })
 
-    it('deve detectar plataforma Vimeo a partir de player.vimeo.com/video/123456789', () => {
+    it('deve detectar plataforma Vimeo a partir de player.vimeo.com/video/123456789 com muted=1', () => {
       const parsed = parseVideoUrl('https://player.vimeo.com/video/123456789')
       expect(parsed.platform).toBe('vimeo')
       expect(parsed.id).toBe('123456789')
-      expect(parsed.embedUrl).toBe('https://player.vimeo.com/video/123456789?autoplay=0')
+      expect(parsed.embedUrl).toBe('https://player.vimeo.com/video/123456789?autoplay=0&muted=1')
+      expect(parsed.embedUrl).toContain('muted=1')
     })
 
-    it('deve detectar plataforma YouTube e montar embedUrl e thumbnail', () => {
+    it('deve detectar plataforma YouTube e montar embedUrl com mute=1 e thumbnail', () => {
       const parsed = parseVideoUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
       expect(parsed.platform).toBe('youtube')
       expect(parsed.id).toBe('dQw4w9WgXcQ')
       expect(parsed.embedUrl).toContain('https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ')
+      expect(parsed.embedUrl).toContain('mute=1')
       expect(parsed.thumbnailUrl).toBe('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg')
     })
 
