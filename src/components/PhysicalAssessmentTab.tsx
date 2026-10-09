@@ -57,6 +57,8 @@ import {
   Save,
   Download,
   Share2,
+  LayoutList,
+  Table as TableIcon,
 } from 'lucide-react'
 
 interface PhysicalAssessmentTabProps {
@@ -85,6 +87,10 @@ export function PhysicalAssessmentTab({
   const [fixedHeight, setFixedHeight] = useState<string>('')
   // Idade calculada
   const studentAge = useMemo(() => calculateAge(studentBirthdate), [studentBirthdate])
+
+  // Alternador de visão mobile vs tabela completa (em telas pequenas)
+  // Por padrão no mobile inicia em 'cards' (visão otimizada e direta)
+  const [mobileViewTab, setMobileViewTab] = useState<'cards' | 'table'>('cards')
 
   // Diálogo para adicionar avaliação
   const [newDateDialogOpen, setNewDateDialogOpen] = useState(false)
@@ -315,6 +321,29 @@ export function PhysicalAssessmentTab({
     }
   }
 
+  // Estado local para digitação imediata e responsiva (sem re-renderizar quebrando foco)
+  const [localDrafts, setLocalDrafts] = useState<Record<string, string>>({})
+
+  // Limpa drafts ao trocar de avaliação
+  useEffect(() => {
+    setLocalDrafts({})
+  }, [selectedAssessmentId])
+
+  // Helper para obter o valor formatado de um campo
+  const getDraftValue = useCallback(
+    (fieldKey: string, actualVal: number | null | undefined): string => {
+      if (fieldKey in localDrafts) {
+        return localDrafts[fieldKey]
+      }
+      return actualVal !== null && actualVal !== undefined ? String(actualVal) : ''
+    },
+    [localDrafts],
+  )
+
+  const handleDraftChange = useCallback((fieldKey: string, val: string) => {
+    setLocalDrafts((prev) => ({ ...prev, [fieldKey]: val }))
+  }, [])
+
   // Atualizar campo de composição corporal ou perimetria
   const handleUpdateField = async (
     assessment: PhysicalAssessment,
@@ -322,17 +351,20 @@ export function PhysicalAssessmentTab({
     rawVal: string,
     subKey?: 'direito' | 'esquerdo',
   ) => {
-    const numVal = rawVal.trim() === '' ? null : parseFloat(rawVal.replace(',', '.'))
+    const cleanStr = (rawVal || '').trim().replace(',', '.')
+    const parsed = cleanStr === '' ? null : parseFloat(cleanStr)
+    const numVal = parsed !== null && !isNaN(parsed) ? parsed : null
+
     const currentData = { ...(assessment.data || {}) }
 
     if (subKey) {
       const currentBilateral: BilateralMeasure = (currentData as any)[path] || {}
       ;(currentData as any)[path] = {
         ...currentBilateral,
-        [subKey]: isNaN(numVal as number) ? null : numVal,
+        [subKey]: numVal,
       }
     } else {
-      ;(currentData as any)[path] = isNaN(numVal as number) ? null : numVal
+      ;(currentData as any)[path] = numVal
 
       // Se mudou o peso e temos altura definida, recalcula IMC se for coerente
       if (path === 'peso' && numVal && fixedHeight) {
@@ -346,10 +378,17 @@ export function PhysicalAssessmentTab({
       }
     }
 
-    // Atualização otimista local
+    // Atualização otimista local imediata no estado
     setAssessments((prev) =>
       prev.map((a) => (a.id === assessment.id ? { ...a, data: currentData } : a)),
     )
+
+    // Atualiza draft com o valor normalizado
+    const draftKey = subKey ? `${path}_${subKey}` : path
+    setLocalDrafts((prev) => ({
+      ...prev,
+      [draftKey]: numVal !== null ? String(numVal) : '',
+    }))
 
     try {
       await physicalAssessmentsService.update(assessment.id, {
@@ -890,11 +929,814 @@ export function PhysicalAssessmentTab({
             </div>
           )}
 
-          {/* Dica / Indicador de rolagem horizontal em viewports estreitas */}
-          <div className="flex sm:hidden items-center justify-between px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-[11px] text-[#C5CEE0]">
+          {/* Seletor de Modo no Mobile: Lista Otimizada (Cards) vs Tabela Completa */}
+          <div className="flex sm:hidden items-center justify-between gap-2 p-1.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+            <button
+              type="button"
+              onClick={() => setMobileViewTab('cards')}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                mobileViewTab === 'cards'
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'text-[#9CA5B8] hover:text-white'
+              }`}
+            >
+              <LayoutList className="w-4 h-4" />
+              Edição Rápida (Direta)
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileViewTab('table')}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
+                mobileViewTab === 'table'
+                  ? 'bg-primary text-primary-foreground shadow-md'
+                  : 'text-[#9CA5B8] hover:text-white'
+              }`}
+            >
+              <TableIcon className="w-4 h-4" />
+              Tabela Comparativa
+            </button>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* VISUALIZAÇÃO MOBILE EM CARDS/LISTA DIRETA (100% VISÍVEL, SEM ROLAR PRO LADO) */}
+          {/* ========================================================================= */}
+          {mobileViewTab === 'cards' && (
+            <div className="block sm:hidden space-y-4">
+              {/* Card de Configurações da Avaliação Atual (Data e Sexo) */}
+              <div className="rounded-xl border border-[#252B3E] bg-[#141828] p-3.5 space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-primary flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4" /> DATA DA AVALIAÇÃO:
+                  </span>
+                  <input
+                    type="date"
+                    value={extractDateInputVal(currentAssessment.date)}
+                    onChange={(e) => handleUpdateDate(currentAssessment, e.target.value)}
+                    className="bg-[#121522] border border-[#252B3E] text-white text-xs px-2.5 py-1.5 rounded-lg font-mono"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#252B3E]/60 text-xs text-[#9CA5B8]">
+                  <span>Sexo de Referência:</span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateSex(currentAssessment, 'F')}
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
+                        currentAssessment.sex === 'F' || !currentAssessment.sex
+                          ? 'bg-pink-500/20 text-pink-300 border border-pink-500/50'
+                          : 'bg-[#121522] border border-[#252B3E] hover:text-white'
+                      }`}
+                    >
+                      Fem (F)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateSex(currentAssessment, 'M')}
+                      className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
+                        currentAssessment.sex === 'M'
+                          ? 'bg-sky-500/20 text-sky-300 border border-sky-500/50'
+                          : 'bg-[#121522] border border-[#252B3E] hover:text-white'
+                      }`}
+                    >
+                      Masc (M)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* SEÇÃO 1: COMPOSIÇÃO CORPORAL (BIOIMPEDÂNCIA) */}
+              <div className="rounded-xl border border-[#252B3E] bg-[#121522] overflow-hidden">
+                <div className="bg-primary/10 border-b border-primary/20 px-3.5 py-2.5">
+                  <h4 className="text-xs font-bold text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                    <Activity className="w-4 h-4 text-primary" />
+                    1. Composição Corporal (Bioimpedância)
+                  </h4>
+                </div>
+
+                <div className="divide-y divide-[#252B3E] p-3 space-y-3">
+                  {/* PESO */}
+                  {(() => {
+                    const curr = currentAssessment.data?.peso ?? null
+                    const prev = previousAssessment?.data?.peso ?? null
+                    return (
+                      <div className="pt-2 first:pt-0">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white flex items-center gap-1">
+                            PESO (kg) <ArrowDown className="w-3 h-3 text-[#9CA5B8]" />
+                          </label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} kg` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="Ex: 68.5"
+                          value={getDraftValue('peso', curr)}
+                          onChange={(e) => handleDraftChange('peso', e.target.value)}
+                          onBlur={(e) =>
+                            handleUpdateField(currentAssessment, 'peso', e.target.value)
+                          }
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* IMC */}
+                  {(() => {
+                    const curr = currentAssessment.data?.imc ?? null
+                    const prev = previousAssessment?.data?.imc ?? null
+                    const currClassif = classifyImc(curr)
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white flex items-center gap-1">
+                            IMC (kg/m²) <ArrowDown className="w-3 h-3 text-[#9CA5B8]" />
+                          </label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? prev : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="Ex: 23.4"
+                            value={getDraftValue('imc', curr)}
+                            onChange={(e) => handleDraftChange('imc', e.target.value)}
+                            onBlur={(e) =>
+                              handleUpdateField(currentAssessment, 'imc', e.target.value)
+                            }
+                            className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary flex-1 touch-manipulation"
+                          />
+                          {currClassif && (
+                            <div className="shrink-0">{renderBadge(currClassif)}</div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* % GORDURA */}
+                  {(() => {
+                    const curr = currentAssessment.data?.gordura ?? null
+                    const prev = previousAssessment?.data?.gordura ?? null
+                    const currSex = currentAssessment.sex || 'F'
+                    const currClassif = classifyBodyFat(curr, currSex, studentAge)
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white flex items-center gap-1">
+                            % GORDURA (↓)
+                          </label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev}%` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="Ex: 24.5"
+                            value={getDraftValue('gordura', curr)}
+                            onChange={(e) => handleDraftChange('gordura', e.target.value)}
+                            onBlur={(e) =>
+                              handleUpdateField(currentAssessment, 'gordura', e.target.value)
+                            }
+                            className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary flex-1 touch-manipulation"
+                          />
+                          {currClassif && (
+                            <div className="shrink-0">{renderBadge(currClassif)}</div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* % MÚSCULOS */}
+                  {(() => {
+                    const curr = currentAssessment.data?.musculos ?? null
+                    const prev = previousAssessment?.data?.musculos ?? null
+                    const currSex = currentAssessment.sex || 'F'
+                    const currClassif = classifySkeletalMuscle(curr, currSex, studentAge)
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-rose-400 flex items-center gap-1">
+                            % MÚSCULOS (↑){' '}
+                            <span className="text-[10px] text-rose-300 font-normal">
+                              (maior melhor)
+                            </span>
+                          </label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev}%` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="Ex: 28.5"
+                            value={getDraftValue('musculos', curr)}
+                            onChange={(e) => handleDraftChange('musculos', e.target.value)}
+                            onBlur={(e) =>
+                              handleUpdateField(currentAssessment, 'musculos', e.target.value)
+                            }
+                            className="bg-[#181C2E] border-rose-900/60 text-white text-base h-12 text-center font-bold focus-visible:ring-rose-500 flex-1 touch-manipulation"
+                          />
+                          {currClassif && (
+                            <div className="shrink-0">{renderBadge(currClassif)}</div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* MR (KCAL) */}
+                  {(() => {
+                    const curr = currentAssessment.data?.mr ?? null
+                    const prev = previousAssessment?.data?.mr ?? null
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white flex items-center gap-1">
+                            MR (↓){' '}
+                            <span className="text-[10px] text-[#9CA5B8]">(kcal - basal)</span>
+                          </label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} kcal` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="Ex: 1420"
+                          value={getDraftValue('mr', curr)}
+                          onChange={(e) => handleDraftChange('mr', e.target.value)}
+                          onBlur={(e) => handleUpdateField(currentAssessment, 'mr', e.target.value)}
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-semibold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* IDADE BIOLÓGICA */}
+                  {(() => {
+                    const curr = currentAssessment.data?.idade_biologica ?? null
+                    const prev = previousAssessment?.data?.idade_biologica ?? null
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white flex items-center gap-1">
+                            IDADE BIOLÓGICA (↓){' '}
+                            <span className="text-[10px] text-[#9CA5B8]">(anos)</span>
+                          </label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} anos` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          placeholder="Ex: 27"
+                          value={getDraftValue('idade_biologica', curr)}
+                          onChange={(e) => handleDraftChange('idade_biologica', e.target.value)}
+                          onBlur={(e) =>
+                            handleUpdateField(currentAssessment, 'idade_biologica', e.target.value)
+                          }
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-semibold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* GORDURA VISCERAL */}
+                  {(() => {
+                    const curr = currentAssessment.data?.gordura_visceral ?? null
+                    const prev = previousAssessment?.data?.gordura_visceral ?? null
+                    const currClassif = classifyVisceralFat(curr)
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white flex items-center gap-1">
+                            GORDURA VISCERAL (↓)
+                          </label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? prev : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            type="text"
+                            inputMode="numeric"
+                            placeholder="Ex: 4"
+                            value={getDraftValue('gordura_visceral', curr)}
+                            onChange={(e) => handleDraftChange('gordura_visceral', e.target.value)}
+                            onBlur={(e) =>
+                              handleUpdateField(
+                                currentAssessment,
+                                'gordura_visceral',
+                                e.target.value,
+                              )
+                            }
+                            className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-semibold focus-visible:ring-primary flex-1 touch-manipulation"
+                          />
+                          {currClassif && (
+                            <div className="shrink-0">{renderBadge(currClassif)}</div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+
+              {/* SEÇÃO 2: PERIMETRIA CORPORAL (MEDIDAS EM CM) */}
+              <div className="rounded-xl border border-[#252B3E] bg-[#121522] overflow-hidden">
+                <div className="bg-primary/10 border-b border-primary/20 px-3.5 py-2.5">
+                  <h4 className="text-xs font-bold text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    2. Medidas Corporais / Perimetria (cm)
+                  </h4>
+                </div>
+
+                <div className="divide-y divide-[#252B3E] p-3 space-y-3">
+                  {/* ANTEBRAÇO (D/E) */}
+                  {(() => {
+                    const currD = currentAssessment.data?.antebraco?.direito ?? null
+                    const currE = currentAssessment.data?.antebraco?.esquerdo ?? null
+                    return (
+                      <div className="pt-2 first:pt-0">
+                        <label className="text-xs font-bold text-white block mb-1.5">
+                          ANTEBRAÇO (cm)
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Direito
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('antebraco_direito', currD)}
+                              onChange={(e) =>
+                                handleDraftChange('antebraco_direito', e.target.value)
+                              }
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'antebraco',
+                                  e.target.value,
+                                  'direito',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Esquerdo
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('antebraco_esquerdo', currE)}
+                              onChange={(e) =>
+                                handleDraftChange('antebraco_esquerdo', e.target.value)
+                              }
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'antebraco',
+                                  e.target.value,
+                                  'esquerdo',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* BÍCEPS (D/E) */}
+                  {(() => {
+                    const currD = currentAssessment.data?.biceps?.direito ?? null
+                    const currE = currentAssessment.data?.biceps?.esquerdo ?? null
+                    return (
+                      <div className="pt-3">
+                        <label className="text-xs font-bold text-white block mb-1.5">
+                          BÍCEPS (cm)
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Direito
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('biceps_direito', currD)}
+                              onChange={(e) => handleDraftChange('biceps_direito', e.target.value)}
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'biceps',
+                                  e.target.value,
+                                  'direito',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Esquerdo
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('biceps_esquerdo', currE)}
+                              onChange={(e) => handleDraftChange('biceps_esquerdo', e.target.value)}
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'biceps',
+                                  e.target.value,
+                                  'esquerdo',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* TÓRAX */}
+                  {(() => {
+                    const curr = currentAssessment.data?.torax ?? null
+                    const prev = previousAssessment?.data?.torax ?? null
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white">TÓRAX (cm)</label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} cm` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="cm"
+                          value={getDraftValue('torax', curr)}
+                          onChange={(e) => handleDraftChange('torax', e.target.value)}
+                          onBlur={(e) =>
+                            handleUpdateField(currentAssessment, 'torax', e.target.value)
+                          }
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* OMBRO */}
+                  {(() => {
+                    const curr = currentAssessment.data?.ombro ?? null
+                    const prev = previousAssessment?.data?.ombro ?? null
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white">OMBRO (cm)</label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} cm` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="cm"
+                          value={getDraftValue('ombro', curr)}
+                          onChange={(e) => handleDraftChange('ombro', e.target.value)}
+                          onBlur={(e) =>
+                            handleUpdateField(currentAssessment, 'ombro', e.target.value)
+                          }
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* CINTURA */}
+                  {(() => {
+                    const curr = currentAssessment.data?.cintura ?? null
+                    const prev = previousAssessment?.data?.cintura ?? null
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white">CINTURA (cm)</label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} cm` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="cm"
+                          value={getDraftValue('cintura', curr)}
+                          onChange={(e) => handleDraftChange('cintura', e.target.value)}
+                          onBlur={(e) =>
+                            handleUpdateField(currentAssessment, 'cintura', e.target.value)
+                          }
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* ABDÔMEN */}
+                  {(() => {
+                    const curr = currentAssessment.data?.abdomen ?? null
+                    const prev = previousAssessment?.data?.abdomen ?? null
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white">ABDÔMEN (cm)</label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} cm` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="cm"
+                          value={getDraftValue('abdomen', curr)}
+                          onChange={(e) => handleDraftChange('abdomen', e.target.value)}
+                          onBlur={(e) =>
+                            handleUpdateField(currentAssessment, 'abdomen', e.target.value)
+                          }
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* QUADRIL */}
+                  {(() => {
+                    const curr = currentAssessment.data?.quadril ?? null
+                    const prev = previousAssessment?.data?.quadril ?? null
+                    return (
+                      <div className="pt-3">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="text-xs font-bold text-white">QUADRIL (cm)</label>
+                          {previousAssessment && (
+                            <span className="text-[11px] text-[#9CA5B8]">
+                              Anterior:{' '}
+                              <strong className="text-secondary">
+                                {prev !== null ? `${prev} cm` : '—'}
+                              </strong>
+                            </span>
+                          )}
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="decimal"
+                          placeholder="cm"
+                          value={getDraftValue('quadril', curr)}
+                          onChange={(e) => handleDraftChange('quadril', e.target.value)}
+                          onBlur={(e) =>
+                            handleUpdateField(currentAssessment, 'quadril', e.target.value)
+                          }
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                        />
+                      </div>
+                    )
+                  })()}
+
+                  {/* RELAÇÃO CINTURA-QUADRIL (RCQ) - Calculada automaticamente */}
+                  {(() => {
+                    const currCintura = currentAssessment.data?.cintura ?? null
+                    const currQuadril = currentAssessment.data?.quadril ?? null
+                    const currRcq = calculateWaistHipRatio(currCintura, currQuadril)
+                    const currSex = currentAssessment.sex || 'F'
+                    const currClassif = classifyWaistHipRatio(currRcq, currSex)
+                    return (
+                      <div className="pt-3 bg-primary/5 p-3 rounded-lg border border-primary/20">
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-xs font-bold text-primary">
+                            RELAÇÃO CINTURA-QUADRIL (RCQ)
+                          </label>
+                          <span className="text-[10px] text-[#9CA5B8]">
+                            Ref: {currSex === 'M' ? '< 0,90' : '< 0,85'}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-[#8A8F98] mb-2">
+                          Cálculo automático (Cintura ÷ Quadril)
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-12 rounded-lg bg-[#181C2E] border border-[#252B3E] flex items-center justify-center font-mono text-base font-black text-white">
+                            {currRcq !== null ? currRcq.toFixed(2).replace('.', ',') : '—'}
+                          </div>
+                          {currClassif && (
+                            <div className="shrink-0">{renderBadge(currClassif)}</div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* COXA (D/E) */}
+                  {(() => {
+                    const currD = currentAssessment.data?.coxa?.direito ?? null
+                    const currE = currentAssessment.data?.coxa?.esquerdo ?? null
+                    return (
+                      <div className="pt-3">
+                        <label className="text-xs font-bold text-white block mb-1.5">
+                          COXA (cm)
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Direito
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('coxa_direito', currD)}
+                              onChange={(e) => handleDraftChange('coxa_direito', e.target.value)}
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'coxa',
+                                  e.target.value,
+                                  'direito',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Esquerdo
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('coxa_esquerdo', currE)}
+                              onChange={(e) => handleDraftChange('coxa_esquerdo', e.target.value)}
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'coxa',
+                                  e.target.value,
+                                  'esquerdo',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+
+                  {/* PANTURRILHA (D/E) */}
+                  {(() => {
+                    const currD = currentAssessment.data?.panturrilha?.direito ?? null
+                    const currE = currentAssessment.data?.panturrilha?.esquerdo ?? null
+                    return (
+                      <div className="pt-3">
+                        <label className="text-xs font-bold text-white block mb-1.5">
+                          PANTURRILHA (cm)
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Direito
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('panturrilha_direito', currD)}
+                              onChange={(e) =>
+                                handleDraftChange('panturrilha_direito', e.target.value)
+                              }
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'panturrilha',
+                                  e.target.value,
+                                  'direito',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                              Esquerdo
+                            </span>
+                            <Input
+                              type="text"
+                              inputMode="decimal"
+                              placeholder="cm"
+                              value={getDraftValue('panturrilha_esquerdo', currE)}
+                              onChange={(e) =>
+                                handleDraftChange('panturrilha_esquerdo', e.target.value)
+                              }
+                              onBlur={(e) =>
+                                handleUpdateField(
+                                  currentAssessment,
+                                  'panturrilha',
+                                  e.target.value,
+                                  'esquerdo',
+                                )
+                              }
+                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })()}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Dica / Indicador de rolagem horizontal em viewports estreitas (apenas se estiver vendo tabela no mobile) */}
+          <div
+            className={`${mobileViewTab === 'table' ? 'flex' : 'hidden'} sm:hidden items-center justify-between px-3 py-2 rounded-xl bg-primary/10 border border-primary/20 text-[11px] text-[#C5CEE0]`}
+          >
             <span className="flex items-center gap-1.5 font-medium">
               <ChevronRight className="w-3.5 h-3.5 text-primary animate-pulse" />
-              Deslize para o lado para editar os campos
+              Deslize para o lado para ver o comparativo
             </span>
             <span className="text-[10px] text-primary font-bold uppercase tracking-wider">
               Arraste →
@@ -902,13 +1744,15 @@ export function PhysicalAssessmentTab({
           </div>
 
           {/* TABELA DE AVALIAÇÃO FÍSICA: UMA COLUNA POR VEZ + COLUNA ANTERIOR (COMPARATIVO) */}
-          <div className="overflow-x-auto rounded-xl border border-[#252B3E] bg-[#121522] shadow-inner max-w-full relative scroll-smooth">
-            <table className="w-full text-xs text-left border-collapse min-w-[560px] sm:min-w-[620px]">
+          <div
+            className={`${mobileViewTab === 'table' ? 'block' : 'hidden sm:block'} overflow-x-auto rounded-xl border border-[#252B3E] bg-[#121522] shadow-inner max-w-full relative scroll-smooth`}
+          >
+            <table className="w-full text-xs text-left border-collapse min-w-[460px] sm:min-w-[620px]">
               {/* CABEÇALHO */}
               <thead>
                 {/* Linha 1: Títulos das colunas */}
                 <tr className="bg-[#1A2138] border-b border-[#252B3E]">
-                  <th className="p-3 font-bold text-white uppercase tracking-wider w-64 sticky left-0 bg-[#1A2138] z-20 border-r border-[#252B3E]">
+                  <th className="p-2 sm:p-3 font-bold text-white uppercase tracking-wider w-36 sm:w-64 sticky left-0 bg-[#1A2138] z-20 border-r border-[#252B3E]">
                     PARÂMETRO / MEDIDA
                   </th>
 
@@ -978,7 +1822,7 @@ export function PhysicalAssessmentTab({
 
                 {/* Linha 2: Subcolunas DIREITO / ESQUERDO (apenas na perimetria, o cabeçalho mostra orientação) */}
                 <tr className="bg-[#141828] border-b border-[#252B3E] text-[11px] text-[#9CA5B8]">
-                  <th className="p-2 font-semibold text-white sticky left-0 bg-[#141828] z-20 border-r border-[#252B3E]">
+                  <th className="p-2 font-semibold text-white sticky left-0 bg-[#141828] z-20 border-r border-[#252B3E] w-36 sm:w-64">
                     SUBDIVISÃO BILATERAL
                   </th>
 
@@ -1024,7 +1868,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.peso ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">
                             PESO (kg) <ArrowDown className="w-3 h-3 text-[#9CA5B8]" />
@@ -1038,18 +1882,18 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Ex: 68.5"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-peso-${curr}`}
+                          value={getDraftValue('peso', curr)}
+                          onChange={(e) => handleDraftChange('peso', e.target.value)}
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'peso', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1064,7 +1908,7 @@ export function PhysicalAssessmentTab({
                   const prevClassif = classifyImc(prev)
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">
                             IMC (kg/m²) <ArrowDown className="w-3 h-3 text-[#9CA5B8]" />
@@ -1079,19 +1923,19 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
-                            type="number"
-                            step="0.1"
+                            type="text"
+                            inputMode="decimal"
                             placeholder="Ex: 23.4"
-                            defaultValue={curr !== null ? String(curr) : ''}
-                            key={`${currentAssessment.id}-imc-${curr}`}
+                            value={getDraftValue('imc', curr)}
+                            onChange={(e) => handleDraftChange('imc', e.target.value)}
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'imc', e.target.value)
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-bold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-bold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -1110,7 +1954,7 @@ export function PhysicalAssessmentTab({
                   const prevClassif = classifyBodyFat(prev, prevSex, studentAge)
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">% GORDURA (↓)</span>
                         </div>
@@ -1123,19 +1967,19 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
-                            type="number"
-                            step="0.1"
+                            type="text"
+                            inputMode="decimal"
                             placeholder="Ex: 24.5"
-                            defaultValue={curr !== null ? String(curr) : ''}
-                            key={`${currentAssessment.id}-gordura-${curr}`}
+                            value={getDraftValue('gordura', curr)}
+                            onChange={(e) => handleDraftChange('gordura', e.target.value)}
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'gordura', e.target.value)
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -1154,10 +1998,10 @@ export function PhysicalAssessmentTab({
                   const prevClassif = classifySkeletalMuscle(prev, prevSex, studentAge)
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-rose-950/15">
-                      <td className="p-2.5 font-black text-rose-400 sticky left-0 bg-[#14121A] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-black text-rose-400 sticky left-0 bg-[#14121A] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1 font-bold">% MÚSCULOS (↑)</span>
-                          <span className="text-[10px] text-rose-300 font-normal">
+                          <span className="text-[10px] text-rose-300 font-normal hidden sm:inline">
                             (maior melhor)
                           </span>
                         </div>
@@ -1170,19 +2014,19 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center bg-rose-950/10 min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center bg-rose-950/10 min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
-                            type="number"
-                            step="0.1"
+                            type="text"
+                            inputMode="decimal"
                             placeholder="Ex: 28.5"
-                            defaultValue={curr !== null ? String(curr) : ''}
-                            key={`${currentAssessment.id}-musculos-${curr}`}
+                            value={getDraftValue('musculos', curr)}
+                            onChange={(e) => handleDraftChange('musculos', e.target.value)}
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'musculos', e.target.value)
                             }
-                            className="bg-[#181C2E] border-rose-900/60 text-white text-xs sm:text-sm h-10 text-center font-bold focus-visible:ring-rose-500 mx-auto max-w-[140px] cursor-text"
+                            className="bg-[#181C2E] border-rose-900/60 text-white text-xs sm:text-sm h-11 text-center font-bold focus-visible:ring-rose-500 mx-auto max-w-[140px] cursor-text touch-manipulation"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -1197,7 +2041,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.mr ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">
                             MR (↓) <span className="text-[10px] text-[#9CA5B8]">(kcal)</span>
@@ -1211,15 +2055,16 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           placeholder="Ex: 1420"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-mr-${curr}`}
+                          value={getDraftValue('mr', curr)}
+                          onChange={(e) => handleDraftChange('mr', e.target.value)}
                           onBlur={(e) => handleUpdateField(currentAssessment, 'mr', e.target.value)}
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1232,7 +2077,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.idade_biologica ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">IDADE BIOLÓGICA (↓)</span>
                         </div>
@@ -1244,17 +2089,18 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
+                          type="text"
+                          inputMode="numeric"
                           placeholder="Ex: 27"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-idade_biologica-${curr}`}
+                          value={getDraftValue('idade_biologica', curr)}
+                          onChange={(e) => handleDraftChange('idade_biologica', e.target.value)}
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'idade_biologica', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1269,7 +2115,7 @@ export function PhysicalAssessmentTab({
                   const prevClassif = classifyVisceralFat(prev)
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">GORDURA VISCERAL (↓)</span>
                         </div>
@@ -1282,14 +2128,15 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             placeholder="Ex: 4"
-                            defaultValue={curr !== null ? String(curr) : ''}
-                            key={`${currentAssessment.id}-gordura_visceral-${curr}`}
+                            value={getDraftValue('gordura_visceral', curr)}
+                            onChange={(e) => handleDraftChange('gordura_visceral', e.target.value)}
                             onBlur={(e) =>
                               handleUpdateField(
                                 currentAssessment,
@@ -1297,7 +2144,7 @@ export function PhysicalAssessmentTab({
                                 e.target.value,
                               )
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -1326,7 +2173,7 @@ export function PhysicalAssessmentTab({
                   const prevE = previousAssessment?.data?.antebraco?.esquerdo ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         ANTEBRAÇO
                       </td>
 
@@ -1339,13 +2186,13 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Dir"
-                          defaultValue={currD !== null ? String(currD) : ''}
-                          key={`${currentAssessment.id}-antebraco-d-${currD}`}
+                          value={getDraftValue('antebraco_direito', currD)}
+                          onChange={(ev) => handleDraftChange('antebraco_direito', ev.target.value)}
                           onBlur={(ev) =>
                             handleUpdateField(
                               currentAssessment,
@@ -1354,16 +2201,18 @@ export function PhysicalAssessmentTab({
                               'direito',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
-                      <td className="py-2 px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Esq"
-                          defaultValue={currE !== null ? String(currE) : ''}
-                          key={`${currentAssessment.id}-antebraco-e-${currE}`}
+                          value={getDraftValue('antebraco_esquerdo', currE)}
+                          onChange={(ev) =>
+                            handleDraftChange('antebraco_esquerdo', ev.target.value)
+                          }
                           onBlur={(ev) =>
                             handleUpdateField(
                               currentAssessment,
@@ -1372,7 +2221,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1387,7 +2236,7 @@ export function PhysicalAssessmentTab({
                   const prevE = previousAssessment?.data?.biceps?.esquerdo ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         BÍCEPS
                       </td>
 
@@ -1400,13 +2249,13 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Dir"
-                          defaultValue={currD !== null ? String(currD) : ''}
-                          key={`${currentAssessment.id}-biceps-d-${currD}`}
+                          value={getDraftValue('biceps_direito', currD)}
+                          onChange={(ev) => handleDraftChange('biceps_direito', ev.target.value)}
                           onBlur={(ev) =>
                             handleUpdateField(
                               currentAssessment,
@@ -1415,16 +2264,16 @@ export function PhysicalAssessmentTab({
                               'direito',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
-                      <td className="py-2 px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Esq"
-                          defaultValue={currE !== null ? String(currE) : ''}
-                          key={`${currentAssessment.id}-biceps-e-${currE}`}
+                          value={getDraftValue('biceps_esquerdo', currE)}
+                          onChange={(ev) => handleDraftChange('biceps_esquerdo', ev.target.value)}
                           onBlur={(ev) =>
                             handleUpdateField(
                               currentAssessment,
@@ -1433,7 +2282,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1446,7 +2295,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.torax ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         TÓRAX
                       </td>
 
@@ -1456,18 +2305,18 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="cm"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-torax-${curr}`}
+                          value={getDraftValue('torax', curr)}
+                          onChange={(e) => handleDraftChange('torax', e.target.value)}
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'torax', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1480,7 +2329,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.ombro ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         OMBRO
                       </td>
 
@@ -1490,18 +2339,18 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="cm"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-ombro-${curr}`}
+                          value={getDraftValue('ombro', curr)}
+                          onChange={(e) => handleDraftChange('ombro', e.target.value)}
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'ombro', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1514,7 +2363,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.cintura ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         CINTURA
                       </td>
 
@@ -1524,18 +2373,18 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="cm"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-cintura-${curr}`}
+                          value={getDraftValue('cintura', curr)}
+                          onChange={(e) => handleDraftChange('cintura', e.target.value)}
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'cintura', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1548,7 +2397,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.abdomen ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         ABDÔMEN
                       </td>
 
@@ -1558,18 +2407,18 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="cm"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-abdomen-${curr}`}
+                          value={getDraftValue('abdomen', curr)}
+                          onChange={(e) => handleDraftChange('abdomen', e.target.value)}
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'abdomen', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1582,7 +2431,7 @@ export function PhysicalAssessmentTab({
                   const prev = previousAssessment?.data?.quadril ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         QUADRIL
                       </td>
 
@@ -1592,18 +2441,18 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
                       >
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="cm"
-                          defaultValue={curr !== null ? String(curr) : ''}
-                          key={`${currentAssessment.id}-quadril-${curr}`}
+                          value={getDraftValue('quadril', curr)}
+                          onChange={(e) => handleDraftChange('quadril', e.target.value)}
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'quadril', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1628,8 +2477,8 @@ export function PhysicalAssessmentTab({
 
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-primary/5">
-                      <td className="p-2.5 font-bold text-primary sticky left-0 bg-[#151928] z-10 border-r border-[#252B3E]">
-                        <div className="flex items-center justify-between">
+                      <td className="p-2.5 font-bold text-primary sticky left-0 bg-[#151928] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5">
                           <span className="flex items-center gap-1">
                             RELAÇÃO CINTURA-QUADRIL (RCQ)
                           </span>
@@ -1667,7 +2516,7 @@ export function PhysicalAssessmentTab({
                   const prevE = previousAssessment?.data?.coxa?.esquerdo ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         COXA
                       </td>
 
@@ -1680,26 +2529,26 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Dir"
-                          defaultValue={currD !== null ? String(currD) : ''}
-                          key={`${currentAssessment.id}-coxa-d-${currD}`}
+                          value={getDraftValue('coxa_direito', currD)}
+                          onChange={(ev) => handleDraftChange('coxa_direito', ev.target.value)}
                           onBlur={(ev) =>
                             handleUpdateField(currentAssessment, 'coxa', ev.target.value, 'direito')
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
-                      <td className="py-2 px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Esq"
-                          defaultValue={currE !== null ? String(currE) : ''}
-                          key={`${currentAssessment.id}-coxa-e-${currE}`}
+                          value={getDraftValue('coxa_esquerdo', currE)}
+                          onChange={(ev) => handleDraftChange('coxa_esquerdo', ev.target.value)}
                           onBlur={(ev) =>
                             handleUpdateField(
                               currentAssessment,
@@ -1708,7 +2557,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
@@ -1723,7 +2572,7 @@ export function PhysicalAssessmentTab({
                   const prevE = previousAssessment?.data?.panturrilha?.esquerdo ?? null
                   return (
                     <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E]">
+                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
                         PANTURRILHA
                       </td>
 
@@ -1736,13 +2585,15 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Dir"
-                          defaultValue={currD !== null ? String(currD) : ''}
-                          key={`${currentAssessment.id}-panturrilha-d-${currD}`}
+                          value={getDraftValue('panturrilha_direito', currD)}
+                          onChange={(ev) =>
+                            handleDraftChange('panturrilha_direito', ev.target.value)
+                          }
                           onBlur={(ev) =>
                             handleUpdateField(
                               currentAssessment,
@@ -1751,16 +2602,18 @@ export function PhysicalAssessmentTab({
                               'direito',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
-                      <td className="py-2 px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
                         <Input
-                          type="number"
-                          step="0.1"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="Esq"
-                          defaultValue={currE !== null ? String(currE) : ''}
-                          key={`${currentAssessment.id}-panturrilha-e-${currE}`}
+                          value={getDraftValue('panturrilha_esquerdo', currE)}
+                          onChange={(ev) =>
+                            handleDraftChange('panturrilha_esquerdo', ev.target.value)
+                          }
                           onBlur={(ev) =>
                             handleUpdateField(
                               currentAssessment,
@@ -1769,7 +2622,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-10 text-center font-medium focus-visible:ring-primary cursor-text"
+                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
                         />
                       </td>
                     </tr>
