@@ -215,4 +215,17 @@ describe('Catálogo de Fichas Modelo do Studio Bru Oliveira', () => {
       expect(capturedPayload.series_data.A.length).toBeGreaterThan(0)
     }
   })
+
+  it('suporta abertura direta no treino e ciclo de séries para modelos', () => {
+    // Modelos abrem em /treino?template=ID e não gravam histórico no banco
+    const template = templateSheetsStorage.getTemplateById('modelo-avancado-masculino')
+    expect(template).toBeDefined()
+
+    // O modelo possui séries A, B e C
+    const availableKeys = Object.keys(template?.series_data || {}).filter(
+      (k) => (template?.series_data as Record<string, unknown[]>)?.[k]?.length > 0,
+    )
+    expect(availableKeys).toEqual(['A', 'B', 'C'])
+    expect(availableKeys[0]).toBe('A')
+  })
 })

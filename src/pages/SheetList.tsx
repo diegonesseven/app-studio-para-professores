@@ -445,26 +445,28 @@ export default function SheetList() {
               (k) => (sheet.series_data as Record<string, unknown[]>)?.[k]?.length > 0,
             )
 
+            // REQUISITO: Clicar no cartão → direto na tela de treino (/treino),
+            // sem telas intermediárias, respeitando o ciclo de séries
+            const handleCardClick = () => {
+              if (isTemplate) {
+                navigate(`/treino?template=${encodeURIComponent(sheet.id)}`)
+              } else if (sheet.student) {
+                navigate(`/treino?students=${sheet.student}&sheet=${sheet.id}`)
+              } else {
+                navigate(`/fichas/${sheet.id}/editar`)
+              }
+            }
+
             return (
               <div
                 key={sheet.id}
                 role="button"
                 tabIndex={0}
-                onClick={() => {
-                  if (isTemplate) {
-                    setViewingTemplateSheet(sheet)
-                  } else {
-                    navigate(`/fichas/${sheet.id}/editar`)
-                  }
-                }}
+                onClick={handleCardClick}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
-                    if (isTemplate) {
-                      setViewingTemplateSheet(sheet)
-                    } else {
-                      navigate(`/fichas/${sheet.id}/editar`)
-                    }
+                    handleCardClick()
                   }
                 }}
                 className={`border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary ${
@@ -629,7 +631,7 @@ export default function SheetList() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
-                        navigate(`/treino?students=${sheet.student}`)
+                        navigate(`/treino?students=${sheet.student}&sheet=${sheet.id}`)
                       }}
                       className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
                     >
@@ -640,11 +642,11 @@ export default function SheetList() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation()
-                        handleOpenCopyModal(sheet)
+                        navigate(`/treino?template=${encodeURIComponent(sheet.id)}`)
                       }}
-                      className="bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold h-9 px-3.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
                     >
-                      <Copy className="w-3.5 h-3.5" /> Vincular Aluno
+                      <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Treinar Agora
                     </Button>
                   )}
                 </div>

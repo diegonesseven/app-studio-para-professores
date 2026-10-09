@@ -22,6 +22,7 @@ import StudentTrainingColumn from '@/components/StudentTrainingColumn'
 import AnamneseModal from '@/components/AnamneseModal'
 import VideoModal from '@/components/VideoModal'
 import { openSheetPrintWindow, shareOrExportSheet } from '@/services/trainingSheetPdf'
+import { templateSheetsStorage } from '@/services/templateSheets'
 import {
   Search,
   X,
@@ -48,12 +49,36 @@ import {
 } from '@/components/ui/dialog'
 import { toast } from '@/hooks/use-toast'
 
+// ID fixo do "aluno virtual" usado quando a sessão abre direto de uma Ficha Modelo
+// (aula avulsa / aluno visitante). Fica apenas em memória: nada é gravado no banco.
+const TEMPLATE_SESSION_ID = 'sessao-modelo'
+
+/**
+ * Ficha da sessão é de modelo (camada de modelos, sem registro no banco)?
+ * IDs dos modelos de fábrica começam com 'modelo-'; modelos criados pelo professor
+ * também abrem pelo mesmo parâmetro ?template=, então basta o aluno virtual da sessão.
+ */
+function isTemplateSessionKey(key: string): boolean {
+  return key === TEMPLATE_SESSION_ID
+}
+
 export default function Training() {
   const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
   const { isProfessor, isAdmin } = useAuth()
   const { appearance } = useTheme()
   const canEditTraining = isProfessor || isAdmin
+
+  // ID da ficha específica aberta diretamente (ex: vindo de /treinos)
+  const sheetIdParam = searchParams.get('sheet') || ''
+
+  // ID da ficha modelo aberta em modo aula avulsa (sem histórico no banco)
+  const templateSheetParam = searchParams.get('template') || ''
+  // Ficha modelo em memória (objetos default + custom salvos localmente)
+  const templateSheet = useMemo(() => {
+    if (!templateSheetParam) return null
+    return templateSheetsStorage.getTemplateById(templateSheetParam) || null
+  }, [templateSheetParam])
 
   // Alunos selecionados na sessão (IDs)
   const studentIdsParam = searchParams.get('students') || ''
@@ -80,11 +105,15 @@ export default function Training() {
   // Série ativa por aluno: { [studentId]: 'A' | 'B' | ... }
   const [activeSeriesMap, setActiveSeriesMap] = useState<Record<string, SeriesKey>>({})
 
-  // Exercícios marcados como feitos na sessão (verde): { [studentId]: { [exerciseIndex]: true } }
-  const [completedMap, setCompletedMap] = useState<Record<string, Record<number, boolean>>>({})
+  // Exercícios marcados como feitos na sessão (verde): { [studentId]: { [seriesKey]: { [exerciseIndex]: true } } }
+  const [completedMap, setCompletedMap] = useState<
+    Record<string, Partial<Record<SeriesKey, Record<number, boolean>>>>
+  >({})
 
-  // Exercícios em execução na sessão (amarelo - 1º toque): { [studentId]: { [exerciseIndex]: true } }
-  const [inProgressMap, setInProgressMap] = useState<Record<string, Record<number, boolean>>>({})
+  // Exercícios em execução na sessão (amarelo - 1º toque): { [studentId]: { [seriesKey]: { [exerciseIndex]: true } } }
+  const [inProgressMap, setInProgressMap] = useState<
+    Record<string, Partial<Record<SeriesKey, Record<number, boolean>>>>
+  >({})
 
   // ID do registro de progresso em andamento na nuvem: { [studentId]: recordId }
   const [sessionRecordMap, setSessionRecordMap] = useState<Record<string, string>>({})
@@ -166,10 +195,78 @@ export default function Training() {
     loadInitial()
   }, [])
 
-  // 2. Carregar dados dos alunos selecionados quando a URL mudar
+  // 2. Carregar dados da sessão (modo ficha modelo OU modo alunos fixos)
   useEffect(() => {
     async function loadSelectedSession() {
-      if (selectedStudentIds.length === 0) {
+      // CASO A: Ficha Modelo aberta em modo aula avulsa (?template=ID)
+      if (templateSheetParam) {
+        setLoading(true)
+        try {
+          const tSheet = templateSheetsStorage.getTemplateById(templateSheetParam)
+          if (!tSheet) {
+            toast({
+              title: 'Modelo não encontrado',
+              description: 'A ficha modelo solicitada não foi localizada.',
+              variant: 'destructive',
+            })
+            setSelectedStudents([])
+            setSheetsMap({})
+            setLoading(false)
+            return
+          }
+
+          // Monta o "aluno virtual" da ficha modelo (apenas em memória, sem persistência no banco)
+          const virtualStudent: Student = {
+            id: TEMPLATE_SESSION_ID,
+            name: `${tSheet.title} (Modelo)`,
+            phone: '',
+            birthdate: '',
+            created: tSheet.created,
+            updated: tSheet.updated,
+          }
+
+          const availableKeys = getAvailableSeriesKeys(tSheet.series_data)
+          const defaultSeries: SeriesKey = availableKeys[0] || 'A'
+
+          setSelectedStudents([virtualStudent])
+          setSheetsMap({ [TEMPLATE_SESSION_ID]: tSheet })
+          setCompletedSessionsCountMap({ [TEMPLATE_SESSION_ID]: 0 })
+          setActiveSeriesMap((prev) => ({
+            ...prev,
+            [TEMPLATE_SESSION_ID]: prev[TEMPLATE_SESSION_ID] || defaultSeries,
+          }))
+          setCompletedMap((prev) => ({
+            ...prev,
+            [TEMPLATE_SESSION_ID]: prev[TEMPLATE_SESSION_ID] || {},
+          }))
+          setInProgressMap((prev) => ({
+            ...prev,
+            [TEMPLATE_SESSION_ID]: prev[TEMPLATE_SESSION_ID] || {},
+          }))
+        } finally {
+          setLoading(false)
+        }
+        return
+      }
+
+      // CASO B: Alunos fixos (?students=... ou ?sheet=...)
+      // Se tiver ?sheet= e nenhum ?students=, resolve o aluno da ficha primeiro
+      let targetStudentIds = [...selectedStudentIds]
+      let specificSheetFromParam: TrainingSheet | null = null
+
+      if (targetStudentIds.length === 0 && sheetIdParam) {
+        try {
+          setLoading(true)
+          specificSheetFromParam = await trainingSheetsService.getById(sheetIdParam)
+          if (specificSheetFromParam && specificSheetFromParam.student) {
+            targetStudentIds = [specificSheetFromParam.student]
+          }
+        } catch (err) {
+          console.error('Erro ao buscar ficha pelo ID:', err)
+        }
+      }
+
+      if (targetStudentIds.length === 0) {
         setSelectedStudents([])
         setSheetsMap({})
         setLoading(false)
@@ -179,7 +276,7 @@ export default function Training() {
       setLoading(true)
       try {
         const studentsData = await Promise.all(
-          selectedStudentIds.map((id) => studentsService.getById(id)),
+          targetStudentIds.map((id) => studentsService.getById(id)),
         )
         setSelectedStudents(studentsData)
 
@@ -193,7 +290,26 @@ export default function Training() {
 
         await Promise.all(
           studentsData.map(async (st) => {
-            const sheet = await trainingSheetsService.getByStudent(st.id)
+            // Se veio pelo parâmetro ?sheet= e corresponde a este aluno, usa diretamente
+            let sheet: TrainingSheet | null = null
+            if (specificSheetFromParam && specificSheetFromParam.student === st.id) {
+              sheet = specificSheetFromParam
+            } else if (sheetIdParam) {
+              // Tenta buscar a ficha específica
+              try {
+                const fetched = await trainingSheetsService.getById(sheetIdParam)
+                if (fetched && fetched.student === st.id) {
+                  sheet = fetched
+                }
+              } catch {
+                sheet = null
+              }
+            }
+
+            if (!sheet) {
+              sheet = await trainingSheetsService.getByStudent(st.id)
+            }
+
             newSheetsMap[st.id] = sheet
 
             if (sheet) {
@@ -269,10 +385,18 @@ export default function Training() {
     }
 
     loadSelectedSession()
-  }, [studentIdsParam])
+  }, [studentIdsParam, templateSheetParam, sheetIdParam])
 
   // Adicionar aluno à sessão (Máximo 4)
   const handleAddStudentToSession = (student: Student) => {
+    // Se estava em modo ficha modelo, ao adicionar um aluno real, transita para a sessão do aluno
+    if (templateSheetParam) {
+      setSearchParams({ students: student.id })
+      setStudentSearch('')
+      setSearchDropdownOpen(false)
+      return
+    }
+
     if (selectedStudentIds.includes(student.id)) {
       setStudentSearch('')
       setSearchDropdownOpen(false)
@@ -298,6 +422,12 @@ export default function Training() {
 
   // Remover aluno da sessão
   const handleRemoveStudentFromSession = (studentId: string) => {
+    if (isTemplateSessionKey(studentId)) {
+      setSearchParams({})
+      setSelectedStudents([])
+      setSheetsMap({})
+      return
+    }
     const nextIds = selectedStudentIds.filter((id) => id !== studentId)
     if (nextIds.length) {
       setSearchParams({ students: nextIds.join(',') })
@@ -315,6 +445,11 @@ export default function Training() {
 
     const sheet = sheetsMap[studentId]
     if (!sheet) return
+
+    // Se for ficha modelo (sessão avulsa), mantém o progresso em memória sem consultar banco
+    if (isTemplateSessionKey(studentId)) {
+      return
+    }
 
     try {
       const existing = await workoutProgressService.getActiveSession(studentId, sheet.id, seriesKey)
@@ -388,7 +523,12 @@ export default function Training() {
       [studentId]: studentCompleted,
     }))
 
-    // Persistência na nuvem (PocketBase) para sincronizar entre dispositivos
+    // REQUISITO: Se for Ficha Modelo (aula avulsa / visitante), NÃO salvar histórico no banco
+    if (isTemplateSessionKey(studentId)) {
+      return
+    }
+
+    // Persistência na nuvem (PocketBase) para alunos fixos
     const sheet = sheetsMap[studentId]
     const currentSeries = activeSeriesMap[studentId] || 'A'
     if (!sheet) return
@@ -459,6 +599,23 @@ export default function Training() {
       [seriesKey]: updatedList,
     }
 
+    // Se for Ficha Modelo, atualiza somente o estado local / template storage em memória se custom
+    if (isTemplateSessionKey(studentId)) {
+      const updatedSheet: TrainingSheet = {
+        ...currentSheet,
+        series_data: updatedSeriesData,
+      }
+      setSheetsMap((prev) => ({
+        ...prev,
+        [studentId]: updatedSheet,
+      }))
+      toast({
+        title: 'Treino atualizado',
+        description: 'Alterações aplicadas na sessão do modelo.',
+      })
+      return true
+    }
+
     try {
       const savedSheet = await trainingSheetsService.update(sheetId, {
         series_data: updatedSeriesData,
@@ -511,6 +668,21 @@ export default function Training() {
       [seriesKey]: [...currentSeriesList, newBlock],
     }
 
+    if (isTemplateSessionKey(studentId)) {
+      setSheetsMap((prev) => ({
+        ...prev,
+        [studentId]: {
+          ...currentSheet,
+          series_data: updatedSeriesData,
+        },
+      }))
+      toast({
+        title: 'Exercício adicionado',
+        description: `${exercise.name} inserido na Série ${seriesKey}.`,
+      })
+      return true
+    }
+
     try {
       const savedSheet = await trainingSheetsService.update(sheetId, {
         series_data: updatedSeriesData,
@@ -556,6 +728,29 @@ export default function Training() {
     const updatedSeriesData: SeriesData = {
       ...(currentSheet.series_data || {}),
       [seriesKey]: updatedList,
+    }
+
+    if (isTemplateSessionKey(studentId)) {
+      setSheetsMap((prev) => ({
+        ...prev,
+        [studentId]: {
+          ...currentSheet,
+          series_data: updatedSeriesData,
+        },
+      }))
+      setCompletedMap((prev) => {
+        const studentChecks = { ...(prev[studentId] || {}) }
+        delete studentChecks[exerciseIndex]
+        return {
+          ...prev,
+          [studentId]: studentChecks,
+        }
+      })
+      toast({
+        title: 'Exercício removido',
+        description: `Exercício removido da Série ${seriesKey}.`,
+      })
+      return true
     }
 
     try {
@@ -624,13 +819,37 @@ export default function Training() {
     }
   }
 
-  // Concluir série de um aluno e salvar no backend
+  // Concluir série de um aluno e salvar no backend (ou apenas em memória para modelo)
   const handleCompleteSeries = async (student: Student) => {
     const sheet = sheetsMap[student.id]
     if (!sheet) return
 
     const currentSeries = activeSeriesMap[student.id] || 'A'
     const exercisesInSeries = sheet.series_data?.[currentSeries] || []
+    const availableKeys = getAvailableSeriesKeys(sheet.series_data)
+    const nextKey = getNextSeriesKey(currentSeries, availableKeys)
+
+    // REQUISITO: Se for ficha modelo, NÃO salvar histórico no banco
+    if (isTemplateSessionKey(student.id)) {
+      setAdvanceDialog({
+        student,
+        completedSeries: currentSeries,
+        nextSeries: nextKey,
+      })
+      setCompletedMap((prev) => ({
+        ...prev,
+        [student.id]: {},
+      }))
+      setInProgressMap((prev) => ({
+        ...prev,
+        [student.id]: {},
+      }))
+      toast({
+        title: `Série ${currentSeries} concluída!`,
+        description: `Treino modelo executado com sucesso (sem gravação de histórico).`,
+      })
+      return
+    }
 
     const allIndices = exercisesInSeries.map((_, i) => i)
     try {
@@ -644,11 +863,6 @@ export default function Training() {
         exercises_snapshot: exercisesInSeries,
         notes: `Concluído em aula pelo Studio Bru Oliveira`,
       })
-
-      // Calcular próxima série respeitando as séries que a ficha realmente possui
-      // Ao terminar a última série disponível (ex: terminou B em ficha A/B), volta para a série A
-      const availableKeys = getAvailableSeriesKeys(sheet.series_data)
-      const nextKey = getNextSeriesKey(currentSeries, availableKeys)
 
       // Abrir modal de confirmação "Série X concluída! Marcar a próxima?"
       setAdvanceDialog({
@@ -707,10 +921,33 @@ export default function Training() {
     if (!sheetCompleteConfirm) return
     const { student, sheet } = sheetCompleteConfirm
 
+    const currentSeries = activeSeriesMap[student.id] || 'A'
+    const currentExercises = sheet.series_data?.[currentSeries] || []
+
+    // REQUISITO: Se for ficha modelo, NÃO salvar histórico no banco
+    if (isTemplateSessionKey(student.id)) {
+      const allDone: Record<number, boolean> = {}
+      currentExercises.forEach((_, i) => {
+        allDone[i] = true
+      })
+      setCompletedMap((prev) => ({
+        ...prev,
+        [student.id]: allDone,
+      }))
+      setInProgressMap((prev) => ({
+        ...prev,
+        [student.id]: {},
+      }))
+      toast({
+        title: 'Ficha Concluída com Sucesso! 🎯',
+        description: `Treino modelo concluído (aula avulsa, sem gravação no histórico).`,
+      })
+      setSheetCompleteConfirm(null)
+      return
+    }
+
     try {
       // Registra a série atual como salva no histórico
-      const currentSeries = activeSeriesMap[student.id] || 'A'
-      const currentExercises = sheet.series_data?.[currentSeries] || []
       const allIndices = currentExercises.map((_, i) => i)
 
       await workoutProgressService.saveExerciseProgress({
@@ -956,9 +1193,24 @@ export default function Training() {
                     completedExercises={completedExercises}
                     inProgressExercises={inProgressMap[st.id] || {}}
                     onToggleExercise={(idx) => handleToggleExercise(st.id, idx)}
-                    onOpenAnamnese={() => setAnamneseStudent(st)}
+                    onOpenAnamnese={() => {
+                      if (isTemplateSessionKey(st.id)) {
+                        toast({
+                          title: 'Ficha Modelo',
+                          description: 'Fichas modelo não possuem anamnese de aluno fixo.',
+                        })
+                        return
+                      }
+                      setAnamneseStudent(st)
+                    }}
                     onEditStartDate={handleOpenEditStartDate}
-                    onEditStudent={() => navigate(`/alunos/${st.id}/editar`)}
+                    onEditStudent={() => {
+                      if (isTemplateSessionKey(st.id)) {
+                        navigate('/fichas')
+                        return
+                      }
+                      navigate(`/alunos/${st.id}/editar`)
+                    }}
                     onOpenVideo={(ex) =>
                       setActiveVideo({
                         title: ex.name,
@@ -1053,11 +1305,26 @@ export default function Training() {
                   onToggleExercise={(idx) =>
                     handleToggleExercise(selectedStudents[mobileActiveIndex].id, idx)
                   }
-                  onOpenAnamnese={() => setAnamneseStudent(selectedStudents[mobileActiveIndex])}
+                  onOpenAnamnese={() => {
+                    const st = selectedStudents[mobileActiveIndex]
+                    if (isTemplateSessionKey(st.id)) {
+                      toast({
+                        title: 'Ficha Modelo',
+                        description: 'Fichas modelo não possuem anamnese de aluno fixo.',
+                      })
+                      return
+                    }
+                    setAnamneseStudent(st)
+                  }}
                   onEditStartDate={handleOpenEditStartDate}
-                  onEditStudent={() =>
-                    navigate(`/alunos/${selectedStudents[mobileActiveIndex].id}/editar`)
-                  }
+                  onEditStudent={() => {
+                    const st = selectedStudents[mobileActiveIndex]
+                    if (isTemplateSessionKey(st.id)) {
+                      navigate('/fichas')
+                      return
+                    }
+                    navigate(`/alunos/${st.id}/editar`)
+                  }}
                   onOpenVideo={(ex) =>
                     setActiveVideo({
                       title: ex.name,
