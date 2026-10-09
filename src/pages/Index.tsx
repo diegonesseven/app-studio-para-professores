@@ -79,21 +79,23 @@ export default function Index() {
         }
 
         // Buscar próxima série dos 5 alunos recentes respeitando as séries que a ficha realmente possui
+        const recStudentIds = recSt.map((s) => s.id)
+        const [sheetsMap, progressMap] = await Promise.all([
+          trainingSheetsService.getActiveMapForStudents(recStudentIds),
+          workoutProgressService.getLatestMapForStudents(recStudentIds),
+        ])
+
         const map: Record<string, SeriesKey> = {}
-        await Promise.all(
-          recSt.map(async (st) => {
-            const [latest, sheet] = await Promise.all([
-              workoutProgressService.getLatestByStudent(st.id),
-              trainingSheetsService.getByStudent(st.id),
-            ])
-            const availableKeys = getAvailableSeriesKeys(sheet?.series_data)
-            if (latest) {
-              map[st.id] = getNextSeriesKey(latest.series_completed, availableKeys)
-            } else {
-              map[st.id] = availableKeys[0] || 'A'
-            }
-          }),
-        )
+        for (const st of recSt) {
+          const sheet = sheetsMap.get(st.id) || null
+          const latest = progressMap.get(st.id) || null
+          const availableKeys = getAvailableSeriesKeys(sheet?.series_data)
+          if (latest) {
+            map[st.id] = getNextSeriesKey(latest.series_completed, availableKeys)
+          } else {
+            map[st.id] = availableKeys[0] || 'A'
+          }
+        }
         setNextSeriesMap(map)
       } catch (err) {
         console.error(err)

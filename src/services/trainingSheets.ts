@@ -2,12 +2,85 @@ import pb from '@/lib/pocketbase/client'
 import type { TrainingSheet, SeriesData } from '@/types'
 import { sanitizeText } from '@/lib/validation'
 
+// Cache leve em memória para fichas ativas indexadas por studentId
+let activeSheetsCache: {
+  timestamp: number
+  map: Map<string, TrainingSheet>
+  allSheets: TrainingSheet[]
+} | null = null
+
+const CACHE_TTL_MS = 60 * 1000 // 1 minuto de cache em memória
+
 export const trainingSheetsService = {
-  async getAll(): Promise<TrainingSheet[]> {
-    return pb.collection('training_sheets').getFullList<TrainingSheet>({
+  clearCache() {
+    activeSheetsCache = null
+  },
+
+  async getAll(options?: { forceRefresh?: boolean }): Promise<TrainingSheet[]> {
+    const now = Date.now()
+    if (
+      !options?.forceRefresh &&
+      activeSheetsCache &&
+      now - activeSheetsCache.timestamp < CACHE_TTL_MS
+    ) {
+      return activeSheetsCache.allSheets
+    }
+
+    const records = await pb.collection('training_sheets').getFullList<TrainingSheet>({
       sort: '-updated',
       expand: 'student',
     })
+
+    const map = new Map<string, TrainingSheet>()
+    // Itera ordenado por created desc ou updated desc para priorizar mais recentes não-arquivadas
+    for (const sh of records) {
+      if (!sh.student) continue
+      if (!sh.is_archived && !map.has(sh.student)) {
+        map.set(sh.student, sh)
+      }
+    }
+    // Fallback: se algum aluno só tiver ficha arquivada
+    for (const sh of records) {
+      if (!sh.student) continue
+      if (!map.has(sh.student)) {
+        map.set(sh.student, sh)
+      }
+    }
+
+    activeSheetsCache = {
+      timestamp: now,
+      map,
+      allSheets: records,
+    }
+
+    return records
+  },
+
+  /**
+   * Retorna um mapa de studentId -> TrainingSheet ativa em UMA única requisição
+   */
+  async getActiveMapForStudents(studentIds?: string[]): Promise<Map<string, TrainingSheet>> {
+    const all = await this.getAll()
+    const map = new Map<string, TrainingSheet>()
+    const targetSet = studentIds ? new Set(studentIds) : null
+
+    for (const sh of all) {
+      if (!sh.student) continue
+      if (targetSet && !targetSet.has(sh.student)) continue
+      if (!sh.is_archived && !map.has(sh.student)) {
+        map.set(sh.student, sh)
+      }
+    }
+    // Fallback para arquivadas se o aluno não tiver ativa
+    for (const sh of all) {
+      if (!sh.student) continue
+      if (targetSet && !targetSet.has(sh.student)) continue
+      if (!map.has(sh.student)) {
+        map.set(sh.student, sh)
+      }
+    }
+
+    return map
   },
 
   async getById(id: string): Promise<TrainingSheet> {
@@ -17,6 +90,11 @@ export const trainingSheetsService = {
   },
 
   async getByStudent(studentId: string): Promise<TrainingSheet | null> {
+    // Se temos no cache recente, usa imediatamente
+    if (activeSheetsCache && activeSheetsCache.map.has(studentId)) {
+      return activeSheetsCache.map.get(studentId) || null
+    }
+
     try {
       // Prioriza a ficha ativa mais recente (não arquivada)
       const records = await pb.collection('training_sheets').getFullList<TrainingSheet>({
@@ -65,6 +143,7 @@ export const trainingSheetsService = {
       for (const s of activeSheets) {
         await pb.collection('training_sheets').update(s.id, { is_archived: true })
       }
+      this.clearCache()
     } catch (e) {
       console.warn('Erro ao arquivar fichas anteriores:', e)
     }
@@ -77,6 +156,7 @@ export const trainingSheetsService = {
     start_date?: string
     is_archived?: boolean
   }): Promise<TrainingSheet> {
+    this.clearCache()
     const payload: Record<string, unknown> = {
       ...data,
       title: data.title ? sanitizeText(data.title) : undefined,
@@ -100,6 +180,7 @@ export const trainingSheetsService = {
       is_archived?: boolean
     },
   ): Promise<TrainingSheet> {
+    this.clearCache()
     const payload: Record<string, unknown> = {
       ...data,
       title: data.title !== undefined ? sanitizeText(data.title) : undefined,
@@ -119,6 +200,7 @@ export const trainingSheetsService = {
     customTitle?: string,
     fallbackSheet?: TrainingSheet,
   ): Promise<TrainingSheet> {
+    this.clearCache()
     let original: TrainingSheet
     try {
       original = await this.getById(id)
@@ -153,6 +235,7 @@ export const trainingSheetsService = {
   },
 
   async delete(id: string): Promise<boolean> {
+    this.clearCache()
     return pb.collection('training_sheets').delete(id)
   },
 

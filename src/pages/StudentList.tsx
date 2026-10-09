@@ -69,22 +69,26 @@ export default function StudentList() {
       const data = await studentsService.getAll(search, sortBy)
       setStudents(data)
 
-      // Descobrir última série concluída respeitando as séries reais da ficha
+      const studentIds = data.map((s) => s.id)
+
+      // Carrega em BATCH (apenas 2 requisições no total para todos os 95+ alunos)
+      // eliminando completamente o padrão N+1 que causava HTTP 429 (Too Many Requests)
+      const [sheetsMap, progressMap] = await Promise.all([
+        trainingSheetsService.getActiveMapForStudents(studentIds),
+        workoutProgressService.getLatestMapForStudents(studentIds),
+      ])
+
       const map: Record<string, SeriesKey> = {}
-      await Promise.all(
-        data.map(async (st) => {
-          const [latest, sheet] = await Promise.all([
-            workoutProgressService.getLatestByStudent(st.id),
-            trainingSheetsService.getByStudent(st.id),
-          ])
-          const available = getAvailableSeriesKeys(sheet?.series_data)
-          if (latest) {
-            map[st.id] = getNextSeriesKey(latest.series_completed, available)
-          } else {
-            map[st.id] = available[0] || 'A'
-          }
-        }),
-      )
+      for (const st of data) {
+        const sheet = sheetsMap.get(st.id) || null
+        const latest = progressMap.get(st.id) || null
+        const available = getAvailableSeriesKeys(sheet?.series_data)
+        if (latest) {
+          map[st.id] = getNextSeriesKey(latest.series_completed, available)
+        } else {
+          map[st.id] = available[0] || 'A'
+        }
+      }
       setNextSeriesMap(map)
     } catch (err: unknown) {
       toast({
