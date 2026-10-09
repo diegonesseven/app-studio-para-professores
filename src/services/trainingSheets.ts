@@ -3,6 +3,7 @@ import type { TrainingSheet, SeriesData } from '@/types'
 import { sanitizeText } from '@/lib/validation'
 
 // Cache leve em memória para fichas ativas indexadas por studentId
+// (usado para mitigar rajadas de requisições simultâneas)
 let activeSheetsCache: {
   timestamp: number
   map: Map<string, TrainingSheet>
