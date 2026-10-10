@@ -16,45 +16,90 @@ export interface UpdateTeacherDTO {
   role?: UserRole
   password?: string
   passwordConfirm?: string
+  oldPassword?: string
 }
 
 export function parseTeacherErrorMessage(err: unknown): string {
   if (err && typeof err === 'object' && 'response' in err) {
     const response = (
-      err as { response?: { message?: string; data?: Record<string, { message?: string }> } }
+      err as {
+        response?: {
+          message?: string
+          data?: Record<string, { code?: string; message?: string } | string>
+        }
+      }
     ).response
     if (response?.data && Object.keys(response.data).length > 0) {
-      if (response.data.email?.message) {
-        const msg = response.data.email.message.toLowerCase()
+      const getFieldMsg = (val: { code?: string; message?: string } | string | undefined) => {
+        if (!val) return ''
+        if (typeof val === 'string') return val
+        return val.message || ''
+      }
+
+      const oldPasswordMsg = getFieldMsg(response.data.oldPassword)
+      if (oldPasswordMsg) {
+        return 'Senha atual incorreta. Por favor, verifique a senha digitada.'
+      }
+
+      const emailMsg = getFieldMsg(response.data.email)
+      if (emailMsg) {
+        const msg = emailMsg.toLowerCase()
         if (msg.includes('unique') || msg.includes('exists') || msg.includes('já')) {
           return 'Este e-mail já está cadastrado no sistema.'
         }
-        return `E-mail: ${response.data.email.message}`
+        return `E-mail: ${emailMsg}`
       }
-      if (response.data.password?.message) {
-        return `Senha: ${response.data.password.message}`
+
+      const passwordMsg = getFieldMsg(response.data.password)
+      if (passwordMsg) {
+        if (
+          passwordMsg.toLowerCase().includes('least') ||
+          passwordMsg.toLowerCase().includes('min')
+        ) {
+          return 'A nova senha deve ter no mínimo 8 caracteres.'
+        }
+        return `Senha: ${passwordMsg}`
       }
-      if (response.data.passwordConfirm?.message) {
+
+      const passwordConfirmMsg = getFieldMsg(response.data.passwordConfirm)
+      if (passwordConfirmMsg) {
         return 'A confirmação de senha não confere.'
       }
-      if (response.data.name?.message) {
-        return `Nome: ${response.data.name.message}`
+
+      const nameMsg = getFieldMsg(response.data.name)
+      if (nameMsg) {
+        return `Nome: ${nameMsg}`
       }
+
       // Retornar a primeira mensagem de erro de campo encontrada
       const firstField = Object.values(response.data)[0]
-      if (firstField?.message) {
-        return firstField.message
+      const firstMsg = getFieldMsg(firstField)
+      if (firstMsg) {
+        return firstMsg
       }
     }
     if (response?.message) {
+      const lower = response.message.toLowerCase()
+      if (
+        lower.includes('old password') ||
+        lower.includes('oldpassword') ||
+        lower.includes('cannot set password without oldpassword')
+      ) {
+        return 'Senha atual incorreta. Por favor, verifique a senha digitada.'
+      }
       return response.message
     }
   }
   if (err instanceof Error) {
+    const lower = err.message.toLowerCase()
     if (
-      err.message.toLowerCase().includes('unique') ||
-      err.message.toLowerCase().includes('already')
+      lower.includes('old password') ||
+      lower.includes('oldpassword') ||
+      lower.includes('cannot set password without oldpassword')
     ) {
+      return 'Senha atual incorreta. Por favor, verifique a senha digitada.'
+    }
+    if (lower.includes('unique') || lower.includes('already')) {
       return 'Este e-mail já está cadastrado no sistema.'
     }
     return err.message
@@ -111,6 +156,9 @@ export const teachersService = {
     if (data.password) {
       payload.password = data.password
       payload.passwordConfirm = data.passwordConfirm || data.password
+      if (data.oldPassword) {
+        payload.oldPassword = data.oldPassword
+      }
     }
 
     return pb.collection('users').update<User>(id, payload)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { teachersService, parseTeacherErrorMessage } from '@/services/teachers'
 import { useAuth } from '@/contexts/AuthContext'
+import pb from '@/lib/pocketbase/client'
 import type { User, UserRole } from '@/types'
 import { validateEmail, sanitizeText } from '@/lib/validation'
 import {
@@ -44,6 +45,7 @@ export default function TeachersPage() {
   const [editingTeacher, setEditingTeacher] = useState<User | null>(null)
   const [formName, setFormName] = useState('')
   const [formEmail, setFormEmail] = useState('')
+  const [formOldPassword, setFormOldPassword] = useState('')
   const [formPassword, setFormPassword] = useState('')
   const [formPasswordConfirm, setFormPasswordConfirm] = useState('')
   const [formRole, setFormRole] = useState<UserRole>('professor')
@@ -53,6 +55,7 @@ export default function TeachersPage() {
   // Modal de Redefinição Direta de Senha
   const [resetModalOpen, setResetModalOpen] = useState(false)
   const [teacherForReset, setTeacherForReset] = useState<User | null>(null)
+  const [resetOldPassword, setResetOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [newPasswordConfirm, setNewPasswordConfirm] = useState('')
   const [resettingPassword, setResettingPassword] = useState(false)
@@ -87,6 +90,7 @@ export default function TeachersPage() {
     setEditingTeacher(null)
     setFormName('')
     setFormEmail('')
+    setFormOldPassword('')
     setFormPassword('')
     setFormPasswordConfirm('')
     setFormRole('professor')
@@ -98,6 +102,7 @@ export default function TeachersPage() {
     setEditingTeacher(teacher)
     setFormName(teacher.name || '')
     setFormEmail(teacher.email || '')
+    setFormOldPassword('')
     setFormPassword('')
     setFormPasswordConfirm('')
     setFormRole((teacher.role as UserRole) || 'professor')
@@ -132,6 +137,11 @@ export default function TeachersPage() {
       }
     } else if (formPassword) {
       // Se estiver editando e digitou senha para trocar
+      const isSelf = editingTeacher?.id === currentUser?.id
+      if (isSelf && !formOldPassword) {
+        setFormError('Informe sua senha atual para alterar a senha da sua conta.')
+        return
+      }
       if (formPassword.length < 8) {
         setFormError('A nova senha deve ter no mínimo 8 caracteres.')
         return
@@ -145,13 +155,31 @@ export default function TeachersPage() {
     try {
       setSubmitting(true)
       if (editingTeacher) {
+        const isSelf = editingTeacher.id === currentUser?.id
         await teachersService.update(editingTeacher.id, {
           name: cleanName,
           email: formEmail.trim(),
           role: formRole,
           password: formPassword || undefined,
           passwordConfirm: formPasswordConfirm || undefined,
+          oldPassword: isSelf && formPassword ? formOldPassword : undefined,
         })
+
+        // Se alterou a própria senha com sucesso, atualiza a sessão
+        if (isSelf && formPassword) {
+          try {
+            await pb.collection('users').authRefresh()
+          } catch {
+            try {
+              await pb
+                .collection('users')
+                .authWithPassword(formEmail.trim().toLowerCase(), formPassword)
+            } catch (reauthErr) {
+              console.warn('Falha no refresh/reautenticação após troca de senha:', reauthErr)
+            }
+          }
+        }
+
         toast({
           title: 'Professor atualizado',
           description: `Os dados de ${cleanName} foram atualizados com sucesso.`,
@@ -187,6 +215,7 @@ export default function TeachersPage() {
   // Redefinição de senha rápida
   const handleOpenResetModal = (teacher: User) => {
     setTeacherForReset(teacher)
+    setResetOldPassword('')
     setNewPassword('')
     setNewPasswordConfirm('')
     setResetError(null)
@@ -197,6 +226,12 @@ export default function TeachersPage() {
     e.preventDefault()
     if (!teacherForReset) return
     setResetError(null)
+
+    const isSelf = teacherForReset.id === currentUser?.id
+    if (isSelf && !resetOldPassword) {
+      setResetError('Informe sua senha atual para alterar a senha da sua conta.')
+      return
+    }
 
     if (!newPassword || newPassword.length < 8) {
       setResetError('A nova senha deve ter no mínimo 8 caracteres.')
@@ -213,7 +248,24 @@ export default function TeachersPage() {
       await teachersService.update(teacherForReset.id, {
         password: newPassword,
         passwordConfirm: newPasswordConfirm,
+        oldPassword: isSelf ? resetOldPassword : undefined,
       })
+
+      // Se alterou a própria senha, atualiza sessão
+      if (isSelf) {
+        try {
+          await pb.collection('users').authRefresh()
+        } catch {
+          try {
+            await pb
+              .collection('users')
+              .authWithPassword(teacherForReset.email.trim().toLowerCase(), newPassword)
+          } catch (reauthErr) {
+            console.warn('Falha no refresh/reautenticação após troca de senha:', reauthErr)
+          }
+        }
+      }
+
       toast({
         title: 'Senha redefinida com sucesso!',
         description: `A nova senha de ${teacherForReset.name || teacherForReset.email} já está ativa.`,
@@ -581,6 +633,23 @@ export default function TeachersPage() {
 
               {/* Senha e Confirmação */}
               <div className="space-y-3 pt-2 border-t border-[#282828]">
+                {/* Campo de Senha Atual exibido apenas ao editar o PRÓPRIO usuário logado */}
+                {editingTeacher && editingTeacher.id === currentUser?.id && (
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                      <KeyRound className="w-3.5 h-3.5" /> Senha Atual (obrigatória para alterar sua
+                      senha)
+                    </label>
+                    <Input
+                      type="password"
+                      placeholder="Digite sua senha atual"
+                      value={formOldPassword}
+                      onChange={(e) => setFormOldPassword(e.target.value)}
+                      className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                    />
+                  </div>
+                )}
+
                 <div className="space-y-1">
                   <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5" />
@@ -671,9 +740,25 @@ export default function TeachersPage() {
             )}
 
             <div className="space-y-3 py-4">
+              {teacherForReset && teacherForReset.id === currentUser?.id && (
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5" /> Senha Atual *
+                  </label>
+                  <Input
+                    type="password"
+                    required
+                    placeholder="Digite sua senha atual"
+                    value={resetOldPassword}
+                    onChange={(e) => setResetOldPassword(e.target.value)}
+                    className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                  />
+                </div>
+              )}
+
               <div className="space-y-1">
                 <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5" /> Nova Senha (mín. 8 caracteres)
+                  <Lock className="w-3.5 h-3.5" /> Nova Senha (mín. 8 caracteres) *
                 </label>
                 <Input
                   type="password"
@@ -687,7 +772,7 @@ export default function TeachersPage() {
 
               <div className="space-y-1">
                 <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5" /> Confirmar Nova Senha
+                  <Lock className="w-3.5 h-3.5" /> Confirmar Nova Senha *
                 </label>
                 <Input
                   type="password"

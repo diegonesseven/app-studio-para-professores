@@ -25,6 +25,7 @@ import {
   SERIES_KEYS,
 } from '@/types'
 import { maskPhone, validatePhone, sanitizeText } from '@/lib/validation'
+import { extractDateInputVal, safeDateToISO } from '@/lib/dateUtils'
 import { trainingSheetsService } from '@/services/trainingSheets'
 import { shareOrExportSheet } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -134,7 +135,7 @@ export default function StudentForm() {
     ])
       .then(([st, history, sheets, exList]) => {
         setName(st.name)
-        setBirthdate(st.birthdate ? st.birthdate.split('T')[0] : '')
+        setBirthdate(st.birthdate ? extractDateInputVal(st.birthdate) : '')
         setPhone(st.phone ? maskPhone(st.phone) : '')
         if (st.photo) {
           setPhotoPreview(pb.files.getURL(st as any, st.photo))
@@ -402,7 +403,7 @@ export default function StudentForm() {
 
       const payload = {
         name: sanitizedName,
-        birthdate: birthdate ? new Date(birthdate).toISOString() : undefined,
+        birthdate: birthdate ? safeDateToISO(birthdate) : undefined,
         phone: phone.trim() ? sanitizeText(phone.trim()) : undefined,
         general_observations: sanitizeText(generalObservations) || undefined,
         restrictions: sanitizeText(restrictions) || undefined,
