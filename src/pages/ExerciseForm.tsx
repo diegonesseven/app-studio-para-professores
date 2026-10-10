@@ -35,7 +35,7 @@ export default function ExerciseForm() {
 
   const [name, setName] = useState('')
   const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>('Peito')
+  const [muscleGroup, setMuscleGroup] = useState<MuscleGroup>('Quadríceps')
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -232,23 +232,12 @@ export default function ExerciseForm() {
               onChange={(e) => setMuscleGroup(e.target.value as MuscleGroup)}
               className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              {muscleGroup === 'A classificar' && (
-                <option value="A classificar" disabled>
-                  ⚠️ A classificar (Selecione o grupo muscular real)
-                </option>
-              )}
               {TARGET_MUSCLE_GROUPS.map((mg) => (
                 <option key={mg} value={mg}>
                   {mg}
                 </option>
               ))}
             </select>
-            {muscleGroup === 'A classificar' && (
-              <p className="text-xs text-amber-400">
-                Este exercício ainda está como &quot;A classificar&quot;. Escolha um dos grupos
-                acima para classificá-lo.
-              </p>
-            )}
           </div>
 
           {/* URL do Vídeo (YouTube ou Vimeo) - Opcional */}

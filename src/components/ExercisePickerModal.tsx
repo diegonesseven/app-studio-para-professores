@@ -47,17 +47,20 @@ export default function ExercisePickerModal({
 
   const muscleGroups = [
     'todos',
-    'Pernas',
-    'Glúteos',
+    'Quadríceps',
+    'Posterior',
+    'Glúteo',
+    'Adutores',
+    'Abdutores',
+    'Panturrilha',
     'Peito',
     'Costas',
-    'Ombros',
     'Bíceps',
     'Tríceps',
+    'Ombro',
     'Abdômen',
-    'Cardio',
-    'Alongamento',
-    'A classificar',
+    'Mobilidades',
+    'Outros',
   ]
 
   const filteredExercises = exercises.filter((ex) => {

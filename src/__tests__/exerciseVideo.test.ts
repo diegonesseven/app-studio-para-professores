@@ -187,12 +187,27 @@ describe('Suporte a Vídeos no Acervo: Vimeo, YouTube e Exercício sem Vídeo', 
   })
 
   describe('Agrupamentos musculares e classificação', () => {
-    it('deve permitir agrupar e conter os 10 grupos padrão além de suportar "A classificar"', async () => {
+    it('deve conter exatamente os 14 grupos musculares na ordem correta', async () => {
       const { MUSCLE_GROUPS, TARGET_MUSCLE_GROUPS } = await import('../types')
-      expect(MUSCLE_GROUPS).toContain('Peito')
-      expect(MUSCLE_GROUPS).toContain('Costas')
-      expect(MUSCLE_GROUPS).toContain('Pernas')
-      expect(TARGET_MUSCLE_GROUPS.length).toBe(10)
+      const EXPECTED_14 = [
+        'Quadríceps',
+        'Posterior',
+        'Glúteo',
+        'Adutores',
+        'Abdutores',
+        'Panturrilha',
+        'Peito',
+        'Costas',
+        'Bíceps',
+        'Tríceps',
+        'Ombro',
+        'Abdômen',
+        'Mobilidades',
+        'Outros',
+      ]
+      expect(MUSCLE_GROUPS).toEqual(EXPECTED_14)
+      expect(TARGET_MUSCLE_GROUPS).toEqual(EXPECTED_14)
+      expect(TARGET_MUSCLE_GROUPS.length).toBe(14)
     })
   })
 })

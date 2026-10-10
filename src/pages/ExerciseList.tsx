@@ -100,9 +100,9 @@ export default function ExerciseList() {
     }
   }
 
-  // Contagem de exercícios pendentes de classificação
-  const pendingCount = useMemo(() => {
-    return exercises.filter((ex) => ex.muscle_group === 'A classificar').length
+  // Contagem de exercícios com classificação não padrão (caso exista algum dado anômalo)
+  const nonStandardCount = useMemo(() => {
+    return exercises.filter((ex) => !MUSCLE_GROUPS.includes(ex.muscle_group)).length
   }, [exercises])
 
   // Função para salvar a classificação rápida diretamente
@@ -170,13 +170,13 @@ export default function ExerciseList() {
           >
             <Tags className="w-4 h-4" />
             <span>{classifyMode ? 'Sair do Modo Classificar' : 'Modo Classificar'}</span>
-            {pendingCount > 0 && (
+            {nonStandardCount > 0 && (
               <span
                 className={`text-[11px] px-1.5 py-0.5 rounded-full font-bold ${
                   classifyMode ? 'bg-black/20 text-black' : 'bg-amber-500/20 text-amber-300'
                 }`}
               >
-                {pendingCount} pendente{pendingCount > 1 ? 's' : ''}
+                {nonStandardCount} pendente{nonStandardCount > 1 ? 's' : ''}
               </span>
             )}
           </Button>
@@ -199,17 +199,17 @@ export default function ExerciseList() {
             <div>
               <p className="text-sm font-semibold text-white">Modo de Classificação Rápida Ativo</p>
               <p className="text-xs text-amber-200/80">
-                Toque no botão de grupo do exercício para reclassificá-lo diretamente (Peito,
-                Costas, Pernas, etc.). O salvamento é automático na nuvem.
+                Toque no botão de grupo do exercício para reclassificá-lo diretamente (Quadríceps,
+                Posterior, Glúteo, etc.). O salvamento é automático na nuvem.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0 text-xs font-medium text-amber-300 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20">
             <Info className="w-4 h-4" />
             <span>
-              {pendingCount === 0
-                ? 'Todos os exercícios foram classificados!'
-                : `${pendingCount} exercício(s) ainda &quot;A classificar&quot;`}
+              {nonStandardCount === 0
+                ? 'Todos os 14 grupos musculares organizados!'
+                : `${nonStandardCount} exercício(s) pendente(s)`}
             </span>
           </div>
         </div>
@@ -234,7 +234,6 @@ export default function ExerciseList() {
             className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
           >
             <option value="all">Todos os Agrupamentos</option>
-            <option value="A classificar">⚠️ A classificar (Pendentes)</option>
             {MUSCLE_GROUPS.map((mg) => (
               <option key={mg} value={mg}>
                 {mg}
@@ -333,13 +332,7 @@ export default function ExerciseList() {
                     </div>
                   )}
 
-                  <Badge
-                    className={`absolute top-2.5 left-2.5 backdrop-blur-md text-[11px] font-medium border ${
-                      exercise.muscle_group === 'A classificar'
-                        ? 'bg-amber-500/90 text-black border-amber-400 font-bold'
-                        : 'bg-black/75 text-white border-white/10 font-normal'
-                    }`}
-                  >
+                  <Badge className="absolute top-2.5 left-2.5 backdrop-blur-md text-[11px] font-medium border bg-black/75 text-white border-white/10 font-normal">
                     {exercise.muscle_group}
                   </Badge>
 
@@ -399,17 +392,9 @@ export default function ExerciseList() {
                         onClick={() =>
                           setOpenSelectorId((curr) => (curr === exercise.id ? null : exercise.id))
                         }
-                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                          exercise.muscle_group === 'A classificar'
-                            ? 'bg-amber-500/15 border-amber-500/40 text-amber-300 hover:bg-amber-500/25 ring-1 ring-amber-500/30'
-                            : 'bg-[#151515] border-[#333] text-white hover:border-primary/50'
-                        }`}
+                        className="w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all bg-[#151515] border-[#333] text-white hover:border-primary/50"
                       >
-                        <span className="truncate">
-                          {exercise.muscle_group === 'A classificar'
-                            ? '⚠️ A classificar (escolher)'
-                            : exercise.muscle_group}
-                        </span>
+                        <span className="truncate">{exercise.muscle_group}</span>
                         <ChevronDown className="w-3.5 h-3.5 text-[#8A8F98] shrink-0 ml-1" />
                       </button>
 
