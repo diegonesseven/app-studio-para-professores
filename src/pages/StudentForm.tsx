@@ -31,6 +31,7 @@ import { shareOrExportSheet } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
 import pb from '@/lib/pocketbase/client'
 import { PhysicalAssessmentTab } from '@/components/PhysicalAssessmentTab'
+import { PhotoSourceModal } from '@/components/PhotoSourceModal'
 import {
   ArrowLeft,
   User,
@@ -79,6 +80,8 @@ export default function StudentForm() {
   const [photoFile, setPhotoFile] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [removePhoto, setRemovePhoto] = useState(false)
+  const [photoSourceOpen, setPhotoSourceOpen] = useState(false)
+  const [anamnesisPhotoSourceOpen, setAnamnesisPhotoSourceOpen] = useState(false)
   const [generalObservations, setGeneralObservations] = useState('')
 
   // Anamnese - Restrições médicas (permanece intacto)
@@ -248,8 +251,7 @@ export default function StudentForm() {
     })
   }
 
-  const handleAnamnesisPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
+  const processAnamnesisFiles = (files: File[]) => {
     if (!files.length) return
 
     const validFiles: File[] = []
@@ -276,6 +278,11 @@ export default function StudentForm() {
     }
 
     setNewPhotoFiles((prev) => [...prev, ...validFiles])
+  }
+
+  const handleAnamnesisPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    processAnamnesisFiles(files)
     e.target.value = ''
   }
 
@@ -314,10 +321,7 @@ export default function StudentForm() {
     }
   }
 
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
+  const processStudentPhotoFile = (file: File) => {
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
     if (!allowedTypes.includes(file.type)) {
       toast({
@@ -325,7 +329,6 @@ export default function StudentForm() {
         description: 'A foto deve ser uma imagem JPG, PNG, WebP ou GIF.',
         variant: 'destructive',
       })
-      e.target.value = ''
       return
     }
 
@@ -336,7 +339,6 @@ export default function StudentForm() {
         description: 'A imagem deve ter no máximo 5MB.',
         variant: 'destructive',
       })
-      e.target.value = ''
       return
     }
 
@@ -347,6 +349,13 @@ export default function StudentForm() {
       setPhotoPreview(reader.result as string)
     }
     reader.readAsDataURL(file)
+  }
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    processStudentPhotoFile(file)
+    e.target.value = ''
   }
 
   const handleRemovePhoto = () => {
@@ -596,20 +605,14 @@ export default function StudentForm() {
                   )}
                 </div>
 
-                <label
-                  htmlFor="student-photo-upload"
+                <button
+                  type="button"
+                  onClick={() => setPhotoSourceOpen(true)}
                   className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-primary text-primary-foreground shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
                   title="Adicionar ou trocar foto do aluno"
                 >
                   <Camera className="w-4 h-4" />
-                  <input
-                    id="student-photo-upload"
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    className="hidden"
-                    onChange={handlePhotoSelect}
-                  />
-                </label>
+                </button>
               </div>
 
               <div className="flex-1 text-center sm:text-left space-y-1.5 min-w-0">
@@ -622,13 +625,14 @@ export default function StudentForm() {
                   imediata.
                 </p>
                 <div className="flex items-center justify-center sm:justify-start gap-2 pt-1">
-                  <label
-                    htmlFor="student-photo-upload"
+                  <button
+                    type="button"
+                    onClick={() => setPhotoSourceOpen(true)}
                     className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#252B3E] hover:bg-[#30374E] text-white border border-[#3A4363] cursor-pointer transition-colors"
                   >
                     <Camera className="w-3.5 h-3.5 text-primary" />
                     {photoPreview ? 'Trocar foto' : 'Selecionar foto'}
-                  </label>
+                  </button>
                   {photoPreview && (
                     <button
                       type="button"
@@ -1073,20 +1077,13 @@ export default function StudentForm() {
                         antes/depois (máx 5MB cada)
                       </p>
                     </div>
-                    <label
-                      htmlFor="anamnesis-photos-input"
+                    <button
+                      type="button"
+                      onClick={() => setAnamnesisPhotoSourceOpen(true)}
                       className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-bold text-xs hover:opacity-90 transition-opacity"
                     >
                       <Plus className="w-3.5 h-3.5" /> Adicionar Fotos
-                      <input
-                        id="anamnesis-photos-input"
-                        type="file"
-                        multiple
-                        accept="image/jpeg,image/png,image/webp"
-                        className="hidden"
-                        onChange={handleAnamnesisPhotoSelect}
-                      />
-                    </label>
+                    </button>
                   </div>
 
                   {/* Grid de Fotos Existentes e Novas */}
@@ -1591,6 +1588,34 @@ export default function StudentForm() {
           </div>
         </form>
       )}
+
+      {/* Seletor de origem da foto principal do aluno (Tirar foto / Galeria) */}
+      <PhotoSourceModal
+        open={photoSourceOpen}
+        onOpenChange={setPhotoSourceOpen}
+        title="Foto do Aluno"
+        description="Tire uma foto na hora com a câmera do aparelho ou escolha da galeria."
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        multiple={false}
+        onFilesSelected={(files) => {
+          if (files[0]) {
+            processStudentPhotoFile(files[0])
+          }
+        }}
+      />
+
+      {/* Seletor de origem das fotos da anamnese (Tirar foto / Galeria) */}
+      <PhotoSourceModal
+        open={anamnesisPhotoSourceOpen}
+        onOpenChange={setAnamnesisPhotoSourceOpen}
+        title="Fotos na Anamnese"
+        description="Tire uma foto do laudo/postura ou escolha fotos da galeria."
+        accept="image/jpeg,image/png,image/webp"
+        multiple={true}
+        onFilesSelected={(files) => {
+          processAnamnesisFiles(files)
+        }}
+      />
 
       {/* MODAL DE FOTO AMPLIADA DA ANAMNESE */}
       <Dialog
