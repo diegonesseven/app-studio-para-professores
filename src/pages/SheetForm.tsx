@@ -18,6 +18,7 @@ import type {
 } from '@/types'
 import { SERIES_KEYS } from '@/types'
 import ExercisePickerModal from '@/components/ExercisePickerModal'
+import { StudentCombobox } from '@/components/StudentCombobox'
 import VideoModal from '@/components/VideoModal'
 import {
   ArrowLeft,
@@ -595,23 +596,18 @@ export default function SheetForm() {
           </div>
 
           {!isTemplateMode && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-80">
               <span className="text-xs text-[#8A8F98] font-medium shrink-0">Aluno:</span>
-              <select
+              <StudentCombobox
+                students={allStudents}
                 value={student?.id || ''}
-                onChange={(e) => {
-                  const st = allStudents.find((s) => s.id === e.target.value) || null
+                compact
+                placeholder="Buscar aluno..."
+                onChange={(_id, st) => {
                   setStudent(st)
                   if (st) setTitle(`Ficha de Treino - ${st.name}`)
                 }}
-                className="h-9 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-2 text-xs focus:ring-1 focus:ring-primary"
-              >
-                {allStudents.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
           )}
         </div>

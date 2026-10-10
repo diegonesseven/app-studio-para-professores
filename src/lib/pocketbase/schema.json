@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-10T17:32:59.411Z",
+  "generatedAt": "2026-10-10T17:50:46.766Z",
   "collections": [
     {
       "name": "users",
@@ -52,7 +52,7 @@
       ]
     },
     {
-      "name": "exercises",
+      "name": "students",
       "type": "base",
       "apiRules": {
         "list": "@request.auth.id != ''",
@@ -69,44 +69,40 @@
           "system": false
         },
         {
-          "name": "youtube_url",
+          "name": "birthdate",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "phone",
           "type": "text",
           "required": false,
           "system": false
         },
         {
-          "name": "youtube_id",
+          "name": "general_observations",
           "type": "text",
           "required": false,
           "system": false
         },
         {
-          "name": "thumbnail_url",
+          "name": "health_history",
           "type": "text",
           "required": false,
           "system": false
         },
         {
-          "name": "muscle_group",
-          "type": "select",
-          "required": true,
-          "system": false,
-          "selectValues": [
-            "Quadríceps",
-            "Posterior",
-            "Glúteo",
-            "Adutores",
-            "Abdutores",
-            "Panturrilha",
-            "Peito",
-            "Costas",
-            "Bíceps",
-            "Tríceps",
-            "Ombro",
-            "Abdômen",
-            "Mobilidades",
-            "Outros"
-          ]
+          "name": "injuries",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "surgeries",
+          "type": "text",
+          "required": false,
+          "system": false
         },
         {
           "name": "restrictions",

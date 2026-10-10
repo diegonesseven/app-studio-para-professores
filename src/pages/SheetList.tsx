@@ -23,6 +23,7 @@ import { exercisesService } from '@/services/exercises'
 import { templateSheetsStorage } from '@/services/templateSheets'
 import { shareOrExportSheet, openSheetPrintWindow } from '@/services/trainingSheetPdf'
 import { useTheme } from '@/contexts/ThemeContext'
+import { StudentCombobox } from '@/components/StudentCombobox'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -837,20 +838,12 @@ export default function SheetList() {
                 <label className="text-xs font-bold uppercase tracking-wider text-[#8A8F98]">
                   Copiar para qual aluno? (Destino):
                 </label>
-                <select
+                <StudentCombobox
+                  students={students.filter((st) => st.id !== copyModalSheet.student)}
                   value={copyTargetStudentId}
-                  onChange={(e) => setCopyTargetStudentId(e.target.value)}
-                  className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="">Selecione o aluno destino...</option>
-                  {students
-                    .filter((st) => st.id !== copyModalSheet.student)
-                    .map((st) => (
-                      <option key={st.id} value={st.id}>
-                        {st.name} {st.phone ? `(${st.phone})` : ''}
-                      </option>
-                    ))}
-                </select>
+                  placeholder="Selecione ou busque o aluno destino..."
+                  onChange={(id) => setCopyTargetStudentId(id)}
+                />
                 <p className="text-[11px] text-[#8A8F98]">
                   Ao confirmar, uma cópia nova será criada e você será levado à tela de edição para
                   fazer os ajustes finos.
@@ -903,17 +896,12 @@ export default function SheetList() {
               <label className="text-xs font-bold text-[#8A8F98] uppercase tracking-wider">
                 Vincular Aluno:
               </label>
-              <select
+              <StudentCombobox
+                students={students}
                 value={selectedStudentForNew}
-                onChange={(e) => setSelectedStudentForNew(e.target.value)}
-                className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                {students.map((st) => (
-                  <option key={st.id} value={st.id}>
-                    {st.name} {st.phone ? `(${st.phone})` : ''}
-                  </option>
-                ))}
-              </select>
+                placeholder="Selecione ou busque o aluno..."
+                onChange={(id) => setSelectedStudentForNew(id)}
+              />
             </div>
 
             <div className="pt-2 border-t border-[#2A2A2A]">

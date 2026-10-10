@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   UserCheck,
 } from 'lucide-react'
+import { StudentCombobox } from '@/components/StudentCombobox'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -417,17 +418,12 @@ export default function Index() {
           </DialogHeader>
 
           <div className="py-3 space-y-2">
-            <select
+            <StudentCombobox
+              students={students}
               value={selectedStudentForSheet}
-              onChange={(e) => setSelectedStudentForSheet(e.target.value)}
-              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {students.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.name} {st.phone ? `(${st.phone})` : ''}
-                </option>
-              ))}
-            </select>
+              placeholder="Selecione ou busque o aluno..."
+              onChange={(id) => setSelectedStudentForSheet(id)}
+            />
           </div>
 
           <DialogFooter className="flex sm:justify-end gap-2 pt-2">

@@ -1044,29 +1044,29 @@ export default function Training() {
   })
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 max-w-full space-y-2.5 sm:space-y-3 animate-fade-in h-full">
-      {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS (compacta no modo multi-ficha) */}
+    <div className="flex flex-col flex-1 min-h-0 max-w-full space-y-1.5 sm:space-y-2 animate-fade-in h-full">
+      {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS (compacta) */}
       <div
-        className={`bg-card/60 border border-border rounded-2xl shadow-md shrink-0 transition-all ${
-          selectedStudents.length > 1 ? 'p-2 sm:p-2.5' : 'p-2.5 sm:p-3'
+        className={`bg-card/60 border border-border rounded-xl shadow-md shrink-0 transition-all ${
+          selectedStudents.length > 0 ? 'px-2 py-1.5 sm:px-2.5 sm:py-2' : 'p-2.5 sm:p-3'
         }`}
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 sm:gap-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2">
           {/* Alunos Selecionados (Chips) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span className="text-xs uppercase tracking-wider text-[#8A8F98] font-bold mr-1 flex items-center gap-1.5">
-              <Users className="w-4 h-4 text-primary" /> Sessão ({selectedStudents.length}/4):
+          <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+            <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#8A8F98] font-bold mr-1 flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-primary" /> Sessão ({selectedStudents.length}/4):
             </span>
 
             {selectedStudents.length === 0 ? (
               <span className="text-xs text-[#8A8F98] italic">
-                Nenhum aluno selecionado. Pesquise abaixo para começar.
+                Nenhum aluno selecionado. Pesquise ao lado para começar.
               </span>
             ) : (
               selectedStudents.map((st) => (
                 <div
                   key={st.id}
-                  className="flex items-center gap-2 bg-[#2A2A2A] border border-[#3A3A3A] px-3 py-1.5 rounded-xl text-xs font-semibold text-white animate-fade-in"
+                  className="flex items-center gap-1.5 bg-[#2A2A2A] border border-[#3A3A3A] px-2.5 py-1 rounded-lg text-xs font-semibold text-white animate-fade-in"
                 >
                   <span className="truncate max-w-[120px] sm:max-w-[160px]">{st.name}</span>
                   <button
@@ -1075,7 +1075,7 @@ export default function Training() {
                     className="text-[#8A8F98] hover:text-white p-0.5 rounded"
                     title="Remover da sessão"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
               ))
@@ -1083,7 +1083,7 @@ export default function Training() {
           </div>
 
           {/* Busca e Adição de Alunos */}
-          <div className="relative min-w-[260px] sm:w-80">
+          <div className="relative min-w-[240px] sm:w-72">
             <div className="relative">
               <Input
                 placeholder="Pesquisar aluno para a aula..."
@@ -1093,9 +1093,9 @@ export default function Training() {
                   setStudentSearch(e.target.value)
                   setSearchDropdownOpen(true)
                 }}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-11 pl-9 pr-3 text-sm focus-visible:ring-primary"
+                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-9 pl-8 pr-3 text-xs sm:text-sm focus-visible:ring-primary"
               />
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
             </div>
 
             {/* Dropdown de Alunos */}
