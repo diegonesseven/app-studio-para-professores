@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-10T17:15:22.859Z",
+  "generatedAt": "2026-10-10T17:32:59.411Z",
   "collections": [
     {
       "name": "users",
@@ -52,7 +52,7 @@
       ]
     },
     {
-      "name": "students",
+      "name": "exercises",
       "type": "base",
       "apiRules": {
         "list": "@request.auth.id != ''",
@@ -69,40 +69,44 @@
           "system": false
         },
         {
-          "name": "birthdate",
-          "type": "date",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "phone",
+          "name": "youtube_url",
           "type": "text",
           "required": false,
           "system": false
         },
         {
-          "name": "general_observations",
+          "name": "youtube_id",
           "type": "text",
           "required": false,
           "system": false
         },
         {
-          "name": "health_history",
+          "name": "thumbnail_url",
           "type": "text",
           "required": false,
           "system": false
         },
         {
-          "name": "injuries",
-          "type": "text",
-          "required": false,
-          "system": false
-        },
-        {
-          "name": "surgeries",
-          "type": "text",
-          "required": false,
-          "system": false
+          "name": "muscle_group",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": [
+            "Quadríceps",
+            "Posterior",
+            "Glúteo",
+            "Adutores",
+            "Abdutores",
+            "Panturrilha",
+            "Peito",
+            "Costas",
+            "Bíceps",
+            "Tríceps",
+            "Ombro",
+            "Abdômen",
+            "Mobilidades",
+            "Outros"
+          ]
         },
         {
           "name": "restrictions",
@@ -222,16 +226,20 @@
           "required": true,
           "system": false,
           "selectValues": [
+            "Quadríceps",
+            "Posterior",
+            "Glúteo",
+            "Adutores",
+            "Abdutores",
+            "Panturrilha",
             "Peito",
             "Costas",
-            "Pernas",
-            "Ombros",
             "Bíceps",
             "Tríceps",
+            "Ombro",
             "Abdômen",
-            "Glúteos",
-            "Cardio",
-            "Alongamento"
+            "Mobilidades",
+            "Outros"
           ]
         },
         {

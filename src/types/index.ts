@@ -11,45 +11,56 @@ export interface User {
 }
 
 export type MuscleGroup =
+  | 'Quadríceps'
+  | 'Posterior'
+  | 'Glúteo'
+  | 'Adutores'
+  | 'Abdutores'
+  | 'Panturrilha'
   | 'Peito'
   | 'Costas'
-  | 'Pernas'
-  | 'Ombros'
   | 'Bíceps'
   | 'Tríceps'
+  | 'Ombro'
   | 'Abdômen'
-  | 'Glúteos'
-  | 'Cardio'
-  | 'Alongamento'
-  | 'A classificar'
+  | 'Mobilidades'
+  | 'Outros'
 
 export const MUSCLE_GROUPS: MuscleGroup[] = [
+  'Quadríceps',
+  'Posterior',
+  'Glúteo',
+  'Adutores',
+  'Abdutores',
+  'Panturrilha',
   'Peito',
   'Costas',
-  'Pernas',
-  'Ombros',
   'Bíceps',
   'Tríceps',
+  'Ombro',
   'Abdômen',
-  'Glúteos',
-  'Cardio',
-  'Alongamento',
+  'Mobilidades',
+  'Outros',
 ]
 
 /**
  * Grupos musculares alvo para classificação do exercício
  */
 export const TARGET_MUSCLE_GROUPS: MuscleGroup[] = [
+  'Quadríceps',
+  'Posterior',
+  'Glúteo',
+  'Adutores',
+  'Abdutores',
+  'Panturrilha',
   'Peito',
   'Costas',
-  'Pernas',
-  'Ombros',
   'Bíceps',
   'Tríceps',
+  'Ombro',
   'Abdômen',
-  'Glúteos',
-  'Cardio',
-  'Alongamento',
+  'Mobilidades',
+  'Outros',
 ]
 
 export type VideoPlatform = 'youtube' | 'vimeo' | 'none'
