@@ -8,17 +8,17 @@
 @layer base {
   :root {
     /* Tema oficial Studio Bru Oliveira: Roxo Predominante (#8B5CF6) e fundos escuros */
-    --background: 247 24% 7%; /* #0F0E17 */
-    --foreground: 0 0% 100%; /* #FFFFFF */
+    --background: 43.6 40.7% 94.7%; /* #0F0E17 */
+    --foreground: 240 15.4% 5.1%; /* #FFFFFF */
 
-    --card: 246 26% 13%; /* #1A1829 */
+    --card: 43.6 40.7% 94.7%; /* #1A1829 */
     --card-foreground: 0 0% 100%;
 
     --popover: 246 26% 13%; /* #1A1829 */
     --popover-foreground: 0 0% 100%;
 
     --primary: 258 90% 66%; /* #8B5CF6 Roxo Oficial */
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 240 15.4% 5.1%;
 
     --secondary: 263 70% 50%; /* #7C3AED Roxo Vibrante */
     --secondary-foreground: 0 0% 100%;
