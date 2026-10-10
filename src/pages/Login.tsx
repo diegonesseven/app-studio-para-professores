@@ -75,7 +75,7 @@ export default function Login() {
       {/* Glow de fundo */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/25 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up text-[#ffffff]">
         {/* Branding Studio Bru Oliveira Oficial */}
         <div className="flex flex-col items-center text-center mb-8">
           <div className="h-20 w-auto max-w-[220px] mb-4 p-2 bg-white rounded-2xl shadow-lg border border-white/20 flex items-center justify-center">
