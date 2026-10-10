@@ -30,6 +30,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { parseAndFormatDate } from '@/lib/dateUtils'
+import { StudentAvatar } from '@/components/StudentAvatar'
 
 interface StudentTrainingColumnProps {
   student: Student
@@ -217,13 +218,6 @@ export default function StudentTrainingColumn({
     }
   }
 
-  const initials = student.name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((n) => n[0].toUpperCase())
-    .join('')
-
   return (
     <div className="flex flex-col h-full min-h-0 bg-card border border-border rounded-2xl shadow-xl overflow-hidden">
       {/* HEADER DO ALUNO - otimizado verticalmente */}
@@ -233,19 +227,16 @@ export default function StudentTrainingColumn({
             <button
               type="button"
               onClick={onEditStudent}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#2A2A2A] border-2 border-primary/40 hover:border-primary text-primary font-black text-xs flex items-center justify-center shrink-0 overflow-hidden transition-all hover:scale-105"
+              className="rounded-full hover:scale-105 transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-primary"
               title={`Ver cadastro de ${student.name} na aba Alunos`}
               aria-label={`Ver cadastro de ${student.name} na aba Alunos`}
             >
-              {student.photo ? (
-                <img
-                  src={pb.files.getURL(student as any, student.photo)}
-                  alt={student.name}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                initials
-              )}
+              <StudentAvatar
+                student={student}
+                className="w-7 h-7 sm:w-8 sm:h-8 border-2 border-primary/40 hover:border-primary"
+                textClassName="text-xs font-black"
+                alt={student.name}
+              />
             </button>
             <div className="min-w-0">
               <button

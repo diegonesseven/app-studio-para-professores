@@ -20,6 +20,7 @@ import { studentsService } from '@/services/students'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Link } from 'react-router-dom'
 import { TrendingUp } from 'lucide-react'
+import { StudentAvatar } from '@/components/StudentAvatar'
 
 interface AnamneseModalProps {
   isOpen: boolean
@@ -66,12 +67,10 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-card/60">
           <div className="flex items-center gap-3 min-w-0 pr-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0">
-              <HeartPulse className="w-5 h-5" />
-            </div>
+            <StudentAvatar student={student} className="w-11 h-11" alt={student.name} />
             <div>
-              <span className="text-[11px] uppercase tracking-wider text-primary font-semibold">
-                Saúde & Anamnese
+              <span className="text-[11px] uppercase tracking-wider text-primary font-semibold flex items-center gap-1">
+                <HeartPulse className="w-3.5 h-3.5 inline text-primary" /> Saúde & Anamnese
               </span>{' '}
               <h3 className="text-lg font-bold text-white truncate">{student.name}</h3>
             </div>

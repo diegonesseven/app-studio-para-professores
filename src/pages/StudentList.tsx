@@ -30,6 +30,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import AnamneseModal from '@/components/AnamneseModal'
+import { StudentAvatar } from '@/components/StudentAvatar'
 import {
   Dialog,
   DialogContent,
@@ -265,12 +266,6 @@ export default function StudentList() {
           {students.map((student) => {
             const age = calculateAge(student.birthdate)
             const nextSeries = nextSeriesMap[student.id] || 'A'
-            const initials = student.name
-              .split(' ')
-              .filter(Boolean)
-              .slice(0, 2)
-              .map((n) => n[0].toUpperCase())
-              .join('')
 
             const isHighlighted = highlightedStudentId === student.id
 
@@ -297,17 +292,7 @@ export default function StudentList() {
                   {/* Topo do Card */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border border-primary/30 text-primary font-bold text-sm flex items-center justify-center shrink-0 overflow-hidden">
-                        {student.photo ? (
-                          <img
-                            src={pb.files.getURL(student as any, student.photo)}
-                            alt={student.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          initials
-                        )}
-                      </div>
+                      <StudentAvatar student={student} className="w-11 h-11" alt={student.name} />
                       <div className="min-w-0">
                         <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors truncate">
                           {student.name}

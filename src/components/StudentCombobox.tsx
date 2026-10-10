@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { Check, ChevronsUpDown, Search, User, X } from 'lucide-react'
+import { Check, ChevronsUpDown, Search, X } from 'lucide-react'
 import { Student } from '@/types'
+import { StudentAvatar } from '@/components/StudentAvatar'
 
 interface StudentComboboxProps {
   students: Student[]
@@ -115,16 +116,22 @@ export function StudentCombobox({
         aria-haspopup="listbox"
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <User className={`${compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} text-[#8A8F98] shrink-0`} />
           {selectedStudent ? (
-            <span className="truncate font-medium text-white">
-              {selectedStudent.name}
-              {selectedStudent.phone && (
-                <span className="text-[#8A8F98] ml-1.5 font-normal text-xs">
-                  ({selectedStudent.phone})
-                </span>
-              )}
-            </span>
+            <>
+              <StudentAvatar
+                student={selectedStudent}
+                className={compact ? 'w-5 h-5 text-[9px]' : 'w-6 h-6 text-[10px]'}
+                alt={selectedStudent.name}
+              />
+              <span className="truncate font-medium text-white">
+                {selectedStudent.name}
+                {selectedStudent.phone && (
+                  <span className="text-[#8A8F98] ml-1.5 font-normal text-xs">
+                    ({selectedStudent.phone})
+                  </span>
+                )}
+              </span>
+            </>
           ) : (
             <span className="text-[#8A8F98] truncate">{placeholder}</span>
           )}
@@ -208,13 +215,16 @@ export function StudentCombobox({
                         : 'hover:bg-[#2A2A2A] text-white'
                     }`}
                   >
-                    <div className="flex flex-col min-w-0 pr-1">
-                      <span className="truncate">{st.name}</span>
-                      {st.phone && (
-                        <span className="text-[10px] text-[#8A8F98] font-normal truncate">
-                          {st.phone}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2 min-w-0 pr-1">
+                      <StudentAvatar student={st} className="w-6 h-6 text-[10px]" alt={st.name} />
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate">{st.name}</span>
+                        {st.phone && (
+                          <span className="text-[10px] text-[#8A8F98] font-normal truncate">
+                            {st.phone}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     {isSelected && <Check className="w-4 h-4 text-primary shrink-0" />}
                   </button>

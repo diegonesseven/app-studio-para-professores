@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import pb from '@/lib/pocketbase/client'
-import type { Student } from '@/types'
 import { cn } from '@/lib/utils'
 
 export interface StudentAvatarProps {
-  student:
-    | Pick<Student, 'id' | 'name' | 'photo' | 'collectionId' | 'collectionName'>
-    | null
-    | undefined
+  student?: {
+    id?: string
+    name?: string
+    photo?: string
+    collectionId?: string
+    collectionName?: string
+  } | null
+  /** Nome direto (caso o objeto aluno não seja passado) */
+  name?: string
+  /** Foto direta (caso o objeto aluno não seja passado) */
+  photo?: string
   /** Classes CSS aplicadas ao container circular (tamanho, borda, etc.) */
   className?: string
   /** Classes adicionais para o texto com as iniciais */
@@ -22,14 +28,22 @@ export interface StudentAvatarProps {
  * - Constrói a URL do PocketBase com pb.files.getURL(record, fieldName).
  * - Se não houver foto cadastrada (ou em caso de falha de carregamento), exibe as iniciais do nome dentro do círculo.
  */
-export function StudentAvatar({ student, className, textClassName, alt }: StudentAvatarProps) {
+export function StudentAvatar({
+  student,
+  name: directName,
+  photo: directPhoto,
+  className,
+  textClassName,
+  alt,
+}: StudentAvatarProps) {
   const [imageError, setImageError] = useState(false)
 
-  const name = student?.name?.trim() || ''
-  const photo = student?.photo
+  const rawName = (directName !== undefined ? directName : student?.name) || ''
+  const trimmedName = rawName.trim()
+  const photo = directPhoto !== undefined ? directPhoto : student?.photo
 
-  const initials = name
-    ? name
+  const initials = trimmedName
+    ? trimmedName
         .split(' ')
         .filter(Boolean)
         .slice(0, 2)
@@ -38,11 +52,26 @@ export function StudentAvatar({ student, className, textClassName, alt }: Studen
     : '?'
 
   let photoUrl = ''
-  if (photo && !imageError && student) {
-    try {
-      photoUrl = pb.files.getURL(student as any, photo)
-    } catch {
-      photoUrl = ''
+  if (photo && !imageError) {
+    // Se a foto já for uma URL completa (ex: blob:, data: ou http), usa direto
+    if (
+      photo.startsWith('http://') ||
+      photo.startsWith('https://') ||
+      photo.startsWith('blob:') ||
+      photo.startsWith('data:')
+    ) {
+      photoUrl = photo
+    } else {
+      try {
+        const record = {
+          id: student?.id || '',
+          collectionId: student?.collectionId || 'students',
+          collectionName: student?.collectionName || 'students',
+        }
+        photoUrl = pb.files.getURL(record as any, photo)
+      } catch {
+        photoUrl = ''
+      }
     }
   }
 
@@ -56,13 +85,13 @@ export function StudentAvatar({ student, className, textClassName, alt }: Studen
       {photoUrl ? (
         <img
           src={photoUrl}
-          alt={alt || name || 'Foto do aluno'}
+          alt={alt || trimmedName || 'Foto do aluno'}
           className="w-full h-full object-cover object-center"
           onError={() => setImageError(true)}
           loading="lazy"
         />
       ) : (
-        <span className={cn('leading-none', textClassName)}>{initials}</span>
+        <span className={cn('leading-none select-none', textClassName)}>{initials}</span>
       )}
     </div>
   )

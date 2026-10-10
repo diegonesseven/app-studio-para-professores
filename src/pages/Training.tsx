@@ -21,6 +21,7 @@ import type {
 import StudentTrainingColumn from '@/components/StudentTrainingColumn'
 import AnamneseModal from '@/components/AnamneseModal'
 import VideoModal from '@/components/VideoModal'
+import { StudentAvatar } from '@/components/StudentAvatar'
 import { openSheetPrintWindow, shareOrExportSheet } from '@/services/trainingSheetPdf'
 import { templateSheetsStorage } from '@/services/templateSheets'
 import {
@@ -1278,9 +1279,12 @@ export default function Training() {
                           : 'bg-[#1E1E1E] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
                       }`}
                     >
-                      <span className="w-5 h-5 rounded-full bg-black/25 flex items-center justify-center text-[10px] font-bold">
-                        {initials}
-                      </span>
+                      <StudentAvatar
+                        student={st}
+                        className="w-5 h-5 border-none bg-black/25"
+                        textClassName="text-[10px] font-bold"
+                        alt={st.name}
+                      />
                       <span className="truncate">{st.name.split(' ')[0]}</span>
                     </button>
                   )

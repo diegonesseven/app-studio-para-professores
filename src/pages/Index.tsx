@@ -24,6 +24,7 @@ import {
   UserCheck,
 } from 'lucide-react'
 import { StudentCombobox } from '@/components/StudentCombobox'
+import { StudentAvatar } from '@/components/StudentAvatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -204,9 +205,12 @@ export default function Index() {
                 className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#2A2A2A] text-left transition-colors group"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-[#2A2A2A] border border-primary/40 text-primary font-bold text-xs flex items-center justify-center shrink-0">
-                    {st.name.slice(0, 2).toUpperCase()}
-                  </div>
+                  <StudentAvatar
+                    student={st}
+                    className="w-9 h-9"
+                    textClassName="text-xs font-bold"
+                    alt={st.name}
+                  />
                   <div className="min-w-0">
                     <span className="text-sm font-bold text-white group-hover:text-primary transition-colors block truncate">
                       {st.name}
@@ -381,9 +385,12 @@ export default function Index() {
                   className="py-3.5 flex items-center justify-between gap-3 hover:bg-[#252525] px-3 rounded-xl transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-[#2A2A2A] border border-primary/40 text-primary font-bold text-sm flex items-center justify-center shrink-0">
-                      {initials}
-                    </div>
+                    <StudentAvatar
+                      student={st}
+                      className="w-10 h-10"
+                      textClassName="text-sm font-bold"
+                      alt={st.name}
+                    />
                     <div className="min-w-0">
                       <span className="text-sm font-bold text-white group-hover:text-primary transition-colors block truncate">
                         {st.name}
