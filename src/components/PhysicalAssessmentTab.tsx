@@ -2174,8 +2174,8 @@ export function PhysicalAssessmentTab({
                   const prevD = previousAssessment?.data?.antebraco?.direito ?? null
                   const prevE = previousAssessment?.data?.antebraco?.esquerdo ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         ANTEBRAÇO
                       </td>
 
@@ -2188,7 +2188,7 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2203,10 +2203,10 @@ export function PhysicalAssessmentTab({
                               'direito',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2223,7 +2223,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2237,8 +2237,8 @@ export function PhysicalAssessmentTab({
                   const prevD = previousAssessment?.data?.biceps?.direito ?? null
                   const prevE = previousAssessment?.data?.biceps?.esquerdo ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-muted/20">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         BÍCEPS
                       </td>
 
@@ -2251,7 +2251,7 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2266,10 +2266,10 @@ export function PhysicalAssessmentTab({
                               'direito',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2284,7 +2284,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2296,8 +2296,8 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.torax ?? null
                   const prev = previousAssessment?.data?.torax ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         TÓRAX
                       </td>
 
@@ -2307,7 +2307,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -2318,7 +2318,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'torax', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2330,8 +2330,8 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.ombro ?? null
                   const prev = previousAssessment?.data?.ombro ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-muted/20">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         OMBRO
                       </td>
 
@@ -2341,7 +2341,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -2352,7 +2352,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'ombro', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2364,8 +2364,8 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.cintura ?? null
                   const prev = previousAssessment?.data?.cintura ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         CINTURA
                       </td>
 
@@ -2375,7 +2375,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -2386,7 +2386,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'cintura', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2398,8 +2398,8 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.abdomen ?? null
                   const prev = previousAssessment?.data?.abdomen ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-muted/20">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         ABDÔMEN
                       </td>
 
@@ -2409,7 +2409,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -2420,7 +2420,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'abdomen', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2432,8 +2432,8 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.quadril ?? null
                   const prev = previousAssessment?.data?.quadril ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         QUADRIL
                       </td>
 
@@ -2443,7 +2443,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -2454,7 +2454,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'quadril', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2478,13 +2478,13 @@ export function PhysicalAssessmentTab({
                   const prevClassif = classifyWaistHipRatio(prevRcq, prevSex)
 
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-primary/5">
-                      <td className="p-2.5 font-bold text-primary sticky left-0 bg-[#151928] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-primary/5">
+                      <td className="p-2.5 font-bold text-primary sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5">
                           <span className="flex items-center gap-1">
                             RELAÇÃO CINTURA-QUADRIL (RCQ)
                           </span>
-                          <span className="text-[10px] text-[#9CA5B8] font-normal">
+                          <span className="text-[10px] text-muted-foreground font-normal">
                             ({currSex === 'M' ? '< 0,90' : '< 0,85'})
                           </span>
                         </div>
@@ -2497,10 +2497,10 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Calculado automaticamente a partir de Cintura e Quadril) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
-                          <div className="text-xs sm:text-sm font-mono font-bold text-white bg-[#181C2E] border border-[#252B3E] rounded h-10 px-3 flex items-center justify-center min-w-[100px]">
+                          <div className="text-xs sm:text-sm font-mono font-bold text-foreground bg-card border border-border rounded h-10 px-3 flex items-center justify-center min-w-[100px] shadow-sm">
                             {currRcq !== null ? currRcq.toFixed(2).replace('.', ',') : '—'}
                           </div>
                           {renderBadge(currClassif)}
@@ -2517,8 +2517,8 @@ export function PhysicalAssessmentTab({
                   const prevD = previousAssessment?.data?.coxa?.direito ?? null
                   const prevE = previousAssessment?.data?.coxa?.esquerdo ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-muted/20">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         COXA
                       </td>
 
@@ -2531,7 +2531,7 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2541,10 +2541,10 @@ export function PhysicalAssessmentTab({
                           onBlur={(ev) =>
                             handleUpdateField(currentAssessment, 'coxa', ev.target.value, 'direito')
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2559,7 +2559,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2573,8 +2573,8 @@ export function PhysicalAssessmentTab({
                   const prevD = previousAssessment?.data?.panturrilha?.direito ?? null
                   const prevE = previousAssessment?.data?.panturrilha?.esquerdo ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         PANTURRILHA
                       </td>
 
@@ -2587,7 +2587,7 @@ export function PhysicalAssessmentTab({
                       )}
 
                       {/* Coluna Atual (D e E) */}
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E]/60 text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2604,10 +2604,10 @@ export function PhysicalAssessmentTab({
                               'direito',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
-                      <td className="py-2 px-1.5 sm:px-2 border-r border-[#252B3E] text-center min-h-[44px]">
+                      <td className="py-2 px-1.5 sm:px-2 border-r border-border text-center min-h-[44px]">
                         <Input
                           type="text"
                           inputMode="decimal"
@@ -2624,7 +2624,7 @@ export function PhysicalAssessmentTab({
                               'esquerdo',
                             )
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-medium focus-visible:ring-primary cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2636,8 +2636,8 @@ export function PhysicalAssessmentTab({
 
           {/* BOTÃO SALVAR AVALIAÇÃO AO FINAL DO FORMULÁRIO */}
           {currentAssessment && (
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 p-4 rounded-xl bg-[#121522] border border-[#252B3E]">
-              <div className="text-xs text-[#9CA5B8] flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 p-4 rounded-xl bg-card border border-border shadow-sm">
+              <div className="text-xs text-muted-foreground flex items-center gap-2">
                 <Info className="w-4 h-4 text-primary shrink-0" />
                 <span>
                   As alterações são salvas automaticamente ao digitar. Use o botão ao lado para
@@ -2649,7 +2649,7 @@ export function PhysicalAssessmentTab({
                 type="button"
                 onClick={handleSaveAssessmentExplicitly}
                 disabled={savingAssessment}
-                className={`font-bold text-sm h-11 px-6 flex items-center justify-center gap-2 shadow-lg transition-all shrink-0 ${
+                className={`font-bold text-sm h-11 px-6 flex items-center justify-center gap-2 shadow-sm transition-all shrink-0 ${
                   saveSuccess
                     ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
                     : 'bg-primary hover:opacity-90 text-primary-foreground'
@@ -2674,12 +2674,12 @@ export function PhysicalAssessmentTab({
 
       {/* DIÁLOGO: NOVA AVALIAÇÃO FÍSICA */}
       <Dialog open={newDateDialogOpen} onOpenChange={setNewDateDialogOpen}>
-        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
               <Plus className="w-5 h-5 text-primary" /> Nova Avaliação Física
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#9CA5B8]">
+            <DialogDescription className="text-xs text-muted-foreground">
               Inicie uma nova avaliação para o aluno {studentName || ''}. O comparativo com a
               avaliação anterior será gerado automaticamente.
             </DialogDescription>
@@ -2687,7 +2687,10 @@ export function PhysicalAssessmentTab({
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <label htmlFor="new-ass-date" className="text-xs text-[#9CA5B8] uppercase font-bold">
+              <label
+                htmlFor="new-ass-date"
+                className="text-xs text-muted-foreground uppercase font-bold"
+              >
                 Data da Avaliação
               </label>
               <Input
@@ -2695,12 +2698,12 @@ export function PhysicalAssessmentTab({
                 type="date"
                 value={newAssessmentDate}
                 onChange={(e) => setNewAssessmentDate(e.target.value)}
-                className="bg-[#121522] border-[#252B3E] text-white h-11"
+                className="bg-muted/40 border-border text-foreground h-11"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs text-[#9CA5B8] uppercase font-bold">
+              <label className="text-xs text-muted-foreground uppercase font-bold">
                 Sexo para Classificação Omron
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -2709,8 +2712,8 @@ export function PhysicalAssessmentTab({
                   onClick={() => setNewAssessmentSex('F')}
                   className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                     newAssessmentSex === 'F'
-                      ? 'bg-pink-500/20 border-pink-500 text-pink-300 font-bold shadow'
-                      : 'bg-[#121522] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                      ? 'bg-pink-100 border-pink-300 text-pink-700 font-bold shadow-sm'
+                      : 'bg-muted/40 border-border text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <UserCheck className="w-4 h-4" /> Feminino (F)
@@ -2720,8 +2723,8 @@ export function PhysicalAssessmentTab({
                   onClick={() => setNewAssessmentSex('M')}
                   className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                     newAssessmentSex === 'M'
-                      ? 'bg-sky-500/20 border-sky-500 text-sky-300 font-bold shadow'
-                      : 'bg-[#121522] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                      ? 'bg-sky-100 border-sky-300 text-sky-700 font-bold shadow-sm'
+                      : 'bg-muted/40 border-border text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <UserCheck className="w-4 h-4" /> Masculino (M)
@@ -2735,7 +2738,7 @@ export function PhysicalAssessmentTab({
               type="button"
               variant="outline"
               onClick={() => setNewDateDialogOpen(false)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>
@@ -2756,14 +2759,14 @@ export function PhysicalAssessmentTab({
         open={Boolean(deleteCandidate)}
         onOpenChange={(open) => !open && setDeleteCandidate(null)}
       >
-        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-              <Trash2 className="w-5 h-5 text-red-400" /> Excluir Avaliação?
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-500" /> Excluir Avaliação?
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#9CA5B8]">
+            <DialogDescription className="text-xs text-muted-foreground">
               Esta ação removerá permanentemente a avaliação do dia{' '}
-              <strong className="text-white">
+              <strong className="text-foreground">
                 {parseAndFormatDate(deleteCandidate?.date, '')}
               </strong>{' '}
               e todas as suas medidas registradas.
@@ -2775,7 +2778,7 @@ export function PhysicalAssessmentTab({
               type="button"
               variant="outline"
               onClick={() => setDeleteCandidate(null)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>
