@@ -146,13 +146,65 @@ export const teachersService = {
   },
 
   /**
-   * Atualiza dados de um professor (nome, email, papel ou redefinição de senha)
+   * Atualiza os dados de um professor como administrador via endpoint seguro de servidor.
+   */
+  async adminUpdate(
+    id: string,
+    data: {
+      password?: string
+      passwordConfirm?: string
+      name?: string
+      email?: string
+      role?: UserRole
+    },
+  ): Promise<User> {
+    const res = await pb.send<User>(`/backend/v1/custom/admin/users/${id}/password`, {
+      method: 'POST',
+      body: {
+        password: data.password,
+        passwordConfirm: data.passwordConfirm || data.password,
+        name: data.name,
+        email: data.email,
+        role: data.role,
+      },
+    })
+    return res
+  },
+
+  /**
+   * Atualiza dados de um professor (nome, email, papel e/ou redefinição de senha)
    */
   async update(id: string, data: UpdateTeacherDTO): Promise<User> {
+    const currentAuthRecord = pb.authStore.record
+    const isSelf = currentAuthRecord?.id === id
+    const isAdmin = currentAuthRecord?.role === 'admin'
+
+    // Quando um administrador edita outro usuário (ou redefinição de senha de outro usuário):
+    // Usamos o endpoint seguro do backend para evitar os erros 400 do PocketBase:
+    // 1) oldPassword obrigatório para não-superusuários
+    // 2) validation_values_mismatch no campo email devido à falta de manageRule
+    if (!isSelf && isAdmin) {
+      return await this.adminUpdate(id, {
+        password: data.password,
+        passwordConfirm: data.passwordConfirm,
+        name: data.name !== undefined ? sanitizeText(data.name) : undefined,
+        email:
+          data.email !== undefined && data.email !== ''
+            ? data.email.trim().toLowerCase()
+            : undefined,
+        role: data.role,
+      })
+    }
+
+    // Caso de auto-alteração (mesmo usuário alterando seus próprios dados / senha com oldPassword):
     const payload: Record<string, unknown> = {}
     if (data.name !== undefined) payload.name = sanitizeText(data.name)
-    if (data.email !== undefined) payload.email = data.email.trim().toLowerCase()
     if (data.role !== undefined) payload.role = data.role
+    // Para o próprio usuário, não enviar email no PATCH de atualização se não tiver mudado
+    // ou se o backend do PocketBase exigir fluxo de requestEmailChange
+    if (data.email !== undefined && data.email !== '') {
+      payload.email = data.email.trim().toLowerCase()
+    }
     if (data.password) {
       payload.password = data.password
       payload.passwordConfirm = data.passwordConfirm || data.password
@@ -161,7 +213,20 @@ export const teachersService = {
       }
     }
 
-    return pb.collection('users').update<User>(id, payload)
+    try {
+      return await pb.collection('users').update<User>(id, payload)
+    } catch (err: unknown) {
+      // Se deu erro de email ("validation_values_mismatch"):
+      const response = (err as { response?: { data?: Record<string, { code?: string }> } })
+        ?.response
+      if (payload.email && response?.data?.email?.code === 'validation_values_mismatch') {
+        delete payload.email
+        if (Object.keys(payload).length > 0) {
+          return await pb.collection('users').update<User>(id, payload)
+        }
+      }
+      throw err
+    }
   },
 
   /**

@@ -84,4 +84,60 @@ describe('Teacher lifecycle and teacher profile password update', () => {
       await adminPb.collection('users').delete(createdTeacher.id)
     }
   })
+
+  it('allows admin to update another teacher profile and reset their password without oldPassword', async () => {
+    const adminPb = new PocketBase(PB_URL)
+    adminPb.autoCancellation(false)
+
+    // Login as admin
+    await adminPb
+      .collection('users')
+      .authWithPassword('moreiradiego.seven@gmail.com', 'Bru@Studio2026!')
+
+    // Create a temporary teacher
+    const testTeacherEmail = `prof_other_${Date.now()}@studiobru.com.br`
+    const initialPass = 'OldPass@1234'
+    const newPassAdminSet = 'NewPassAdmin@9876'
+
+    const teacher = await adminPb.collection('users').create({
+      name: 'Professor Outro',
+      email: testTeacherEmail,
+      password: initialPass,
+      passwordConfirm: initialPass,
+      role: 'professor',
+      emailVisibility: false,
+    })
+
+    try {
+      // Call custom admin password/user endpoint
+      const updateRes = await adminPb.send<any>(
+        `/backend/v1/custom/admin/users/${teacher.id}/password`,
+        {
+          method: 'POST',
+          body: {
+            name: 'Professor Outro Editado',
+            password: newPassAdminSet,
+            passwordConfirm: newPassAdminSet,
+            role: 'professor',
+          },
+        },
+      )
+
+      expect(updateRes.id).toBe(teacher.id)
+      expect(updateRes.name).toBe('Professor Outro Editado')
+
+      // Verify the teacher can now log in with the new password set by the admin
+      const teacherPb = new PocketBase(PB_URL)
+      teacherPb.autoCancellation(false)
+
+      const teacherAuth = await teacherPb
+        .collection('users')
+        .authWithPassword(testTeacherEmail, newPassAdminSet)
+
+      expect(teacherAuth.token).toBeTruthy()
+      expect(teacherAuth.record.name).toBe('Professor Outro Editado')
+    } finally {
+      await adminPb.collection('users').delete(teacher.id)
+    }
+  })
 })
