@@ -7,46 +7,46 @@
 
 @layer base {
   :root {
-    /* Tema oficial Studio Bru Oliveira: Roxo Predominante (#8B5CF6) e fundos escuros */
-    --background: 43.6 40.7% 94.7%; /* #0F0E17 */
-    --foreground: 240 15.4% 5.1%; /* #FFFFFF */
+    /* Tema oficial Studio Bru Oliveira: Roxo Predominante (#8B5CF6) e fundos claros */
+    --background: 210 40% 98%; /* #F8FAFC Slate-50 */
+    --foreground: 222 47% 11%; /* #0F172A Slate-900 */
 
-    --card: 43.6 40.7% 94.7%; /* #1A1829 */
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%; /* #FFFFFF Branco */
+    --card-foreground: 222 47% 11%; /* #0F172A Slate-900 */
 
-    --popover: 246 26% 13%; /* #1A1829 */
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 100%; /* #FFFFFF Branco */
+    --popover-foreground: 222 47% 11%; /* #0F172A Slate-900 */
 
     --primary: 258 90% 66%; /* #8B5CF6 Roxo Oficial */
-    --primary-foreground: 240 15.4% 5.1%;
+    --primary-foreground: 0 0% 100%; /* Branco sobre roxo */
 
-    --secondary: 263 70% 50%; /* #7C3AED Roxo Vibrante */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 258 90% 96%; /* #F5F3FF Roxo suave */
+    --secondary-foreground: 263 70% 45%; /* Roxo escuro */
 
-    --muted: 246 20% 18%;
-    --muted-foreground: 250 16% 70%; /* #A6A4BF */
+    --muted: 210 40% 96.1%; /* #F1F5F9 Slate-100 */
+    --muted-foreground: 215 16% 47%; /* #64748B Slate-500 */
 
-    --accent: 258 90% 66%; /* Roxo Destaque */
-    --accent-foreground: 0 0% 100%;
+    --accent: 258 90% 96%;
+    --accent-foreground: 263 70% 45%;
 
-    --destructive: 358 75% 59%; /* #E5484D */
+    --destructive: 0 84.2% 60.2%; /* #EF4444 */
     --destructive-foreground: 0 0% 100%;
 
-    --success: 166 50% 50%; /* #41B397 */
+    --success: 160 84% 39%; /* #10B981 */
 
-    --border: 246 18% 22%; /* #28243D */
-    --input: 246 18% 22%;
+    --border: 214 32% 91%; /* #E2E8F0 Slate-200 */
+    --input: 214 32% 91%; /* #E2E8F0 Slate-200 */
     --ring: 258 90% 66%; /* #8B5CF6 */
 
     --radius: 0.625rem;
 
-    --sidebar-background: 247 28% 9%; /* #12101D */
-    --sidebar-foreground: 0 0% 95%;
+    --sidebar-background: 0 0% 100%; /* #FFFFFF */
+    --sidebar-foreground: 222 47% 11%; /* #0F172A */
     --sidebar-primary: 258 90% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 246 20% 18%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 246 18% 20%;
+    --sidebar-accent: 210 40% 96.1%; /* #F1F5F9 */
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%; /* #E2E8F0 */
     --sidebar-ring: 258 90% 66%;
   }
 
@@ -90,7 +90,7 @@
     touch-action: manipulation;
   }
 
-  /* Scrollbar customizada escura */
+  /* Scrollbar customizada clara */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -99,7 +99,7 @@
     background: hsl(var(--background));
   }
   ::-webkit-scrollbar-thumb {
-    background: #2a2a2a;
+    background: #cbd5e1;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {

@@ -200,10 +200,10 @@ export default function StudentList() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
             <Users className="w-7 h-7 text-primary" /> Gestão de Alunos
           </h1>
-          <p className="text-sm text-[#8A8F98] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Cadastros, fichas de saúde, anamnese e atalhos rápidos para conduzir aulas
           </p>
         </div>
@@ -222,37 +222,37 @@ export default function StudentList() {
             placeholder="Pesquisar aluno por nome..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-primary"
+            className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 pl-11 pr-4 focus-visible:ring-primary shadow-sm"
           />
-          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
         </div>
 
         <div className="relative">
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'name' | '-updated')}
-            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full h-12 bg-card border border-border text-foreground rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-sm"
           >
             <option value="name">Ordem Alfabética</option>
             <option value="-updated">Atividade Recente</option>
           </select>
-          <ArrowUpDown className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98] pointer-events-none" />
+          <ArrowUpDown className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         </div>
       </div>
 
       {/* Lista de Alunos */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
+        <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando alunos do Studio Bru Oliveira...</p>
         </div>
       ) : students.length === 0 ? (
-        <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-10 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#2A2A2A] flex items-center justify-center text-[#8A8F98] mb-4">
+        <div className="bg-card border border-border rounded-2xl p-10 text-center flex flex-col items-center shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground mb-4">
             <Users className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">Nenhum aluno encontrado</h3>
-          <p className="text-sm text-[#8A8F98] max-w-sm mb-6">
+          <h3 className="text-lg font-bold text-foreground mb-1">Nenhum aluno encontrado</h3>
+          <p className="text-sm text-muted-foreground max-w-sm mb-6">
             Não há registros com os critérios informados. Comece adicionando um novo aluno.
           </p>
           <Link to="/alunos/novo">
@@ -282,10 +282,10 @@ export default function StudentList() {
                     navigate(`/alunos/${student.id}/editar`)
                   }
                 }}
-                className={`rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary ${
+                className={`rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary ${
                   isHighlighted
-                    ? 'bg-[#222222] border-2 border-primary ring-4 ring-primary/20 shadow-2xl scale-[1.01]'
-                    : 'bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/60'
+                    ? 'bg-primary/5 border-2 border-primary ring-4 ring-primary/20 shadow-lg scale-[1.01]'
+                    : 'bg-card border border-border hover:border-primary/60 shadow-sm'
                 }`}
               >
                 <div>
@@ -294,10 +294,10 @@ export default function StudentList() {
                     <div className="flex items-center gap-3 min-w-0">
                       <StudentAvatar student={student} className="w-11 h-11" alt={student.name} />
                       <div className="min-w-0">
-                        <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors truncate">
+                        <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors truncate">
                           {student.name}
                         </h3>
-                        <div className="flex items-center gap-2 text-xs text-[#8A8F98]">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
                           {age !== null ? (
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" /> {age} anos
@@ -312,14 +312,14 @@ export default function StudentList() {
                       </div>
                     </div>
 
-                    <Badge className="bg-primary/15 text-primary border border-primary/30 text-xs px-2.5 py-0.5 font-semibold shrink-0">
+                    <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs px-2.5 py-0.5 font-semibold shrink-0">
                       Treino {nextSeries}
                     </Badge>
                   </div>
 
                   {/* Restrições / Alerta */}
                   {student.restrictions && (
-                    <div className="mb-3 p-2 rounded-lg bg-amber-950/30 border border-amber-800/40 text-[11px] text-amber-300 font-medium line-clamp-1">
+                    <div className="mb-3 p-2 rounded-lg bg-amber-50 border border-amber-200 text-[11px] text-amber-800 font-medium line-clamp-1">
                       ⚠️ {student.restrictions}
                     </div>
                   )}
@@ -330,13 +330,13 @@ export default function StudentList() {
                       {student.goals.slice(0, 3).map((goal) => (
                         <span
                           key={goal}
-                          className="text-[10px] bg-[#2A2A2A] text-[#8A8F98] px-2 py-0.5 rounded-full"
+                          className="text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full border border-border"
                         >
                           {goal}
                         </span>
                       ))}
                       {student.goals.length > 3 && (
-                        <span className="text-[10px] text-[#8A8F98] py-0.5">
+                        <span className="text-[10px] text-muted-foreground py-0.5">
                           +{student.goals.length - 3}
                         </span>
                       )}
@@ -346,7 +346,7 @@ export default function StudentList() {
 
                 {/* Ações inferiores */}
                 <div
-                  className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2"
+                  className="pt-3 border-t border-border flex items-center justify-between gap-2"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center gap-1">
@@ -355,12 +355,12 @@ export default function StudentList() {
                       type="button"
                       disabled={exportingStudentId === student.id}
                       onClick={() => handleExportStudentSheet(student)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
                       title="Exportar / Compartilhar Ficha (PDF/Impressão)"
                       aria-label={`Exportar ficha de ${student.name}`}
                     >
                       {exportingStudentId === student.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-secondary" />
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
                       ) : (
                         <Share2 className="w-4 h-4" />
                       )}
@@ -369,7 +369,7 @@ export default function StudentList() {
                     <button
                       type="button"
                       onClick={() => setSelectedStudentForAnamnese(student)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-primary hover:bg-[#2A2A2A] transition-colors"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
                       title="Ver Anamnese"
                       aria-label={`Ver anamnese de ${student.name}`}
                     >
@@ -379,7 +379,7 @@ export default function StudentList() {
                     <Link to={`/alunos/${student.id}/editar`} onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
-                        className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                         title="Editar cadastro do aluno"
                         aria-label={`Editar ${student.name}`}
                       >
@@ -393,7 +393,7 @@ export default function StudentList() {
                         setDeleteId(student.id)
                         setDeleteName(student.name)
                       }}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-muted transition-colors"
                       title="Excluir aluno"
                       aria-label={`Excluir ${student.name}`}
                     >
@@ -407,7 +407,7 @@ export default function StudentList() {
                     onClick={() => navigate(`/treino?students=${student.id}`)}
                     className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
                   >
-                    <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Abrir Treino
+                    <PlaySquare className="w-3.5 h-3.5 text-primary-foreground" /> Abrir Treino
                   </Button>
                 </div>
               </div>
@@ -425,10 +425,10 @@ export default function StudentList() {
 
       {/* Confirmação de Exclusão */}
       <Dialog open={Boolean(deleteId)} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white">Excluir aluno?</DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogTitle className="text-lg font-bold text-foreground">Excluir aluno?</DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm">
               Tem certeza que deseja excluir o cadastro de &quot;{deleteName}&quot;? As fichas de
               treino vinculadas a este aluno também serão removidas.
             </DialogDescription>
@@ -437,7 +437,7 @@ export default function StudentList() {
             <Button
               variant="outline"
               onClick={() => setDeleteId(null)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>

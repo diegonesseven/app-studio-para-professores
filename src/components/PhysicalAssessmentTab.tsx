@@ -475,7 +475,7 @@ export function PhysicalAssessmentTab({
       return (
         <td
           colSpan={subLabel ? 1 : 2}
-          className="p-2 border-r border-[#252B3E] text-center text-xs text-[#5D667E] bg-[#0E111B]/60 italic font-mono"
+          className="p-2 border-r border-border text-center text-xs text-muted-foreground bg-muted/30 italic font-mono"
         >
           —
         </td>
@@ -488,13 +488,13 @@ export function PhysicalAssessmentTab({
     return (
       <td
         colSpan={subLabel ? 1 : 2}
-        className="p-1.5 border-r border-[#252B3E] text-center bg-[#0E111B]/80"
+        className="p-1.5 border-r border-border text-center bg-muted/40"
       >
         <div className="flex flex-col items-center justify-center gap-0.5">
           <div className="flex items-center justify-center gap-1">
             <span
               className={`font-semibold text-xs font-mono ${
-                hasPrev ? 'text-[#C5CEE0]' : 'text-[#5D667E] italic'
+                hasPrev ? 'text-foreground' : 'text-muted-foreground italic'
               }`}
             >
               {hasPrev ? formatMetricValue(prevVal, unit) : '—'}
@@ -506,10 +506,10 @@ export function PhysicalAssessmentTab({
             <div
               className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[10px] font-bold border ${
                 evo.trend === 'better'
-                  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   : evo.trend === 'worse'
-                    ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
-                    : 'bg-[#181C2E] text-[#9CA5B8] border-[#252B3E]'
+                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    : 'bg-muted text-muted-foreground border-border'
               }`}
               title={`Evolução em relação à avaliação anterior: ${evo.diffFormatted}`}
             >
@@ -642,21 +642,21 @@ export function PhysicalAssessmentTab({
   const previousDateFormatted = parseAndFormatDate(previousAssessment?.date, '')
 
   return (
-    <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl overflow-hidden p-6 sm:p-8 space-y-6">
+    <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden p-6 sm:p-8 space-y-6">
       {/* Cabeçalho da Aba */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#252B3E] gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-border gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
             <Activity className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg font-bold text-white">Avaliação Física e Perimetria</h3>
-              <span className="text-xs bg-primary/30 text-white font-semibold px-2 py-0.5 rounded-full">
+              <h3 className="text-lg font-bold text-foreground">Avaliação Física e Perimetria</h3>
+              <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full border border-primary/20">
                 {assessments.length} {assessments.length === 1 ? 'avaliação' : 'avaliações'}
               </span>
             </div>
-            <p className="text-xs text-[#9CA5B8]">
+            <p className="text-xs text-muted-foreground">
               Uma avaliação por vez com comparativo automático da evolução com a avaliação anterior
             </p>
           </div>
@@ -671,7 +671,7 @@ export function PhysicalAssessmentTab({
                 size="sm"
                 onClick={handleDownloadImage}
                 disabled={exportingImage}
-                className="border-emerald-500/40 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-xs h-9 px-3 flex items-center gap-1.5"
+                className="border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs h-9 px-3 flex items-center gap-1.5"
                 title="Baixar imagem (PNG) com parâmetros, referências e resultados para enviar ao aluno"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -684,7 +684,7 @@ export function PhysicalAssessmentTab({
                 size="sm"
                 onClick={handleShareImage}
                 disabled={exportingImage}
-                className="border-[#25D366]/40 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] text-xs h-9 px-3 flex items-center gap-1.5"
+                className="border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs h-9 px-3 flex items-center gap-1.5"
                 title="Compartilhar resultado da avaliação com o aluno via WhatsApp ou outro app"
               >
                 <Share2 className="w-3.5 h-3.5" />
@@ -722,9 +722,9 @@ export function PhysicalAssessmentTab({
             variant="outline"
             size="sm"
             onClick={() => setReferenceModalOpen(true)}
-            className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-white text-xs h-9 px-3 flex items-center gap-1.5"
+            className="border-border bg-card hover:bg-muted text-foreground text-xs h-9 px-3 flex items-center gap-1.5"
           >
-            <BookOpen className="w-3.5 h-3.5 text-secondary" /> Tabelas Omron
+            <BookOpen className="w-3.5 h-3.5 text-primary" /> Tabelas Omron
           </Button>
 
           <Button
@@ -743,13 +743,13 @@ export function PhysicalAssessmentTab({
 
       {/* Alerta quando faltar Idade no cadastro do Aluno */}
       {(!studentAge || studentAge <= 0) && (
-        <div className="bg-amber-500/10 border border-amber-500/40 rounded-xl p-3.5 flex items-start gap-3 text-xs text-amber-200">
-          <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex items-start gap-3 text-xs text-amber-900">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold text-amber-300 block">
+            <span className="font-bold text-amber-800 block">
               Atenção: Idade do aluno não identificada no cadastro
             </span>
-            <p className="text-[#C5CEE0]">
+            <p className="text-amber-800/90">
               As tabelas de referência Omron para <strong>% de Gordura Corporal</strong> e{' '}
               <strong>% de Músculos Esqueléticos</strong> utilizam a idade e o sexo para definir as
               faixas corretas. Complete o campo de <strong>Data de Nascimento</strong> nos dados do
@@ -760,15 +760,15 @@ export function PhysicalAssessmentTab({
       )}
 
       {/* Bloco Cinza do Topo (Idade e Altura - Fixos) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-[#121522] border border-[#252B3E] p-4 rounded-xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 bg-muted/40 border border-border p-4 rounded-xl">
         <div className="space-y-1">
-          <span className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold flex items-center gap-1.5">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-primary" /> IDADE
           </span>
-          <div className="text-sm font-black text-white flex items-center gap-2">
+          <div className="text-sm font-black text-foreground flex items-center gap-2">
             {studentAge !== null ? `${studentAge} anos` : 'Não informada'}
             {studentBirthdate && (
-              <span className="text-[11px] text-[#8A8F98] font-normal">
+              <span className="text-[11px] text-muted-foreground font-normal">
                 ({parseAndFormatDate(studentBirthdate)})
               </span>
             )}
@@ -778,7 +778,7 @@ export function PhysicalAssessmentTab({
         <div className="space-y-1">
           <label
             htmlFor="fixed-height"
-            className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold flex items-center gap-1.5 cursor-pointer"
+            className="text-xs uppercase tracking-wider text-muted-foreground font-bold flex items-center gap-1.5 cursor-pointer"
           >
             <TrendingUp className="w-3.5 h-3.5 text-primary" /> ALTURA (cm ou m)
           </label>
@@ -788,14 +788,14 @@ export function PhysicalAssessmentTab({
               placeholder="Ex: 170 ou 1.70"
               value={fixedHeight}
               onChange={(e) => handleHeightChange(e.target.value)}
-              className="bg-[#181C2E] border-[#252B3E] text-white h-9 text-xs w-32 focus-visible:ring-primary"
+              className="bg-card border-border text-foreground h-9 text-xs w-32 focus-visible:ring-primary shadow-sm"
             />
-            <span className="text-xs text-[#8A8F98]">cm</span>
+            <span className="text-xs text-muted-foreground">cm</span>
           </div>
         </div>
 
-        <div className="space-y-1 sm:col-span-2 flex items-center gap-2 text-xs text-[#9CA5B8] bg-[#181C2E]/60 p-2.5 rounded-lg border border-[#252B3E]/60">
-          <Info className="w-4 h-4 text-secondary shrink-0" />
+        <div className="space-y-1 sm:col-span-2 flex items-center gap-2 text-xs text-muted-foreground bg-muted/60 p-2.5 rounded-lg border border-border">
+          <Info className="w-4 h-4 text-primary shrink-0" />
           <span>
             Os valores preenchidos abaixo calculam o IMC e classificam automaticamente % Gordura, %
             Músculo e Gordura Visceral. A coluna <strong>Anterior</strong> compara a evolução lado a
@@ -806,14 +806,16 @@ export function PhysicalAssessmentTab({
 
       {/* Conteúdo principal */}
       {loading ? (
-        <div className="py-12 text-center text-xs text-[#8A8F98]">
+        <div className="py-12 text-center text-xs text-muted-foreground">
           Carregando avaliações físicas...
         </div>
       ) : assessments.length === 0 ? (
-        <div className="py-12 text-center bg-[#121522] rounded-xl border border-[#252B3E] p-8 space-y-3">
+        <div className="py-12 text-center bg-card rounded-xl border border-border p-8 space-y-3 shadow-sm">
           <Activity className="w-10 h-10 text-primary/40 mx-auto" />
-          <h4 className="text-base font-bold text-white">Nenhuma avaliação física registrada</h4>
-          <p className="text-xs text-[#9CA5B8] max-w-md mx-auto">
+          <h4 className="text-base font-bold text-foreground">
+            Nenhuma avaliação física registrada
+          </h4>
+          <p className="text-xs text-muted-foreground max-w-md mx-auto">
             Clique no botão <strong>"+ Nova Avaliação"</strong> para criar a primeira avaliação e
             preencher os dados de bioimpedância e perimetria do aluno.
           </p>
@@ -829,9 +831,9 @@ export function PhysicalAssessmentTab({
       ) : currentAssessment ? (
         <div className="space-y-4">
           {/* BARRA DE NAVEGAÇÃO E SELEÇÃO DE AVALIAÇÃO (Uma por vez) */}
-          <div className="bg-[#121522] border border-[#252B3E] rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="bg-card border border-border rounded-xl p-3 flex flex-col md:flex-row items-center justify-between gap-3 shadow-sm">
             <div className="flex items-center gap-2 w-full md:w-auto justify-between md:justify-start">
-              <span className="text-xs uppercase font-bold text-[#9CA5B8] flex items-center gap-1.5">
+              <span className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-1.5">
                 <History className="w-3.5 h-3.5 text-primary" /> Avaliação em Exibição:
               </span>
 
@@ -843,12 +845,12 @@ export function PhysicalAssessmentTab({
                   size="sm"
                   disabled={currentIndex <= 0}
                   onClick={handleGoToPreviousAssessment}
-                  className="h-8 w-8 p-0 bg-[#181C2E] border-[#252B3E] text-white hover:bg-[#20263B] disabled:opacity-40"
+                  className="h-8 w-8 p-0 bg-card border-border text-foreground hover:bg-muted disabled:opacity-40"
                   title="Ir para avaliação mais antiga"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
-                <span className="text-xs font-mono text-[#9CA5B8] px-2 font-semibold">
+                <span className="text-xs font-mono text-muted-foreground px-2 font-semibold">
                   {currentIndex + 1} de {sortedAssessments.length}
                 </span>
                 <Button
@@ -857,7 +859,7 @@ export function PhysicalAssessmentTab({
                   size="sm"
                   disabled={currentIndex >= sortedAssessments.length - 1}
                   onClick={handleGoToNextAssessment}
-                  className="h-8 w-8 p-0 bg-[#181C2E] border-[#252B3E] text-white hover:bg-[#20263B] disabled:opacity-40"
+                  className="h-8 w-8 p-0 bg-card border-border text-foreground hover:bg-muted disabled:opacity-40"
                   title="Ir para avaliação mais recente"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -871,7 +873,7 @@ export function PhysicalAssessmentTab({
                 aria-label="Selecionar avaliação física"
                 value={currentAssessment.id}
                 onChange={(e) => handleSelectAssessment(e.target.value)}
-                className="bg-[#181C2E] border border-[#252B3E] text-white text-xs rounded-lg px-3 py-1.5 font-semibold focus:outline-none focus:ring-1 focus:ring-primary w-full md:w-auto"
+                className="bg-card border border-border text-foreground text-xs rounded-lg px-3 py-1.5 font-semibold focus:outline-none focus:ring-1 focus:ring-primary w-full md:w-auto shadow-sm"
               >
                 {sortedAssessments.map((ass, idx) => {
                   const d = parseAndFormatDate(ass.date, 'Sem data')
@@ -889,7 +891,7 @@ export function PhysicalAssessmentTab({
                 variant="outline"
                 size="sm"
                 onClick={() => setDeleteCandidate(currentAssessment)}
-                className="h-8 px-2.5 border-red-900/50 bg-red-950/20 text-red-400 hover:bg-red-950/40 hover:text-red-300 text-xs shrink-0 flex items-center gap-1"
+                className="h-8 px-2.5 border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 text-xs shrink-0 flex items-center gap-1"
                 title="Excluir esta avaliação"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -900,26 +902,26 @@ export function PhysicalAssessmentTab({
 
           {/* Banner informativo de comparativo com a anterior */}
           {previousAssessment ? (
-            <div className="bg-gradient-to-r from-primary/10 via-[#181C2E] to-secondary/10 border border-primary/30 rounded-xl p-3 flex items-center justify-between gap-3 text-xs flex-wrap">
+            <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between gap-3 text-xs flex-wrap">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-primary/20 border border-primary/40 text-primary flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4 text-secondary" />
+                <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <span className="font-bold text-white">Comparativo Automático Ativo: </span>
-                  <span className="text-[#9CA5B8]">
+                  <span className="font-bold text-foreground">Comparativo Automático Ativo: </span>
+                  <span className="text-muted-foreground">
                     Comparando a avaliação atual (<strong>{selectedDateFormatted}</strong>) com a
                     imediatamente anterior do dia{' '}
-                    <strong className="text-secondary">{previousDateFormatted}</strong>.
+                    <strong className="text-primary">{previousDateFormatted}</strong>.
                   </span>
                 </div>
               </div>
-              <span className="text-[11px] text-[#9CA5B8] bg-[#121522] px-2.5 py-1 rounded-md border border-[#252B3E]">
+              <span className="text-[11px] text-muted-foreground bg-card px-2.5 py-1 rounded-md border border-border">
                 Coluna <strong>Anterior</strong> é somente leitura
               </span>
             </div>
           ) : (
-            <div className="bg-[#121522] border border-[#252B3E] rounded-xl p-3 flex items-center gap-2 text-xs text-[#9CA5B8]">
+            <div className="bg-muted/40 border border-border rounded-xl p-3 flex items-center gap-2 text-xs text-muted-foreground">
               <Info className="w-4 h-4 text-primary shrink-0" />
               <span>
                 Esta é a primeira avaliação cadastrada do aluno (não há avaliação anterior para
@@ -930,14 +932,14 @@ export function PhysicalAssessmentTab({
           )}
 
           {/* Seletor de Modo no Mobile: Lista Otimizada (Cards) vs Tabela Completa */}
-          <div className="flex sm:hidden items-center justify-between gap-2 p-1.5 rounded-xl bg-[#121522] border border-[#252B3E]">
+          <div className="flex sm:hidden items-center justify-between gap-2 p-1.5 rounded-xl bg-card border border-border">
             <button
               type="button"
               onClick={() => setMobileViewTab('cards')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                 mobileViewTab === 'cards'
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'text-[#9CA5B8] hover:text-white'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <LayoutList className="w-4 h-4" />
@@ -948,8 +950,8 @@ export function PhysicalAssessmentTab({
               onClick={() => setMobileViewTab('table')}
               className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                 mobileViewTab === 'table'
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'text-[#9CA5B8] hover:text-white'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <TableIcon className="w-4 h-4" />
@@ -963,7 +965,7 @@ export function PhysicalAssessmentTab({
           {mobileViewTab === 'cards' && (
             <div className="block sm:hidden space-y-4">
               {/* Card de Configurações da Avaliação Atual (Data e Sexo) */}
-              <div className="rounded-xl border border-[#252B3E] bg-[#141828] p-3.5 space-y-3">
+              <div className="rounded-xl border border-border bg-card p-3.5 space-y-3 shadow-sm">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-bold text-primary flex items-center gap-1.5">
                     <Calendar className="w-4 h-4" /> DATA DA AVALIAÇÃO:
@@ -972,11 +974,11 @@ export function PhysicalAssessmentTab({
                     type="date"
                     value={extractDateInputVal(currentAssessment.date)}
                     onChange={(e) => handleUpdateDate(currentAssessment, e.target.value)}
-                    className="bg-[#121522] border border-[#252B3E] text-white text-xs px-2.5 py-1.5 rounded-lg font-mono"
+                    className="bg-muted/40 border border-border text-foreground text-xs px-2.5 py-1.5 rounded-lg font-mono"
                   />
                 </div>
 
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#252B3E]/60 text-xs text-[#9CA5B8]">
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-border text-xs text-muted-foreground">
                   <span>Sexo de Referência:</span>
                   <div className="flex items-center gap-1.5">
                     <button
@@ -984,8 +986,8 @@ export function PhysicalAssessmentTab({
                       onClick={() => handleUpdateSex(currentAssessment, 'F')}
                       className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
                         currentAssessment.sex === 'F' || !currentAssessment.sex
-                          ? 'bg-pink-500/20 text-pink-300 border border-pink-500/50'
-                          : 'bg-[#121522] border border-[#252B3E] hover:text-white'
+                          ? 'bg-pink-100 text-pink-700 border border-pink-300'
+                          : 'bg-muted/40 border border-border text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       Fem (F)
@@ -995,8 +997,8 @@ export function PhysicalAssessmentTab({
                       onClick={() => handleUpdateSex(currentAssessment, 'M')}
                       className={`px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
                         currentAssessment.sex === 'M'
-                          ? 'bg-sky-500/20 text-sky-300 border border-sky-500/50'
-                          : 'bg-[#121522] border border-[#252B3E] hover:text-white'
+                          ? 'bg-sky-100 text-sky-700 border border-sky-300'
+                          : 'bg-muted/40 border border-border text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       Masc (M)
@@ -1006,9 +1008,9 @@ export function PhysicalAssessmentTab({
               </div>
 
               {/* SEÇÃO 1: COMPOSIÇÃO CORPORAL (BIOIMPEDÂNCIA) */}
-              <div className="rounded-xl border border-[#252B3E] bg-[#121522] overflow-hidden">
+              <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                 <div className="bg-primary/10 border-b border-primary/20 px-3.5 py-2.5">
-                  <h4 className="text-xs font-bold text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                     <Activity className="w-4 h-4 text-primary" />
                     1. Composição Corporal (Bioimpedância)
                   </h4>
@@ -1043,7 +1045,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'peso', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1079,7 +1081,7 @@ export function PhysicalAssessmentTab({
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'imc', e.target.value)
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary flex-1 touch-manipulation"
+                            className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary flex-1 touch-manipulation shadow-sm"
                           />
                           {currClassif && (
                             <div className="shrink-0">{renderBadge(currClassif)}</div>
@@ -1120,7 +1122,7 @@ export function PhysicalAssessmentTab({
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'gordura', e.target.value)
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary flex-1 touch-manipulation"
+                            className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary flex-1 touch-manipulation shadow-sm"
                           />
                           {currClassif && (
                             <div className="shrink-0">{renderBadge(currClassif)}</div>
@@ -1164,7 +1166,7 @@ export function PhysicalAssessmentTab({
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'musculos', e.target.value)
                             }
-                            className="bg-[#181C2E] border-rose-900/60 text-white text-base h-12 text-center font-bold focus-visible:ring-rose-500 flex-1 touch-manipulation"
+                            className="bg-card border-rose-300 text-foreground text-base h-12 text-center font-bold focus-visible:ring-rose-500 flex-1 touch-manipulation shadow-sm"
                           />
                           {currClassif && (
                             <div className="shrink-0">{renderBadge(currClassif)}</div>
@@ -1201,7 +1203,7 @@ export function PhysicalAssessmentTab({
                           value={getDraftValue('mr', curr)}
                           onChange={(e) => handleDraftChange('mr', e.target.value)}
                           onBlur={(e) => handleUpdateField(currentAssessment, 'mr', e.target.value)}
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-semibold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-semibold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1236,7 +1238,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'idade_biologica', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-semibold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-semibold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1276,7 +1278,7 @@ export function PhysicalAssessmentTab({
                                 e.target.value,
                               )
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-semibold focus-visible:ring-primary flex-1 touch-manipulation"
+                            className="bg-card border-border text-foreground text-base h-12 text-center font-semibold focus-visible:ring-primary flex-1 touch-manipulation shadow-sm"
                           />
                           {currClassif && (
                             <div className="shrink-0">{renderBadge(currClassif)}</div>
@@ -1289,9 +1291,9 @@ export function PhysicalAssessmentTab({
               </div>
 
               {/* SEÇÃO 2: PERIMETRIA CORPORAL (MEDIDAS EM CM) */}
-              <div className="rounded-xl border border-[#252B3E] bg-[#121522] overflow-hidden">
+              <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
                 <div className="bg-primary/10 border-b border-primary/20 px-3.5 py-2.5">
-                  <h4 className="text-xs font-bold text-secondary uppercase tracking-wider flex items-center gap-1.5">
+                  <h4 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                     <TrendingUp className="w-4 h-4 text-primary" />
                     2. Medidas Corporais / Perimetria (cm)
                   </h4>
@@ -1328,11 +1330,11 @@ export function PhysicalAssessmentTab({
                                   'direito',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                             />
                           </div>
                           <div>
-                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                            <span className="text-[10px] text-muted-foreground uppercase block mb-1">
                               Esquerdo
                             </span>
                             <Input
@@ -1351,7 +1353,7 @@ export function PhysicalAssessmentTab({
                                   'esquerdo',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                             />
                           </div>
                         </div>
@@ -1387,11 +1389,11 @@ export function PhysicalAssessmentTab({
                                   'direito',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                             />
                           </div>
                           <div>
-                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
+                            <span className="text-[10px] text-muted-foreground uppercase block mb-1">
                               Esquerdo
                             </span>
                             <Input
@@ -1408,7 +1410,7 @@ export function PhysicalAssessmentTab({
                                   'esquerdo',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                             />
                           </div>
                         </div>
@@ -1442,7 +1444,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'torax', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1474,7 +1476,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'ombro', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1506,7 +1508,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'cintura', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1538,7 +1540,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'abdomen', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1570,7 +1572,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'quadril', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                          className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                         />
                       </div>
                     )
@@ -1597,7 +1599,7 @@ export function PhysicalAssessmentTab({
                           Cálculo automático (Cintura ÷ Quadril)
                         </p>
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 h-12 rounded-lg bg-[#181C2E] border border-[#252B3E] flex items-center justify-center font-mono text-base font-black text-white">
+                          <div className="flex-1 h-12 rounded-lg bg-card border border-border flex items-center justify-center font-mono text-base font-black text-foreground shadow-sm">
                             {currRcq !== null ? currRcq.toFixed(2).replace('.', ',') : '—'}
                           </div>
                           {currClassif && (
@@ -1636,19 +1638,19 @@ export function PhysicalAssessmentTab({
                                   'direito',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                             />
                           </div>
                           <div>
-                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
-                              Esquerdo
+                            <span className="text-[10px] text-muted-foreground uppercase block mb-1">
+                              Esquerda
                             </span>
                             <Input
                               type="text"
                               inputMode="decimal"
                               placeholder="cm"
-                              value={getDraftValue('coxa_esquerdo', currE)}
-                              onChange={(e) => handleDraftChange('coxa_esquerdo', e.target.value)}
+                              value={getDraftValue('coxa_esquerda', currE)}
+                              onChange={(e) => handleDraftChange('coxa_esquerda', e.target.value)}
                               onBlur={(e) =>
                                 handleUpdateField(
                                   currentAssessment,
@@ -1657,8 +1659,8 @@ export function PhysicalAssessmentTab({
                                   'esquerdo',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
-                            />
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
+                            />{' '}
                           </div>
                         </div>
                       </div>
@@ -1695,20 +1697,20 @@ export function PhysicalAssessmentTab({
                                   'direito',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
                             />
                           </div>
                           <div>
-                            <span className="text-[10px] text-[#9CA5B8] uppercase block mb-1">
-                              Esquerdo
+                            <span className="text-[10px] text-muted-foreground uppercase block mb-1">
+                              Esquerda
                             </span>
                             <Input
                               type="text"
                               inputMode="decimal"
                               placeholder="cm"
-                              value={getDraftValue('panturrilha_esquerdo', currE)}
+                              value={getDraftValue('panturrilha_esquerda', currE)}
                               onChange={(e) =>
-                                handleDraftChange('panturrilha_esquerdo', e.target.value)
+                                handleDraftChange('panturrilha_esquerda', e.target.value)
                               }
                               onBlur={(e) =>
                                 handleUpdateField(
@@ -1718,8 +1720,8 @@ export function PhysicalAssessmentTab({
                                   'esquerdo',
                                 )
                               }
-                              className="bg-[#181C2E] border-[#252B3E] text-white text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation"
-                            />
+                              className="bg-card border-border text-foreground text-base h-12 text-center font-bold focus-visible:ring-primary w-full touch-manipulation shadow-sm"
+                            />{' '}
                           </div>
                         </div>
                       </div>
@@ -1745,14 +1747,14 @@ export function PhysicalAssessmentTab({
 
           {/* TABELA DE AVALIAÇÃO FÍSICA: UMA COLUNA POR VEZ + COLUNA ANTERIOR (COMPARATIVO) */}
           <div
-            className={`${mobileViewTab === 'table' ? 'block' : 'hidden sm:block'} overflow-x-auto rounded-xl border border-[#252B3E] bg-[#121522] shadow-inner max-w-full relative scroll-smooth`}
+            className={`${mobileViewTab === 'table' ? 'block' : 'hidden sm:block'} overflow-x-auto rounded-xl border border-border bg-card shadow-sm max-w-full relative scroll-smooth`}
           >
             <table className="w-full text-xs text-left border-collapse min-w-[460px] sm:min-w-[620px]">
               {/* CABEÇALHO */}
               <thead>
                 {/* Linha 1: Títulos das colunas */}
-                <tr className="bg-[#1A2138] border-b border-[#252B3E]">
-                  <th className="p-2 sm:p-3 font-bold text-white uppercase tracking-wider w-36 sm:w-64 sticky left-0 bg-[#1A2138] z-20 border-r border-[#252B3E]">
+                <tr className="bg-slate-100 border-b border-border">
+                  <th className="p-2 sm:p-3 font-bold text-foreground uppercase tracking-wider w-36 sm:w-64 sticky left-0 bg-slate-100 z-20 border-r border-border">
                     PARÂMETRO / MEDIDA
                   </th>
 
@@ -1760,16 +1762,16 @@ export function PhysicalAssessmentTab({
                   {previousAssessment && (
                     <th
                       colSpan={2}
-                      className="p-2.5 text-center font-bold text-white border-r border-[#252B3E] bg-[#0E111B] w-48 sm:w-56"
+                      className="p-2.5 text-center font-bold text-foreground border-r border-border bg-slate-50 w-48 sm:w-56"
                     >
                       <div className="flex flex-col items-center justify-center gap-0.5">
-                        <span className="text-[10px] uppercase tracking-wider text-secondary font-black">
+                        <span className="text-[10px] uppercase tracking-wider text-primary font-black">
                           ANTERIOR
                         </span>
-                        <span className="text-xs font-mono text-[#C5CEE0]">
+                        <span className="text-xs font-mono text-muted-foreground font-semibold">
                           {previousDateFormatted}
                         </span>
-                        <span className="text-[10px] text-[#8A8F98] font-normal">
+                        <span className="text-[10px] text-muted-foreground font-normal">
                           (somente leitura)
                         </span>
                       </div>
@@ -1779,7 +1781,7 @@ export function PhysicalAssessmentTab({
                   {/* Coluna da Avaliação Atual (Edição Ativa) */}
                   <th
                     colSpan={2}
-                    className="p-2.5 text-center font-bold text-white border-r border-[#252B3E] bg-[#181C2E] min-w-[240px]"
+                    className="p-2.5 text-center font-bold text-foreground border-r border-border bg-white min-w-[240px]"
                   >
                     <div className="flex items-center justify-between gap-1 px-1">
                       <span className="text-[11px] text-primary font-bold">DATA ATUAL:</span>
@@ -1787,20 +1789,20 @@ export function PhysicalAssessmentTab({
                         type="date"
                         value={extractDateInputVal(currentAssessment.date)}
                         onChange={(e) => handleUpdateDate(currentAssessment, e.target.value)}
-                        className="bg-[#121522] border border-[#252B3E] text-white text-xs px-2 py-0.5 rounded font-mono"
+                        className="bg-card border border-border text-foreground text-xs px-2 py-0.5 rounded font-mono shadow-sm"
                         title="Clique para alterar a data desta avaliação"
                       />
                     </div>
                     {/* Seletor de sexo específico para esta avaliação */}
-                    <div className="flex items-center justify-center gap-2 pt-1 text-[10px] text-[#9CA5B8]">
+                    <div className="flex items-center justify-center gap-2 pt-1 text-[10px] text-muted-foreground">
                       <span>Sexo:</span>
                       <button
                         type="button"
                         onClick={() => handleUpdateSex(currentAssessment, 'F')}
                         className={`px-1.5 py-0.5 rounded ${
                           currentAssessment.sex === 'F' || !currentAssessment.sex
-                            ? 'bg-pink-500/20 text-pink-300 font-bold border border-pink-500/40'
-                            : 'hover:text-white'
+                            ? 'bg-pink-100 text-pink-700 font-bold border border-pink-300'
+                            : 'hover:text-foreground'
                         }`}
                       >
                         Fem (F)
@@ -1810,8 +1812,8 @@ export function PhysicalAssessmentTab({
                         onClick={() => handleUpdateSex(currentAssessment, 'M')}
                         className={`px-1.5 py-0.5 rounded ${
                           currentAssessment.sex === 'M'
-                            ? 'bg-sky-500/20 text-sky-300 font-bold border border-sky-500/40'
-                            : 'hover:text-white'
+                            ? 'bg-sky-100 text-sky-700 font-bold border border-sky-300'
+                            : 'hover:text-foreground'
                         }`}
                       >
                         Masc (M)
@@ -1821,42 +1823,42 @@ export function PhysicalAssessmentTab({
                 </tr>
 
                 {/* Linha 2: Subcolunas DIREITO / ESQUERDO (apenas na perimetria, o cabeçalho mostra orientação) */}
-                <tr className="bg-[#141828] border-b border-[#252B3E] text-[11px] text-[#9CA5B8]">
-                  <th className="p-2 font-semibold text-white sticky left-0 bg-[#141828] z-20 border-r border-[#252B3E] w-36 sm:w-64">
+                <tr className="bg-slate-50 border-b border-border text-[11px] text-muted-foreground">
+                  <th className="p-2 font-semibold text-foreground sticky left-0 bg-slate-50 z-20 border-r border-border w-36 sm:w-64">
                     SUBDIVISÃO BILATERAL
                   </th>
 
                   {/* Subcolunas da Anterior se houver */}
                   {previousAssessment && (
                     <>
-                      <th className="p-2 text-center font-semibold text-[#8A8F98] border-r border-[#252B3E]/60 w-24 sm:w-28 bg-[#0E111B]">
+                      <th className="p-2 text-center font-semibold text-muted-foreground border-r border-border w-24 sm:w-28 bg-slate-50/70">
                         DIREITO
                       </th>
-                      <th className="p-2 text-center font-semibold text-[#8A8F98] border-r border-[#252B3E] w-24 sm:w-28 bg-[#0E111B]">
+                      <th className="p-2 text-center font-semibold text-muted-foreground border-r border-border w-24 sm:w-28 bg-slate-50/70">
                         ESQUERDO
                       </th>
                     </>
                   )}
 
                   {/* Subcolunas da Atual */}
-                  <th className="p-2 text-center font-semibold text-primary border-r border-[#252B3E]/60 w-28 sm:w-32 bg-[#15192A]">
+                  <th className="p-2 text-center font-semibold text-primary border-r border-border w-28 sm:w-32 bg-white">
                     DIREITO
                   </th>
-                  <th className="p-2 text-center font-semibold text-primary border-r border-[#252B3E] w-28 sm:w-32 bg-[#15192A]">
+                  <th className="p-2 text-center font-semibold text-primary border-r border-border w-28 sm:w-32 bg-white">
                     ESQUERDO
                   </th>
                 </tr>
               </thead>
 
               {/* CORPO DA TABELA */}
-              <tbody className="divide-y divide-[#252B3E] text-white">
+              <tbody className="divide-y divide-border text-foreground">
                 {/* ========================================================= */}
                 {/* SEÇÃO 1: COMPOSIÇÃO CORPORAL */}
                 {/* ========================================================= */}
                 <tr className="bg-primary/10 border-b border-primary/20">
                   <td
                     colSpan={1 + (previousAssessment ? 2 : 0) + 2}
-                    className="p-2 text-xs font-bold text-secondary uppercase tracking-wider sticky left-0"
+                    className="p-2 text-xs font-bold text-primary uppercase tracking-wider sticky left-0 bg-primary/10"
                   >
                     1. Composição Corporal (Bioimpedância)
                   </td>
@@ -1867,11 +1869,11 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.peso ?? null
                   const prev = previousAssessment?.data?.peso ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">
-                            PESO (kg) <ArrowDown className="w-3 h-3 text-[#9CA5B8]" />
+                            PESO (kg) <ArrowDown className="w-3 h-3 text-muted-foreground" />
                           </span>
                         </div>
                       </td>
@@ -1882,7 +1884,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -1893,7 +1895,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'peso', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -1907,11 +1909,11 @@ export function PhysicalAssessmentTab({
                   const currClassif = classifyImc(curr)
                   const prevClassif = classifyImc(prev)
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-muted/20">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">
-                            IMC (kg/m²) <ArrowDown className="w-3 h-3 text-[#9CA5B8]" />
+                            IMC (kg/m²) <ArrowDown className="w-3 h-3 text-muted-foreground" />
                           </span>
                         </div>
                       </td>
@@ -1923,7 +1925,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
@@ -1935,7 +1937,7 @@ export function PhysicalAssessmentTab({
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'imc', e.target.value)
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-bold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                            className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-bold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -1953,8 +1955,8 @@ export function PhysicalAssessmentTab({
                   const currClassif = classifyBodyFat(curr, currSex, studentAge)
                   const prevClassif = classifyBodyFat(prev, prevSex, studentAge)
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">% GORDURA (↓)</span>
                         </div>
@@ -1967,7 +1969,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
@@ -1979,7 +1981,7 @@ export function PhysicalAssessmentTab({
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'gordura', e.target.value)
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                            className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -1997,11 +1999,11 @@ export function PhysicalAssessmentTab({
                   const currClassif = classifySkeletalMuscle(curr, currSex, studentAge)
                   const prevClassif = classifySkeletalMuscle(prev, prevSex, studentAge)
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-rose-950/15">
-                      <td className="p-2.5 font-black text-rose-400 sticky left-0 bg-[#14121A] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-rose-50/40">
+                      <td className="p-2.5 font-bold text-rose-700 sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1 font-bold">% MÚSCULOS (↑)</span>
-                          <span className="text-[10px] text-rose-300 font-normal hidden sm:inline">
+                          <span className="text-[10px] text-rose-600 font-normal hidden sm:inline">
                             (maior melhor)
                           </span>
                         </div>
@@ -2014,7 +2016,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center bg-rose-950/10 min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center bg-rose-50/20 min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
@@ -2026,7 +2028,7 @@ export function PhysicalAssessmentTab({
                             onBlur={(e) =>
                               handleUpdateField(currentAssessment, 'musculos', e.target.value)
                             }
-                            className="bg-[#181C2E] border-rose-900/60 text-white text-xs sm:text-sm h-11 text-center font-bold focus-visible:ring-rose-500 mx-auto max-w-[140px] cursor-text touch-manipulation"
+                            className="bg-card border-rose-300 text-foreground text-xs sm:text-sm h-11 text-center font-bold focus-visible:ring-rose-500 mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -2040,11 +2042,11 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.mr ?? null
                   const prev = previousAssessment?.data?.mr ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">
-                            MR (↓) <span className="text-[10px] text-[#9CA5B8]">(kcal)</span>
+                            MR (↓) <span className="text-[10px] text-muted-foreground">(kcal)</span>
                           </span>
                         </div>
                       </td>
@@ -2055,7 +2057,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -2064,7 +2066,7 @@ export function PhysicalAssessmentTab({
                           value={getDraftValue('mr', curr)}
                           onChange={(e) => handleDraftChange('mr', e.target.value)}
                           onBlur={(e) => handleUpdateField(currentAssessment, 'mr', e.target.value)}
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2076,8 +2078,8 @@ export function PhysicalAssessmentTab({
                   const curr = currentAssessment.data?.idade_biologica ?? null
                   const prev = previousAssessment?.data?.idade_biologica ?? null
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors bg-[#141828]/50">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors bg-muted/20">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">IDADE BIOLÓGICA (↓)</span>
                         </div>
@@ -2089,7 +2091,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <Input
                           type="text"
@@ -2100,7 +2102,7 @@ export function PhysicalAssessmentTab({
                           onBlur={(e) =>
                             handleUpdateField(currentAssessment, 'idade_biologica', e.target.value)
                           }
-                          className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                          className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                         />
                       </td>
                     </tr>
@@ -2114,8 +2116,8 @@ export function PhysicalAssessmentTab({
                   const currClassif = classifyVisceralFat(curr)
                   const prevClassif = classifyVisceralFat(prev)
                   return (
-                    <tr className="hover:bg-[#1A2035] transition-colors">
-                      <td className="p-2.5 font-bold text-white sticky left-0 bg-[#121522] z-10 border-r border-[#252B3E] w-36 sm:w-64">
+                    <tr className="hover:bg-muted/40 transition-colors">
+                      <td className="p-2.5 font-bold text-foreground sticky left-0 bg-slate-50 z-10 border-r border-border w-36 sm:w-64">
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1">GORDURA VISCERAL (↓)</span>
                         </div>
@@ -2128,7 +2130,7 @@ export function PhysicalAssessmentTab({
                       {/* Coluna Atual (Editável) */}
                       <td
                         colSpan={2}
-                        className="py-2.5 px-2 sm:px-3 border-r border-[#252B3E] text-center min-h-[44px]"
+                        className="py-2.5 px-2 sm:px-3 border-r border-border text-center min-h-[44px]"
                       >
                         <div className="flex flex-col items-center justify-center gap-1">
                           <Input
@@ -2144,7 +2146,7 @@ export function PhysicalAssessmentTab({
                                 e.target.value,
                               )
                             }
-                            className="bg-[#181C2E] border-[#252B3E] text-white text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation"
+                            className="bg-card border-border text-foreground text-xs sm:text-sm h-11 text-center font-semibold focus-visible:ring-primary mx-auto max-w-[140px] cursor-text touch-manipulation shadow-sm"
                           />
                           {renderBadge(currClassif)}
                         </div>
@@ -2159,7 +2161,7 @@ export function PhysicalAssessmentTab({
                 <tr className="bg-primary/10 border-b border-primary/20">
                   <td
                     colSpan={1 + (previousAssessment ? 2 : 0) + 2}
-                    className="p-2 text-xs font-bold text-secondary uppercase tracking-wider sticky left-0"
+                    className="p-2 text-xs font-bold text-primary uppercase tracking-wider sticky left-0 bg-primary/10"
                   >
                     2. Perimetria Corporal (cm)
                   </td>

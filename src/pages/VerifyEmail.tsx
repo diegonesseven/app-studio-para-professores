@@ -36,27 +36,29 @@ export default function VerifyEmail() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative">
-      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up text-center">
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl relative z-10 animate-fade-in-up text-center">
         <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto mb-4">
           <Dumbbell className="w-7 h-7 text-white stroke-[2.5]" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Verificação de E-mail</h1>
-        <p className="text-sm text-[#8A8F98] mb-6">Studio Bru Oliveira</p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">
+          Verificação de E-mail
+        </h1>
+        <p className="text-sm text-muted-foreground mb-6">Studio Bru Oliveira</p>
 
         {status === 'loading' && (
           <div className="py-8 flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
-            <p className="text-sm text-[#8A8F98]">Validando sua conta...</p>
+            <p className="text-sm text-muted-foreground">Validando sua conta...</p>
           </div>
         )}
 
         {status === 'success' && (
           <div className="py-4 space-y-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h2 className="text-lg font-semibold text-white">E-mail verificado!</h2>
-            <p className="text-sm text-[#8A8F98]">
+            <h2 className="text-lg font-semibold text-foreground">E-mail verificado!</h2>
+            <p className="text-sm text-muted-foreground">
               Sua conta foi confirmada com sucesso. Você já pode fazer login na plataforma.
             </p>
             <div className="pt-2">
@@ -72,14 +74,14 @@ export default function VerifyEmail() {
 
         {status === 'error' && (
           <div className="py-4 space-y-4">
-            <div className="w-12 h-12 rounded-full bg-red-950/60 border border-red-600/40 text-red-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-red-50 border border-red-200 text-red-600 flex items-center justify-center mx-auto">
               <AlertCircle className="w-6 h-6" />
             </div>
-            <h2 className="text-lg font-semibold text-white">Falha na verificação</h2>
-            <p className="text-sm text-red-300">{errorMessage}</p>
+            <h2 className="text-lg font-semibold text-foreground">Falha na verificação</h2>
+            <p className="text-sm text-red-600">{errorMessage}</p>
             <div className="pt-2">
               <Link to="/login">
-                <Button variant="outline" className="w-full border-[#2E2E2E] text-white">
+                <Button variant="outline" className="w-full border-border text-foreground">
                   Voltar ao Login
                 </Button>
               </Link>

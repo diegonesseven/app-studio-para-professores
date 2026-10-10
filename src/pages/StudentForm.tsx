@@ -482,7 +482,9 @@ export default function StudentForm() {
   }
 
   if (loading) {
-    return <div className="py-20 text-center text-[#8A8F98]">Carregando dados do aluno...</div>
+    return (
+      <div className="py-20 text-center text-muted-foreground">Carregando dados do aluno...</div>
+    )
   }
 
   return (
@@ -490,7 +492,7 @@ export default function StudentForm() {
       <div className="flex items-center justify-between">
         <Link
           to="/alunos"
-          className="inline-flex items-center gap-1.5 text-sm text-[#8A8F98] hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar para Alunos
         </Link>
@@ -499,7 +501,7 @@ export default function StudentForm() {
             type="button"
             variant="ghost"
             onClick={() => setDeleteDialogOpen(true)}
-            className="text-red-400 hover:text-red-300 hover:bg-red-950/30 text-xs h-9"
+            className="text-red-500 hover:text-red-600 hover:bg-red-50 text-xs h-9"
           >
             <Trash2 className="w-4 h-4 mr-1.5" /> Excluir Cadastro
           </Button>
@@ -507,14 +509,14 @@ export default function StudentForm() {
       </div>
 
       {/* ABAS DO CADASTRO DO ALUNO: Dados / Anamnese vs Avaliação Física */}
-      <div className="flex items-center gap-2 border-b border-[#252B3E] pb-2">
+      <div className="flex items-center gap-2 border-b border-border pb-2">
         <button
           type="button"
           onClick={() => setActiveMainTab('cadastro')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeMainTab === 'cadastro'
-              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-              : 'bg-[#181C2E] text-[#9CA5B8] hover:text-white border border-[#252B3E]'
+              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+              : 'bg-card text-muted-foreground hover:text-foreground border border-border'
           }`}
         >
           <User className="w-4 h-4" />
@@ -526,13 +528,13 @@ export default function StudentForm() {
           onClick={() => setActiveMainTab('avaliacao')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all ${
             activeMainTab === 'avaliacao'
-              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-              : 'bg-[#181C2E] text-[#9CA5B8] hover:text-white border border-[#252B3E]'
+              ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
+              : 'bg-card text-muted-foreground hover:text-foreground border border-border'
           }`}
         >
           <Activity className="w-4 h-4" />
           <span>Avaliação Física</span>
-          <span className="text-[10px] bg-secondary/30 text-secondary border border-secondary/40 font-black px-1.5 py-0.2 rounded uppercase">
+          <span className="text-[10px] bg-primary/10 text-primary border border-primary/20 font-black px-1.5 py-0.2 rounded uppercase">
             Novo
           </span>
         </button>
@@ -543,10 +545,10 @@ export default function StudentForm() {
         (isEditing && id ? (
           <PhysicalAssessmentTab studentId={id} studentName={name} studentBirthdate={birthdate} />
         ) : (
-          <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl p-8 text-center space-y-3">
+          <div className="bg-card border border-border rounded-2xl p-8 text-center space-y-3 shadow-sm">
             <Activity className="w-12 h-12 text-primary/40 mx-auto" />
-            <h3 className="text-base font-bold text-white">Salve o aluno primeiro</h3>
-            <p className="text-xs text-[#9CA5B8] max-w-sm mx-auto">
+            <h3 className="text-base font-bold text-foreground">Salve o aluno primeiro</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
               Preencha o nome do aluno na aba "Dados & Anamnese" e clique em "Salvar Aluno" para
               habilitar o registro de avaliações físicas e bioimpedância.
             </p>
@@ -564,16 +566,16 @@ export default function StudentForm() {
       {activeMainTab === 'cadastro' && (
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Bloco 1: Dados Básicos */}
-          <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl p-6 sm:p-8 shadow-xl space-y-5">
-            <div className="flex items-center gap-3 pb-4 border-b border-[#252B3E]">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 text-secondary flex items-center justify-center">
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm space-y-5">
+            <div className="flex items-center gap-3 pb-4 border-b border-border">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
                 <User className="w-5 h-5" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">
+                <h2 className="text-lg font-bold text-foreground">
                   {isEditing ? 'Editar Aluno' : 'Cadastrar Novo Aluno'}
                 </h2>
-                <p className="text-xs text-[#9CA5B8]">
+                <p className="text-xs text-muted-foreground">
                   Informações de contato e dados pessoais básicos
                 </p>
               </div>
@@ -582,7 +584,7 @@ export default function StudentForm() {
             {/* Foto do Aluno */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 pb-2">
               <div className="relative group shrink-0">
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border-2 border-primary/40 flex items-center justify-center overflow-hidden shadow-inner">
+                <div className="w-24 h-24 rounded-2xl bg-muted border-2 border-primary/40 flex items-center justify-center overflow-hidden shadow-inner">
                   {photoPreview ? (
                     <img
                       src={photoPreview}
@@ -617,10 +619,10 @@ export default function StudentForm() {
 
               <div className="flex-1 text-center sm:text-left space-y-1.5 min-w-0">
                 <div className="flex items-center justify-center sm:justify-start gap-2">
-                  <span className="text-sm font-semibold text-white">Foto do Aluno</span>
-                  <span className="text-[11px] text-[#8A8F98]">(opcional, máx 5MB)</span>
+                  <span className="text-sm font-semibold text-foreground">Foto do Aluno</span>
+                  <span className="text-[11px] text-muted-foreground">(opcional, máx 5MB)</span>
                 </div>
-                <p className="text-xs text-[#9CA5B8]">
+                <p className="text-xs text-muted-foreground">
                   Aparece no cabeçalho dos treinos e na lista de alunos para identificação visual
                   imediata.
                 </p>
@@ -628,7 +630,7 @@ export default function StudentForm() {
                   <button
                     type="button"
                     onClick={() => setPhotoSourceOpen(true)}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-[#252B3E] hover:bg-[#30374E] text-white border border-[#3A4363] cursor-pointer transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 text-foreground border border-border cursor-pointer transition-colors"
                   >
                     <Camera className="w-3.5 h-3.5 text-primary" />
                     {photoPreview ? 'Trocar foto' : 'Selecionar foto'}
@@ -637,7 +639,7 @@ export default function StudentForm() {
                     <button
                       type="button"
                       onClick={handleRemovePhoto}
-                      className="inline-flex items-center gap-1 text-xs text-red-400 hover:text-red-300 px-2 py-1.5 rounded-lg hover:bg-red-950/30 transition-colors"
+                      className="inline-flex items-center gap-1 text-xs text-red-500 hover:text-red-600 px-2 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
                     >
                       <X className="w-3.5 h-3.5" /> Remover
                     </button>
@@ -647,7 +649,7 @@ export default function StudentForm() {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="name" className="text-sm text-white font-medium">
+              <Label htmlFor="name" className="text-sm text-foreground font-medium">
                 Nome Completo *
               </Label>
               <Input
@@ -656,13 +658,13 @@ export default function StudentForm() {
                 placeholder="Ex: Mariana Costa"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
+                className="bg-muted/40 border-border text-foreground placeholder:text-muted-foreground h-12 focus-visible:ring-primary"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="birthdate" className="text-sm text-white font-medium">
+                <Label htmlFor="birthdate" className="text-sm text-foreground font-medium">
                   Data de Nascimento
                 </Label>
                 <div className="relative">
@@ -671,14 +673,14 @@ export default function StudentForm() {
                     type="date"
                     value={birthdate}
                     onChange={(e) => setBirthdate(e.target.value)}
-                    className="bg-[#121212] border-[#2E2E2E] text-white h-12 focus-visible:ring-primary"
+                    className="bg-muted/40 border-border text-foreground h-12 focus-visible:ring-primary"
                   />
-                  <Calendar className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98] pointer-events-none" />
+                  <Calendar className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="phone" className="text-sm text-white font-medium">
+                <Label htmlFor="phone" className="text-sm text-foreground font-medium">
                   Telefone de Contato / WhatsApp
                 </Label>
                 <div className="relative">
@@ -687,22 +689,22 @@ export default function StudentForm() {
                     placeholder="(11) 98765-4321"
                     value={phone}
                     onChange={(e) => handlePhoneChange(e.target.value)}
-                    className={`bg-[#121212] ${
+                    className={`bg-muted/40 ${
                       phoneError
                         ? 'border-red-500 focus-visible:ring-red-500'
-                        : 'border-[#2E2E2E] focus-visible:ring-primary'
-                    } text-white placeholder:text-[#8A8F98] h-12 pr-10`}
+                        : 'border-border focus-visible:ring-primary'
+                    } text-foreground placeholder:text-muted-foreground h-12 pr-10`}
                   />
-                  <Phone className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98] pointer-events-none" />
+                  <Phone className="w-4 h-4 absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 </div>
                 {phoneError && (
-                  <p className="text-xs text-red-400 font-medium mt-1">{phoneError}</p>
+                  <p className="text-xs text-red-500 font-medium mt-1">{phoneError}</p>
                 )}
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="obs" className="text-sm text-white font-medium">
+              <Label htmlFor="obs" className="text-sm text-foreground font-medium">
                 Observações Gerais
               </Label>
               <Textarea
@@ -711,27 +713,27 @@ export default function StudentForm() {
                 placeholder="Ex: Dias e horários de preferência, metas pessoais, profissão..."
                 value={generalObservations}
                 onChange={(e) => setGeneralObservations(e.target.value)}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-primary"
+                className="bg-muted/40 border-border text-foreground placeholder:text-muted-foreground resize-none focus-visible:ring-primary"
               />
             </div>
           </div>
 
           {/* Bloco 2: Histórico de Treinos e Professor (Exibido na edição do aluno) */}
           {isEditing && (
-            <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl p-6 sm:p-8 space-y-5">
-              <div className="flex items-center justify-between pb-4 border-b border-[#252B3E] gap-2 flex-wrap">
+            <div className="bg-card border border-border rounded-2xl shadow-sm p-6 sm:p-8 space-y-5">
+              <div className="flex items-center justify-between pb-4 border-b border-border gap-2 flex-wrap">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-secondary/20 border border-secondary/40 text-secondary flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
                     <History className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
                       Histórico de Treinos com Professor
-                      <span className="text-xs bg-primary/30 text-white font-semibold px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
                         {studentHistory.length} sessões
                       </span>
                     </h3>
-                    <p className="text-xs text-[#9CA5B8]">
+                    <p className="text-xs text-muted-foreground">
                       Séries treinadas (A–E), dias, horários e professores responsáveis que
                       acompanharam o aluno
                     </p>
@@ -785,10 +787,10 @@ export default function StudentForm() {
                         })
                       }
                     }}
-                    className="border-secondary/40 bg-secondary/15 hover:bg-secondary/25 text-white font-bold text-xs h-9 px-3 flex items-center gap-1.5"
+                    className="border-border bg-card hover:bg-muted text-foreground font-bold text-xs h-9 px-3 flex items-center gap-1.5"
                     title="Exportar / Compartilhar ficha deste aluno em PDF"
                   >
-                    <Share2 className="w-3.5 h-3.5 text-secondary" /> Exportar Ficha (PDF)
+                    <Share2 className="w-3.5 h-3.5 text-primary" /> Exportar Ficha (PDF)
                   </Button>
 
                   <Link to={`/treino?students=${id}`}>
@@ -804,9 +806,11 @@ export default function StudentForm() {
               </div>
 
               {studentHistory.length === 0 ? (
-                <div className="py-8 text-center text-xs text-[#9CA5B8] bg-[#121522] rounded-xl border border-[#252B3E] p-6 space-y-1">
-                  <History className="w-8 h-8 text-[#9CA5B8] opacity-40 mx-auto mb-2" />
-                  <p className="font-semibold text-white text-sm">Nenhum treino registrado ainda</p>
+                <div className="py-8 text-center text-xs text-muted-foreground bg-muted/40 rounded-xl border border-border p-6 space-y-1">
+                  <History className="w-8 h-8 text-muted-foreground opacity-40 mx-auto mb-2" />
+                  <p className="font-semibold text-foreground text-sm">
+                    Nenhum treino registrado ainda
+                  </p>
                   <p>
                     Assim que o professor iniciar as séries na Tela de Treino, o histórico detalhado
                     aparecerá aqui.
@@ -839,28 +843,28 @@ export default function StudentForm() {
                     return (
                       <div
                         key={sess.id}
-                        className="bg-[#121522] border border-[#252B3E] hover:border-primary/50 rounded-xl p-3.5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                        className="bg-card border border-border hover:border-primary/50 rounded-xl p-3.5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
                       >
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/40 text-primary font-black text-sm flex items-center justify-center shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary font-black text-sm flex items-center justify-center shrink-0">
                             {sess.series_completed}
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-bold text-sm text-white">
+                              <span className="font-bold text-sm text-foreground">
                                 Série {sess.series_completed}
                               </span>
                               <span
                                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                                   sess.is_completed
-                                    ? 'bg-secondary/20 text-secondary border border-secondary/40'
-                                    : 'bg-primary/20 text-primary border border-primary/30'
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-primary/10 text-primary border border-primary/20'
                                 }`}
                               >
                                 {sess.is_completed ? 'Concluída' : 'Em andamento'}
                               </span>
                             </div>
-                            <div className="flex items-center gap-3 text-xs text-[#9CA5B8] mt-1 flex-wrap">
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 flex-wrap">
                               <span className="flex items-center gap-1 capitalize">
                                 <Calendar className="w-3.5 h-3.5" /> {dateFormatted}
                               </span>
@@ -871,7 +875,7 @@ export default function StudentForm() {
                                 <Dumbbell className="w-3.5 h-3.5" /> {countDone}/{totalExercises}{' '}
                                 exercícios
                               </span>
-                              <span className="flex items-center gap-1 font-semibold text-secondary">
+                              <span className="flex items-center gap-1 font-semibold text-primary">
                                 <GraduationCap className="w-3.5 h-3.5" /> Prof. {teacherName}
                               </span>
                             </div>
@@ -884,9 +888,9 @@ export default function StudentForm() {
                             variant="outline"
                             size="sm"
                             onClick={() => setSelectedHistorySession(sess)}
-                            className="border-[#2E2E2E] bg-[#171717] hover:bg-[#252525] text-white text-xs h-8 px-2.5 flex items-center gap-1"
+                            className="border-border bg-card hover:bg-muted text-foreground text-xs h-8 px-2.5 flex items-center gap-1"
                           >
-                            <Eye className="w-3.5 h-3.5 text-secondary" /> Ver Exercícios
+                            <Eye className="w-3.5 h-3.5 text-primary" /> Ver Exercícios
                           </Button>
                         </div>
                       </div>
@@ -899,20 +903,20 @@ export default function StudentForm() {
 
           {/* Bloco 3: Histórico de Fichas do Aluno (Item 4) */}
           {isEditing && (
-            <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl p-6 sm:p-8 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-[#252B3E] gap-2 flex-wrap">
+            <div className="bg-card border border-border rounded-2xl shadow-sm p-6 sm:p-8 space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-border gap-2 flex-wrap">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
                     <Layers className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
                       Fichas Anteriores e Histórico
-                      <span className="text-xs bg-primary/30 text-white font-semibold px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-primary/10 text-primary font-semibold px-2 py-0.5 rounded-full">
                         {allStudentSheets.length} ficha(s)
                       </span>
                     </h3>
-                    <p className="text-xs text-[#9CA5B8]">
+                    <p className="text-xs text-muted-foreground">
                       Todas as fichas criadas para este aluno ficam arquivadas aqui para consulta
                     </p>
                   </div>
@@ -930,7 +934,7 @@ export default function StudentForm() {
               </div>
 
               {allStudentSheets.length === 0 ? (
-                <div className="py-6 text-center text-xs text-[#9CA5B8] bg-[#121522] rounded-xl border border-[#252B3E] p-4">
+                <div className="py-6 text-center text-xs text-muted-foreground bg-muted/40 rounded-xl border border-border p-4">
                   Nenhuma ficha montada para este aluno ainda.
                 </div>
               ) : (
@@ -952,8 +956,8 @@ export default function StudentForm() {
                         key={sh.id}
                         className={`p-4 rounded-xl border transition-all flex flex-col justify-between gap-3 ${
                           isCurrentActive
-                            ? 'bg-[#1A2138] border-primary/60 shadow-md ring-1 ring-primary/40'
-                            : 'bg-[#121522] border-[#252B3E] hover:border-[#384260]'
+                            ? 'bg-primary/5 border-primary shadow-sm ring-1 ring-primary/30'
+                            : 'bg-card border-border hover:border-primary/50'
                         }`}
                       >
                         <div className="space-y-1.5">
@@ -961,20 +965,20 @@ export default function StudentForm() {
                             <span
                               className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
                                 isCurrentActive
-                                  ? 'bg-secondary/20 text-secondary border border-secondary/40'
-                                  : 'bg-[#252B3E] text-[#9CA5B8]'
+                                  ? 'bg-primary/10 text-primary border border-primary/20'
+                                  : 'bg-muted text-muted-foreground'
                               }`}
                             >
                               {isCurrentActive ? 'Ficha Atual Ativa' : 'Ficha Anterior / Arquivada'}
                             </span>
-                            <span className="text-[11px] text-[#9CA5B8] flex items-center gap-1">
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                               <Calendar className="w-3 h-3 text-primary" /> {dateStr}
                             </span>
                           </div>
-                          <h4 className="font-bold text-white text-sm truncate">
+                          <h4 className="font-bold text-foreground text-sm truncate">
                             {sh.title || `Ficha de Treino - ${name}`}
                           </h4>
-                          <p className="text-xs text-[#9CA5B8]">
+                          <p className="text-xs text-muted-foreground">
                             {totalExercises} exercícios no total • Séries{' '}
                             {Object.keys(sh.series_data || {})
                               .filter((k) => (sh.series_data as any)?.[k]?.length > 0)
@@ -982,15 +986,15 @@ export default function StudentForm() {
                           </p>
                         </div>
 
-                        <div className="flex items-center gap-2 pt-2 border-t border-[#252B3E]">
+                        <div className="flex items-center gap-2 pt-2 border-t border-border">
                           <Button
                             type="button"
                             variant="outline"
                             size="sm"
                             onClick={() => setViewingArchivedSheet(sh)}
-                            className="flex-1 border-[#2E2E2E] bg-[#171717] hover:bg-[#252525] text-white text-xs h-8 flex items-center justify-center gap-1.5"
+                            className="flex-1 border-border bg-card hover:bg-muted text-foreground text-xs h-8 flex items-center justify-center gap-1.5"
                           >
-                            <Eye className="w-3.5 h-3.5 text-secondary" /> Visualizar Ficha
+                            <Eye className="w-3.5 h-3.5 text-primary" /> Visualizar Ficha
                           </Button>
 
                           <Link to={`/fichas/${sh.id}`} className="shrink-0">
@@ -998,7 +1002,7 @@ export default function StudentForm() {
                               type="button"
                               variant="outline"
                               size="sm"
-                              className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-white text-xs h-8 px-2.5"
+                              className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-foreground text-xs h-8 px-2.5"
                               title="Editar ficha"
                             >
                               Editar
@@ -1014,45 +1018,45 @@ export default function StudentForm() {
           )}
 
           {/* Bloco 4: Anamnese (Itens 5 e 6 - Modelo Exato Solicitado) */}
-          <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
             <button
               type="button"
               onClick={() => setAnamneseOpen(!anamneseOpen)}
-              className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-[#20263B] transition-colors"
+              className="w-full p-5 sm:p-6 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-400 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center">
                   <HeartPulse className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <h3 className="text-base font-bold text-foreground flex items-center gap-2">
                     Anamnese Completa do Aluno
-                    <span className="text-xs bg-[#252B3E] text-[#9CA5B8] font-normal px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-muted text-muted-foreground font-normal px-2 py-0.5 rounded-full border border-border">
                       Opcional
                     </span>
                   </h3>
-                  <p className="text-xs text-[#9CA5B8]">
+                  <p className="text-xs text-muted-foreground">
                     Histórico médico, fotos de laudos/evolução, restrições e questionário de saúde
                   </p>
                 </div>
               </div>
 
               {anamneseOpen ? (
-                <ChevronUp className="w-5 h-5 text-[#8A8F98]" />
+                <ChevronUp className="w-5 h-5 text-muted-foreground" />
               ) : (
-                <ChevronDown className="w-5 h-5 text-[#8A8F98]" />
+                <ChevronDown className="w-5 h-5 text-muted-foreground" />
               )}
             </button>
 
             {anamneseOpen && (
-              <div className="p-6 sm:p-8 pt-0 border-t border-[#252B3E] space-y-6 animate-fade-in">
+              <div className="p-6 sm:p-8 pt-0 border-t border-border space-y-6 animate-fade-in">
                 {/* CAMPO FIXO: Restrições médicas / Cuidado em aula (permanece intacto) */}
                 <div className="space-y-1.5 pt-4">
                   <Label
                     htmlFor="restr"
-                    className="text-sm text-amber-300 font-bold flex items-center gap-1.5"
+                    className="text-sm text-amber-700 font-bold flex items-center gap-1.5"
                   >
-                    <AlertCircle className="w-4 h-4 text-amber-400" /> Restrições médicas / Cuidado
+                    <AlertCircle className="w-4 h-4 text-amber-600" /> Restrições médicas / Cuidado
                     em aula
                   </Label>
                   <Textarea
@@ -1061,18 +1065,18 @@ export default function StudentForm() {
                     placeholder="Ex: Não pode correr, joelho sensível, hipertensão controlada..."
                     value={restrictions}
                     onChange={(e) => setRestrictions(e.target.value)}
-                    className="bg-[#121522] border-amber-900/60 text-white placeholder:text-[#8A8F98] resize-none focus-visible:ring-amber-500"
+                    className="bg-amber-50/50 border-amber-200 text-foreground placeholder:text-muted-foreground resize-none focus-visible:ring-amber-500"
                   />
                 </div>
 
                 {/* FOTOS NA ANAMNESE (Item 5) */}
-                <div className="space-y-3 p-4 rounded-xl bg-[#121522] border border-[#252B3E]">
+                <div className="space-y-3 p-4 rounded-xl bg-muted/30 border border-border">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <div>
-                      <Label className="text-sm text-white font-bold flex items-center gap-2">
+                      <Label className="text-sm text-foreground font-bold flex items-center gap-2">
                         <Camera className="w-4 h-4 text-primary" /> Fotos na Anamnese
                       </Label>
-                      <p className="text-xs text-[#9CA5B8]">
+                      <p className="text-xs text-muted-foreground">
                         Anexe laudos médicos entregues pelo aluno, fotos de postura ou evolução
                         antes/depois (máx 5MB cada)
                       </p>
@@ -1088,7 +1092,7 @@ export default function StudentForm() {
 
                   {/* Grid de Fotos Existentes e Novas */}
                   {existingAnamnesisPhotos.length === 0 && newPhotoFiles.length === 0 ? (
-                    <p className="text-xs text-[#8A8F98] italic py-2">
+                    <p className="text-xs text-muted-foreground italic py-2">
                       Nenhuma foto anexada à anamnese até o momento.
                     </p>
                   ) : (
@@ -1104,7 +1108,7 @@ export default function StudentForm() {
                         return (
                           <div
                             key={photoName}
-                            className="relative group rounded-xl overflow-hidden border border-[#252B3E] bg-black aspect-square"
+                            className="relative group rounded-xl overflow-hidden border border-border bg-black aspect-square"
                           >
                             <img
                               src={url}
@@ -1170,7 +1174,7 @@ export default function StudentForm() {
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="treinouPersonal"
-                      className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                      className="text-xs uppercase tracking-wider text-muted-foreground font-bold"
                     >
                       Já treinou com Personal antes?
                     </Label>
@@ -1179,7 +1183,7 @@ export default function StudentForm() {
                       placeholder="Ex: Sim, durante 6 meses em 2022..."
                       value={treinouPersonalAntes}
                       onChange={(e) => setTreinouPersonalAntes(e.target.value)}
-                      className="bg-[#121522] border-[#252B3E] text-white h-11"
+                      className="bg-muted/40 border-border text-foreground h-11"
                     />
                   </div>
 
@@ -1187,7 +1191,7 @@ export default function StudentForm() {
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="profissao"
-                      className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                      className="text-xs uppercase tracking-wider text-muted-foreground font-bold"
                     >
                       Profissão
                     </Label>
@@ -1196,13 +1200,13 @@ export default function StudentForm() {
                       placeholder="Ex: Arquiteta, Advogado, Desenvolvedor..."
                       value={profissao}
                       onChange={(e) => setProfissao(e.target.value)}
-                      className="bg-[#121522] border-[#252B3E] text-white h-11"
+                      className="bg-muted/40 border-border text-foreground h-11"
                     />
                   </div>
 
                   {/* 3. Objetivo */}
                   <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Objetivo:
                     </Label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1224,15 +1228,15 @@ export default function StudentForm() {
                             onClick={() => toggleObjetivo(item)}
                             className={`p-2.5 rounded-lg text-xs font-semibold border text-left flex items-center gap-2 transition-all ${
                               isSel
-                                ? 'bg-primary/20 border-primary text-secondary font-bold shadow-sm'
-                                : 'bg-[#121522] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                                ? 'bg-primary/10 border-primary text-primary font-bold shadow-sm'
+                                : 'bg-muted/30 border-border text-muted-foreground hover:text-foreground'
                             }`}
                           >
                             <span
                               className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
                                 isSel
                                   ? 'bg-primary border-primary text-primary-foreground'
-                                  : 'border-[#4A5578]'
+                                  : 'border-border'
                               }`}
                             >
                               {isSel && <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -1248,7 +1252,7 @@ export default function StudentForm() {
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="enfase"
-                      className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                      className="text-xs uppercase tracking-wider text-muted-foreground font-bold"
                     >
                       Você deseja dar ênfase em alguma musculatura? Qual?
                     </Label>
@@ -1257,17 +1261,17 @@ export default function StudentForm() {
                       placeholder="Ex: Glúteos e posteriores de coxa, dorsais..."
                       value={enfaseMusculatura}
                       onChange={(e) => setEnfaseMusculatura(e.target.value)}
-                      className="bg-[#121522] border-[#252B3E] text-white h-11"
+                      className="bg-muted/40 border-border text-foreground h-11"
                     />
                   </div>
 
                   {/* 5. Já praticou algum exercício físico? ( ) NÃO ( ) SIM. Quais? */}
-                  <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                  <div className="space-y-2 p-3.5 rounded-xl bg-muted/30 border border-border">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Já praticou algum exercício físico?
                     </Label>
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="praticouExercicio"
@@ -1278,7 +1282,7 @@ export default function StudentForm() {
                         />
                         <span>( ) NÃO</span>
                       </label>
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="praticouExercicio"
@@ -1295,7 +1299,7 @@ export default function StudentForm() {
                         placeholder="Quais exercícios já praticou? Ex: Musculação, natação, corrida..."
                         value={praticouExercicioQuais}
                         onChange={(e) => setPraticouExercicioQuais(e.target.value)}
-                        className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                        className="bg-card border-border text-foreground h-10 mt-1"
                       />
                     )}
                   </div>
@@ -1304,7 +1308,7 @@ export default function StudentForm() {
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="tempoSem"
-                      className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                      className="text-xs uppercase tracking-wider text-muted-foreground font-bold"
                     >
                       Há quanto tempo não pratica um exercício físico?
                     </Label>
@@ -1313,17 +1317,17 @@ export default function StudentForm() {
                       placeholder="Ex: Parado há 1 ano, nunca treinou regularmente..."
                       value={tempoSemPraticar}
                       onChange={(e) => setTempoSemPraticar(e.target.value)}
-                      className="bg-[#121522] border-[#252B3E] text-white h-11"
+                      className="bg-muted/40 border-border text-foreground h-11"
                     />
                   </div>
 
                   {/* 7. Possui alguma restrição à exercício físico? ( ) NÃO ( ) SIM. Quais? */}
-                  <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                  <div className="space-y-2 p-3.5 rounded-xl bg-muted/30 border border-border">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Possui alguma restrição à exercício físico?
                     </Label>
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="restricaoExercicio"
@@ -1334,7 +1338,7 @@ export default function StudentForm() {
                         />
                         <span>( ) NÃO</span>
                       </label>
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="restricaoExercicio"
@@ -1351,14 +1355,14 @@ export default function StudentForm() {
                         placeholder="Quais restrições? Ex: Cargas axiais na coluna, impactos..."
                         value={restricaoExercicioQuais}
                         onChange={(e) => setRestricaoExercicioQuais(e.target.value)}
-                        className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                        className="bg-card border-border text-foreground h-10 mt-1"
                       />
                     )}
                   </div>
 
                   {/* 8. Possui alguma doença? ( ) Não ( ) Diabetes ( ) Hipertensão ( ) Outros */}
-                  <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                  <div className="space-y-2 p-3.5 rounded-xl bg-muted/30 border border-border">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Possui alguma doença?
                     </Label>
                     <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
@@ -1373,9 +1377,9 @@ export default function StudentForm() {
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-2 transition-all ${
                               isSel
                                 ? isNao
-                                  ? 'bg-emerald-600/25 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-500/20'
-                                  : 'bg-primary/20 border-primary text-secondary font-bold'
-                                : 'bg-[#181C2E] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-bold shadow-sm'
+                                  : 'bg-primary/10 border-primary text-primary font-bold'
+                                : 'bg-card border-border text-muted-foreground hover:text-foreground'
                             }`}
                           >
                             <span
@@ -1384,7 +1388,7 @@ export default function StudentForm() {
                                   ? isNao
                                     ? 'bg-emerald-600 border-emerald-500 text-white'
                                     : 'bg-primary border-primary text-primary-foreground'
-                                  : 'border-[#4A5578]'
+                                  : 'border-border'
                               }`}
                             >
                               {isSel && <CheckCircle2 className="w-3 h-3" />}
@@ -1399,7 +1403,7 @@ export default function StudentForm() {
                         placeholder="Especifique outras doenças..."
                         value={doencasOutros}
                         onChange={(e) => setDoencasOutros(e.target.value)}
-                        className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                        className="bg-card border-border text-foreground h-10 mt-1"
                       />
                     )}
                   </div>
@@ -1408,7 +1412,7 @@ export default function StudentForm() {
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="lesao"
-                      className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold"
+                      className="text-xs uppercase tracking-wider text-muted-foreground font-bold"
                     >
                       Possui alguma lesão?
                     </Label>
@@ -1417,17 +1421,17 @@ export default function StudentForm() {
                       placeholder="Ex: Menisco no joelho direito, tendinopatia patelar..."
                       value={possuiLesao}
                       onChange={(e) => setPossuiLesao(e.target.value)}
-                      className="bg-[#121522] border-[#252B3E] text-white h-11"
+                      className="bg-muted/40 border-border text-foreground h-11"
                     />
                   </div>
 
                   {/* 10. Dores em alguma parte do corpo? ( ) NÃO ( ) SIM. Quais? */}
-                  <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                  <div className="space-y-2 p-3.5 rounded-xl bg-muted/30 border border-border">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Dores em alguma parte do corpo?
                     </Label>
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="doresCorpo"
@@ -1438,7 +1442,7 @@ export default function StudentForm() {
                         />
                         <span>( ) NÃO</span>
                       </label>
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="doresCorpo"
@@ -1455,18 +1459,18 @@ export default function StudentForm() {
                         placeholder="Quais partes do corpo? Ex: Lombar ao final do dia, ombro..."
                         value={doresCorpoQuais}
                         onChange={(e) => setDoresCorpoQuais(e.target.value)}
-                        className="bg-[#181C2E] border-[#252B3E] text-white h-10 mt-1"
+                        className="bg-card border-border text-foreground h-10 mt-1"
                       />
                     )}
                   </div>
 
                   {/* 11. Faz dieta? ( ) SIM ( ) NÃO */}
-                  <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                  <div className="space-y-2 p-3.5 rounded-xl bg-muted/30 border border-border">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Faz dieta?
                     </Label>
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="fazDieta"
@@ -1477,7 +1481,7 @@ export default function StudentForm() {
                         />
                         <span>( ) SIM</span>
                       </label>
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="fazDieta"
@@ -1492,12 +1496,12 @@ export default function StudentForm() {
                   </div>
 
                   {/* 12. Faz acompanhamento com nutricionista? ( ) SIM ( ) NÃO */}
-                  <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                  <div className="space-y-2 p-3.5 rounded-xl bg-muted/30 border border-border">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Faz acompanhamento com nutricionista?
                     </Label>
                     <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="fazNutricionista"
@@ -1508,7 +1512,7 @@ export default function StudentForm() {
                         />
                         <span>( ) SIM</span>
                       </label>
-                      <label className="flex items-center gap-2 text-xs text-white cursor-pointer">
+                      <label className="flex items-center gap-2 text-xs text-foreground cursor-pointer">
                         <input
                           type="radio"
                           name="fazNutricionista"
@@ -1523,8 +1527,8 @@ export default function StudentForm() {
                   </div>
 
                   {/* 13. Faz uso de ( ) Não ( ) Álcool ( ) Tabaco */}
-                  <div className="space-y-2 p-3.5 rounded-xl bg-[#121522] border border-[#252B3E]">
-                    <Label className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold">
+                  <div className="space-y-2 p-3.5 rounded-xl bg-muted/30 border border-border">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground font-bold">
                       Faz uso de
                     </Label>
                     <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap">
@@ -1539,9 +1543,9 @@ export default function StudentForm() {
                             className={`px-3 py-1.5 rounded-lg text-xs font-semibold border flex items-center gap-2 transition-all ${
                               isSel
                                 ? isNao
-                                  ? 'bg-emerald-600/25 border-emerald-500 text-emerald-300 font-bold shadow-sm shadow-emerald-500/20'
-                                  : 'bg-primary/20 border-primary text-secondary font-bold'
-                                : 'bg-[#181C2E] border-[#252B3E] text-[#9CA5B8] hover:text-white'
+                                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700 font-bold shadow-sm'
+                                  : 'bg-primary/10 border-primary text-primary font-bold'
+                                : 'bg-card border-border text-muted-foreground hover:text-foreground'
                             }`}
                           >
                             <span
@@ -1550,7 +1554,7 @@ export default function StudentForm() {
                                   ? isNao
                                     ? 'bg-emerald-600 border-emerald-500 text-white'
                                     : 'bg-primary border-primary text-primary-foreground'
-                                  : 'border-[#4A5578]'
+                                  : 'border-border'
                               }`}
                             >
                               {isSel && <CheckCircle2 className="w-3 h-3" />}
@@ -1572,7 +1576,7 @@ export default function StudentForm() {
               <Button
                 type="button"
                 variant="outline"
-                className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white h-12 px-5"
+                className="border-border bg-card hover:bg-muted text-foreground h-12 px-5"
               >
                 Cancelar
               </Button>
@@ -1580,7 +1584,7 @@ export default function StudentForm() {
             <Button
               type="submit"
               disabled={saving}
-              className="bg-primary hover:opacity-90 text-primary-foreground font-bold h-12 px-8 shadow-lg text-base"
+              className="bg-primary hover:opacity-90 text-primary-foreground font-bold h-12 px-8 shadow-md text-base"
             >
               <Save className="w-5 h-5 mr-2" />
               {saving ? 'Salvando...' : 'Salvar Aluno'}
@@ -1622,12 +1626,12 @@ export default function StudentForm() {
         open={Boolean(previewEnlargedPhoto)}
         onOpenChange={(open) => !open && setPreviewEnlargedPhoto(null)}
       >
-        <DialogContent className="bg-black/95 border-[#252B3E] text-white sm:max-w-3xl p-3 flex flex-col items-center">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-3xl p-3 flex flex-col items-center">
           <div className="w-full flex justify-end">
             <button
               type="button"
               onClick={() => setPreviewEnlargedPhoto(null)}
-              className="p-1 rounded-lg text-[#9CA5B8] hover:text-white"
+              className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1647,13 +1651,13 @@ export default function StudentForm() {
         open={Boolean(viewingArchivedSheet)}
         onOpenChange={(open) => !open && setViewingArchivedSheet(null)}
       >
-        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader className="border-b border-[#252B3E] pb-3">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-2xl max-h-[85vh] flex flex-col shadow-xl">
+          <DialogHeader className="border-b border-border pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider text-secondary font-bold">
+              <span className="text-xs uppercase tracking-wider text-primary font-bold">
                 Consulta de Ficha Arquivada
               </span>
-              <span className="bg-[#252B3E] text-[#9CA5B8] text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-muted text-muted-foreground text-xs font-bold px-2 py-0.5 rounded-full border border-border">
                 {viewingArchivedSheet?.start_date || viewingArchivedSheet?.created
                   ? new Date(
                       viewingArchivedSheet.start_date || viewingArchivedSheet.created,
@@ -1661,10 +1665,10 @@ export default function StudentForm() {
                   : 'Histórico'}
               </span>
             </div>
-            <DialogTitle className="text-lg font-bold text-white">
+            <DialogTitle className="text-lg font-bold text-foreground">
               {viewingArchivedSheet?.title || `Ficha de Treino - ${name}`}
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#9CA5B8]">
+            <DialogDescription className="text-xs text-muted-foreground">
               {viewingArchivedSheet?.notes || 'Sem observações adicionais.'}
             </DialogDescription>
           </DialogHeader>
@@ -1680,8 +1684,10 @@ export default function StudentForm() {
                     <span className="w-6 h-6 rounded-md bg-primary text-primary-foreground font-black text-xs flex items-center justify-center">
                       {k}
                     </span>
-                    <span className="font-bold text-sm text-white">Série {k}</span>
-                    <span className="text-xs text-[#9CA5B8]">({blocks.length} exercícios)</span>
+                    <span className="font-bold text-sm text-foreground">Série {k}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({blocks.length} exercícios)
+                    </span>
                   </div>
 
                   <div className="space-y-1.5 pl-2">
@@ -1690,21 +1696,21 @@ export default function StudentForm() {
                       return (
                         <div
                           key={i}
-                          className="p-2.5 rounded-lg bg-[#121522] border border-[#252B3E] flex items-center justify-between text-xs gap-2"
+                          className="p-2.5 rounded-lg bg-muted/40 border border-border flex items-center justify-between text-xs gap-2"
                         >
                           <div className="min-w-0">
-                            <span className="font-bold text-white block truncate">
+                            <span className="font-bold text-foreground block truncate">
                               #{i + 1} {ex?.name || 'Exercício'}
                             </span>
-                            <span className="text-[11px] text-[#9CA5B8]">
+                            <span className="text-[11px] text-muted-foreground">
                               {ex?.muscle_group || 'Geral'} {b.notes ? `• ${b.notes}` : ''}
                             </span>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="text-secondary font-bold block">
+                            <span className="text-primary font-bold block">
                               {b.sets}x {b.reps || '10-12'}
                             </span>
-                            <span className="text-[11px] text-[#9CA5B8]">
+                            <span className="text-[11px] text-muted-foreground">
                               {b.load ? `Carga: ${b.load}` : 'Carga padrão'}
                             </span>
                           </div>
@@ -1717,7 +1723,7 @@ export default function StudentForm() {
             })}
           </div>
 
-          <DialogFooter className="border-t border-[#252B3E] pt-3 flex sm:justify-between items-center gap-2">
+          <DialogFooter className="border-t border-border pt-3 flex sm:justify-between items-center gap-2">
             {viewingArchivedSheet && (
               <Button
                 type="button"
@@ -1749,9 +1755,9 @@ export default function StudentForm() {
                     })
                   }
                 }}
-                className="border-secondary/40 bg-secondary/15 hover:bg-secondary/25 text-white font-bold text-xs h-9 px-3 flex items-center gap-1.5"
+                className="border-border bg-card hover:bg-muted text-foreground font-bold text-xs h-9 px-3 flex items-center gap-1.5"
               >
-                <Share2 className="w-3.5 h-3.5 text-secondary" /> Exportar PDF Desta Ficha
+                <Share2 className="w-3.5 h-3.5 text-primary" /> Exportar PDF Desta Ficha
               </Button>
             )}
 
@@ -1771,32 +1777,34 @@ export default function StudentForm() {
         open={Boolean(selectedHistorySession)}
         onOpenChange={(open) => !open && setSelectedHistorySession(null)}
       >
-        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-lg max-h-[85vh] flex flex-col">
-          <DialogHeader className="border-b border-[#252B3E] pb-3">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-lg max-h-[85vh] flex flex-col shadow-xl">
+          <DialogHeader className="border-b border-border pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-wider text-secondary font-bold">
+              <span className="text-xs uppercase tracking-wider text-primary font-bold">
                 Detalhes da Aula
               </span>
-              <span className="bg-primary text-white text-xs font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
                 Série {selectedHistorySession?.series_completed}
               </span>
             </div>
-            <DialogTitle className="text-lg font-bold text-white">{name || 'Aluno'}</DialogTitle>
-            <DialogDescription className="text-xs text-[#9CA5B8] flex items-center gap-2 flex-wrap pt-0.5">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              {name || 'Aluno'}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap pt-0.5">
               <span>
                 {selectedHistorySession &&
                   new Date(
                     selectedHistorySession.completed_at || selectedHistorySession.created,
                   ).toLocaleString('pt-BR')}
               </span>
-              <span className="text-secondary font-semibold">
+              <span className="text-primary font-semibold">
                 • Professor: {selectedHistorySession?.expand?.teacher?.name || 'Professor'}
               </span>
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-3 overflow-y-auto space-y-2.5 flex-1 pr-1">
-            <span className="text-xs font-semibold text-[#9CA5B8] uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
               Exercícios da Série {selectedHistorySession?.series_completed}:
             </span>
 
@@ -1815,31 +1823,31 @@ export default function StudentForm() {
                     key={i}
                     className={`p-3 rounded-xl border flex items-center justify-between gap-3 text-xs ${
                       isMarkedDone
-                        ? 'bg-secondary/10 border-secondary/40'
-                        : 'bg-[#121522] border-[#252B3E] opacity-75'
+                        ? 'bg-primary/5 border-primary/40'
+                        : 'bg-muted/40 border-border opacity-75'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
                           isMarkedDone
-                            ? 'bg-secondary text-secondary-foreground font-bold'
-                            : 'border border-[#454545] text-transparent'
+                            ? 'bg-primary text-primary-foreground font-bold'
+                            : 'border border-muted-foreground text-transparent'
                         }`}
                       >
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <span className="font-bold text-white block truncate">{exName}</span>
-                        <span className="text-[11px] text-[#9CA5B8]">{muscle}</span>
+                        <span className="font-bold text-foreground block truncate">{exName}</span>
+                        <span className="text-[11px] text-muted-foreground">{muscle}</span>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="font-semibold text-white block">
+                      <span className="font-semibold text-foreground block">
                         {block.sets}x {block.reps || '10'}
                       </span>
-                      <span className="text-[11px] text-secondary font-medium">
+                      <span className="text-[11px] text-primary font-medium">
                         {block.load ? `Carga: ${block.load}` : 'Carga padrão'}
                       </span>
                     </div>
@@ -1847,20 +1855,20 @@ export default function StudentForm() {
                 )
               })
             ) : (
-              <p className="text-xs text-[#9CA5B8] italic">
+              <p className="text-xs text-muted-foreground italic">
                 Nenhum detalhe de exercício registrado para esta sessão.
               </p>
             )}
 
             {selectedHistorySession?.notes && (
-              <div className="p-3 rounded-xl bg-[#121522] border border-[#252B3E] text-xs">
-                <span className="font-bold text-[#9CA5B8] block mb-1">Anotações:</span>
-                <p className="text-white">{selectedHistorySession.notes}</p>
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="font-bold text-muted-foreground block mb-1">Anotações:</span>
+                <p className="text-foreground">{selectedHistorySession.notes}</p>
               </div>
             )}
           </div>
 
-          <DialogFooter className="border-t border-[#252B3E] pt-3">
+          <DialogFooter className="border-t border-border pt-3">
             <Button
               type="button"
               onClick={() => setSelectedHistorySession(null)}
@@ -1874,10 +1882,10 @@ export default function StudentForm() {
 
       {/* Confirmação de Exclusão */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white">
+        <DialogContent className="bg-card border-border text-foreground">
           <DialogHeader>
             <DialogTitle>Excluir Aluno?</DialogTitle>
-            <DialogDescription className="text-[#9CA5B8]">
+            <DialogDescription className="text-muted-foreground">
               Esta ação removerá o aluno "{name}" do sistema. Fichas vinculadas também poderão ser
               afetadas. Deseja prosseguir?
             </DialogDescription>
@@ -1887,7 +1895,7 @@ export default function StudentForm() {
               type="button"
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>

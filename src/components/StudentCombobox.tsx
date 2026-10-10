@@ -106,9 +106,9 @@ export function StudentCombobox({
             setSearchTerm('')
           }
         }}
-        className={`w-full flex items-center justify-between gap-2 bg-[#121212] border border-[#2E2E2E] text-white rounded-md transition-all cursor-pointer select-none ${
+        className={`w-full flex items-center justify-between gap-2 bg-card border border-border text-foreground rounded-md transition-all cursor-pointer select-none ${
           compact ? 'h-9 px-2 text-xs' : 'h-12 px-3 text-sm'
-        } ${isOpen ? 'ring-2 ring-primary border-primary' : 'hover:border-[#444444]'} ${
+        } ${isOpen ? 'ring-2 ring-primary border-primary' : 'hover:border-primary/50'} ${
           disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''
         }`}
         role="combobox"
@@ -123,17 +123,17 @@ export function StudentCombobox({
                 className={compact ? 'w-5 h-5 text-[9px]' : 'w-6 h-6 text-[10px]'}
                 alt={selectedStudent.name}
               />
-              <span className="truncate font-medium text-white">
+              <span className="truncate font-medium text-foreground">
                 {selectedStudent.name}
                 {selectedStudent.phone && (
-                  <span className="text-[#8A8F98] ml-1.5 font-normal text-xs">
+                  <span className="text-muted-foreground ml-1.5 font-normal text-xs">
                     ({selectedStudent.phone})
                   </span>
                 )}
               </span>
             </>
           ) : (
-            <span className="text-[#8A8F98] truncate">{placeholder}</span>
+            <span className="text-muted-foreground truncate">{placeholder}</span>
           )}
         </div>
 
@@ -142,26 +142,26 @@ export function StudentCombobox({
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 rounded text-[#8A8F98] hover:text-white hover:bg-[#222222] transition-colors"
+              className="p-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               title="Limpar seleção"
               aria-label="Limpar seleção"
             >
               <X className={compact ? 'w-3 h-3' : 'w-3.5 h-3.5'} />
             </button>
           )}
-          <ChevronsUpDown className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-[#8A8F98]`} />
+          <ChevronsUpDown className={`${compact ? 'w-3 h-3' : 'w-4 h-4'} text-muted-foreground`} />
         </div>
       </div>
 
       {/* Popover flutuante com campo de busca em tempo real e lista filtrada */}
       {isOpen && (
         <div
-          className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-[#1E1E1E] border border-[#2E2E2E] rounded-xl shadow-2xl p-2 space-y-2 animate-fade-in"
+          className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-card border border-border rounded-xl shadow-xl p-2 space-y-2 animate-fade-in"
           style={{ minWidth: '260px' }}
         >
           {/* Input de digitação / autocomplete */}
           <div className="relative">
-            <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+            <Search className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               ref={inputRef}
               type="text"
@@ -178,7 +178,7 @@ export function StudentCombobox({
                 }
               }}
               placeholder="Digite parte do nome..."
-              className="w-full h-10 pl-8 pr-8 bg-[#121212] border border-[#2E2E2E] text-white placeholder:text-[#8A8F98] rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="w-full h-10 pl-8 pr-8 bg-muted/40 border border-border text-foreground placeholder:text-muted-foreground rounded-lg text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-primary"
             />
             {searchTerm && (
               <button
@@ -187,7 +187,7 @@ export function StudentCombobox({
                   setSearchTerm('')
                   inputRef.current?.focus()
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[#8A8F98] hover:text-white p-1"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
                 title="Limpar busca"
               >
                 <X className="w-3.5 h-3.5" />
@@ -198,7 +198,7 @@ export function StudentCombobox({
           {/* Lista com scroll */}
           <div className="max-h-56 overflow-y-auto space-y-1 pr-0.5" role="listbox">
             {filteredStudents.length === 0 ? (
-              <div className="py-6 text-center text-xs text-[#8A8F98]">{emptyText}</div>
+              <div className="py-6 text-center text-xs text-muted-foreground">{emptyText}</div>
             ) : (
               filteredStudents.map((st) => {
                 const isSelected = st.id === value
@@ -211,8 +211,8 @@ export function StudentCombobox({
                     aria-selected={isSelected}
                     className={`w-full flex items-center justify-between gap-2 p-2 rounded-lg text-left text-xs transition-colors ${
                       isSelected
-                        ? 'bg-primary/20 text-white font-bold border border-primary/40'
-                        : 'hover:bg-[#2A2A2A] text-white'
+                        ? 'bg-primary/10 text-primary font-bold border border-primary/30'
+                        : 'hover:bg-muted text-foreground'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0 pr-1">
@@ -220,7 +220,9 @@ export function StudentCombobox({
                       <div className="flex flex-col min-w-0">
                         <span className="truncate">{st.name}</span>
                         {st.phone && (
-                          <span className="text-[10px] text-[#8A8F98] font-normal truncate">
+                          <span
+                            className={`text-[10px] font-normal truncate ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}
+                          >
                             {st.phone}
                           </span>
                         )}

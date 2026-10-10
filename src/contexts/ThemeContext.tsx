@@ -89,18 +89,35 @@ function applyThemeToDocument(appearance: AppAppearanceSettings) {
     root.style.setProperty('--background', bgHsl.string)
     root.style.setProperty('--sidebar-background', bgHsl.string)
     root.style.setProperty('--app-bg', appearance.background_color)
+
+    // Ajusta o foreground (texto principal) de acordo com o brilho do fundo
+    const isBgDark = bgHsl.l < 50
+    const textFg = isBgDark ? '0 0% 100%' : '222 47% 11%'
+    const mutedFg = isBgDark ? '250 16% 70%' : '215 16% 47%'
+    const borderCol = isBgDark ? '246 18% 22%' : '214 32% 91%'
+    root.style.setProperty('--foreground', textFg)
+    root.style.setProperty('--muted-foreground', mutedFg)
+    root.style.setProperty('--border', borderCol)
+    root.style.setProperty('--input', borderCol)
+    root.style.setProperty('--sidebar-foreground', textFg)
+    root.style.setProperty('--sidebar-border', borderCol)
   }
 
   if (surfaceHsl) {
     root.style.setProperty('--card', surfaceHsl.string)
     root.style.setProperty('--popover', surfaceHsl.string)
     root.style.setProperty('--app-surface', appearance.surface_color)
+
+    const isSurfaceDark = surfaceHsl.l < 50
+    const cardFg = isSurfaceDark ? '0 0% 100%' : '222 47% 11%'
+    root.style.setProperty('--card-foreground', cardFg)
+    root.style.setProperty('--popover-foreground', cardFg)
   }
 
   // Define se o texto de contraste da cor primária deve ser branco ou escuro
   if (primaryHsl) {
     const isBright = primaryHsl.l > 65
-    const fg = isBright ? '0 0% 0%' : '0 0% 100%'
+    const fg = isBright ? '222 47% 11%' : '0 0% 100%'
     root.style.setProperty('--primary-foreground', fg)
     root.style.setProperty('--accent-foreground', fg)
     root.style.setProperty('--sidebar-primary-foreground', fg)

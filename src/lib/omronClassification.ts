@@ -84,9 +84,9 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       label: 'Abaixo do peso',
       level: 'baixo',
       statusColor: 'yellow',
-      badgeBg: 'bg-amber-500/15',
-      badgeText: 'text-amber-400',
-      badgeBorder: 'border-amber-500/30',
+      badgeBg: 'bg-amber-50',
+      badgeText: 'text-amber-700',
+      badgeBorder: 'border-amber-200',
       rangeLabel: '< 18,5',
     }
   }
@@ -95,9 +95,9 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       label: 'Normal',
       level: 'normal',
       statusColor: 'green',
-      badgeBg: 'bg-emerald-500/15',
-      badgeText: 'text-emerald-400',
-      badgeBorder: 'border-emerald-500/30',
+      badgeBg: 'bg-emerald-50',
+      badgeText: 'text-emerald-700',
+      badgeBorder: 'border-emerald-200',
       rangeLabel: '18,5 – 24,9',
     }
   }
@@ -106,9 +106,9 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       label: 'Sobrepeso',
       level: 'alto',
       statusColor: 'yellow',
-      badgeBg: 'bg-amber-500/15',
-      badgeText: 'text-amber-400',
-      badgeBorder: 'border-amber-500/30',
+      badgeBg: 'bg-amber-50',
+      badgeText: 'text-amber-700',
+      badgeBorder: 'border-amber-200',
       rangeLabel: '25,0 – 29,9',
     }
   }
@@ -117,9 +117,9 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       label: 'Obesidade grau I',
       level: 'muito_alto',
       statusColor: 'red',
-      badgeBg: 'bg-rose-500/15',
-      badgeText: 'text-rose-400',
-      badgeBorder: 'border-rose-500/30',
+      badgeBg: 'bg-rose-50',
+      badgeText: 'text-rose-700',
+      badgeBorder: 'border-rose-200',
       rangeLabel: '30,0 – 34,9',
     }
   }
@@ -128,9 +128,9 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
       label: 'Obesidade grau II',
       level: 'muito_alto',
       statusColor: 'red',
-      badgeBg: 'bg-rose-500/15',
-      badgeText: 'text-rose-400',
-      badgeBorder: 'border-rose-500/30',
+      badgeBg: 'bg-rose-50',
+      badgeText: 'text-rose-700',
+      badgeBorder: 'border-rose-200',
       rangeLabel: '35,0 – 39,9',
     }
   }
@@ -138,9 +138,9 @@ export function classifyImc(imc?: number | null): ClassificationResult | null {
     label: 'Obesidade grau III',
     level: 'muito_alto',
     statusColor: 'red',
-    badgeBg: 'bg-rose-500/15',
-    badgeText: 'text-rose-400',
-    badgeBorder: 'border-rose-500/30',
+    badgeBg: 'bg-rose-50',
+    badgeText: 'text-rose-700',
+    badgeBorder: 'border-rose-200',
     rangeLabel: '≥ 40,0',
   }
 }
@@ -202,9 +202,9 @@ export function classifyBodyFat(
       label: 'Baixo',
       level: 'baixo',
       statusColor: 'yellow',
-      badgeBg: 'bg-amber-500/15',
-      badgeText: 'text-amber-400',
-      badgeBorder: 'border-amber-500/30',
+      badgeBg: 'bg-amber-50',
+      badgeText: 'text-amber-700',
+      badgeBorder: 'border-amber-200',
       rangeLabel: `< ${th.normalMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
@@ -214,9 +214,9 @@ export function classifyBodyFat(
       label: 'Normal',
       level: 'normal',
       statusColor: 'green',
-      badgeBg: 'bg-emerald-500/15',
-      badgeText: 'text-emerald-400',
-      badgeBorder: 'border-emerald-500/30',
+      badgeBg: 'bg-emerald-50',
+      badgeText: 'text-emerald-700',
+      badgeBorder: 'border-emerald-200',
       rangeLabel: `${normalRangeText} (Ref: ${th.ageRange} anos)`,
     }
   }
@@ -226,9 +226,9 @@ export function classifyBodyFat(
       label: 'Alto',
       level: 'alto',
       statusColor: 'yellow',
-      badgeBg: 'bg-amber-500/15',
-      badgeText: 'text-amber-400',
-      badgeBorder: 'border-amber-500/30',
+      badgeBg: 'bg-amber-50',
+      badgeText: 'text-amber-700',
+      badgeBorder: 'border-amber-200',
       rangeLabel: `${th.altoMin.toString().replace('.', ',')} – ${(th.muitoAltoMin - 0.1).toFixed(1).replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
@@ -237,9 +237,9 @@ export function classifyBodyFat(
     label: 'Muito alto',
     level: 'muito_alto',
     statusColor: 'red',
-    badgeBg: 'bg-rose-500/15',
-    badgeText: 'text-rose-400',
-    badgeBorder: 'border-rose-500/30',
+    badgeBg: 'bg-rose-50',
+    badgeText: 'text-rose-700',
+    badgeBorder: 'border-rose-200',
     rangeLabel: `≥ ${th.muitoAltoMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
   }
 }
@@ -301,9 +301,9 @@ export function classifySkeletalMuscle(
       label: 'Baixo',
       level: 'baixo',
       statusColor: 'red', // Quanto maior melhor, portanto baixo é vermelho
-      badgeBg: 'bg-rose-500/15',
-      badgeText: 'text-rose-400',
-      badgeBorder: 'border-rose-500/30',
+      badgeBg: 'bg-rose-50',
+      badgeText: 'text-rose-700',
+      badgeBorder: 'border-rose-200',
       rangeLabel: `< ${th.normalMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
@@ -313,9 +313,9 @@ export function classifySkeletalMuscle(
       label: 'Normal',
       level: 'normal',
       statusColor: 'green',
-      badgeBg: 'bg-emerald-500/15',
-      badgeText: 'text-emerald-400',
-      badgeBorder: 'border-emerald-500/30',
+      badgeBg: 'bg-emerald-50',
+      badgeText: 'text-emerald-700',
+      badgeBorder: 'border-emerald-200',
       rangeLabel: `${th.normalMin.toString().replace('.', ',')} – ${(th.altoMin - 0.1).toFixed(1).replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
@@ -325,9 +325,9 @@ export function classifySkeletalMuscle(
       label: 'Alto (Excelente)',
       level: 'alto',
       statusColor: 'green', // Desejável
-      badgeBg: 'bg-emerald-500/20',
-      badgeText: 'text-emerald-300 font-bold',
-      badgeBorder: 'border-emerald-500/40',
+      badgeBg: 'bg-emerald-100',
+      badgeText: 'text-emerald-800 font-bold',
+      badgeBorder: 'border-emerald-300',
       rangeLabel: `${th.altoMin.toString().replace('.', ',')} – ${(th.muitoAltoMin - 0.1).toFixed(1).replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
     }
   }
@@ -336,9 +336,9 @@ export function classifySkeletalMuscle(
     label: 'Muito Alto (Excelente)',
     level: 'muito_alto',
     statusColor: 'green', // Melhor resultado!
-    badgeBg: 'bg-emerald-500/25',
-    badgeText: 'text-emerald-200 font-black',
-    badgeBorder: 'border-emerald-400/50',
+    badgeBg: 'bg-emerald-100',
+    badgeText: 'text-emerald-900 font-black',
+    badgeBorder: 'border-emerald-400',
     rangeLabel: `≥ ${th.muitoAltoMin.toString().replace('.', ',')}% (Ref: ${th.ageRange} anos)`,
   }
 }
@@ -361,9 +361,9 @@ export function classifyVisceralFat(visceral?: number | null): ClassificationRes
       label: 'Normal',
       level: 'normal',
       statusColor: 'green',
-      badgeBg: 'bg-emerald-500/15',
-      badgeText: 'text-emerald-400',
-      badgeBorder: 'border-emerald-500/30',
+      badgeBg: 'bg-emerald-50',
+      badgeText: 'text-emerald-700',
+      badgeBorder: 'border-emerald-200',
       rangeLabel: '< 9 (1–9)',
     }
   }
@@ -372,9 +372,9 @@ export function classifyVisceralFat(visceral?: number | null): ClassificationRes
       label: 'Alto',
       level: 'alto',
       statusColor: 'yellow',
-      badgeBg: 'bg-amber-500/15',
-      badgeText: 'text-amber-400',
-      badgeBorder: 'border-amber-500/30',
+      badgeBg: 'bg-amber-50',
+      badgeText: 'text-amber-700',
+      badgeBorder: 'border-amber-200',
       rangeLabel: '10 a 14',
     }
   }
@@ -382,9 +382,9 @@ export function classifyVisceralFat(visceral?: number | null): ClassificationRes
     label: 'Muito alto',
     level: 'muito_alto',
     statusColor: 'red',
-    badgeBg: 'bg-rose-500/15',
-    badgeText: 'text-rose-400',
-    badgeBorder: 'border-rose-500/30',
+    badgeBg: 'bg-rose-50',
+    badgeText: 'text-rose-700',
+    badgeBorder: 'border-rose-200',
     rangeLabel: '> 15',
   }
 }
@@ -418,9 +418,9 @@ export function classifyWaistHipRatio(
       label: 'Saudável',
       level: 'normal',
       statusColor: 'green',
-      badgeBg: 'bg-emerald-500/15',
-      badgeText: 'text-emerald-400',
-      badgeBorder: 'border-emerald-500/30',
+      badgeBg: 'bg-emerald-50',
+      badgeText: 'text-emerald-700',
+      badgeBorder: 'border-emerald-200',
       rangeLabel: `${thresholdStr} (Nível saudável)`,
     }
   }
@@ -429,9 +429,9 @@ export function classifyWaistHipRatio(
     label: 'Risco Elevado',
     level: 'alto',
     statusColor: 'yellow',
-    badgeBg: 'bg-amber-500/15',
-    badgeText: 'text-amber-400',
-    badgeBorder: 'border-amber-500/30',
+    badgeBg: 'bg-amber-50',
+    badgeText: 'text-amber-700',
+    badgeBorder: 'border-amber-200',
     rangeLabel: `≥ ${threshold.toFixed(2).replace('.', ',')}`,
   }
 }

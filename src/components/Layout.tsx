@@ -72,8 +72,8 @@ export default function Layout() {
       {/* SIDEBAR TABLET/DESKTOP (>= 1024px) */}
       <aside className="hidden lg:flex flex-col w-64 bg-card/60 backdrop-blur-md border-r border-border z-20 shrink-0">
         {/* Header / Brand */}
-        <div className="p-4 border-b border-[#2A2A2A] flex items-center gap-3">
-          <div className="h-11 w-11 rounded-xl bg-white border border-white/20 flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-sm">
+        <div className="p-4 border-b border-border flex items-center gap-3">
+          <div className="h-11 w-11 rounded-xl bg-white border border-border flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-sm">
             <img
               src={appearance.logo_url || STUDIO_LOGO_SRC}
               alt={appearance.studio_name || 'Studio Bru Oliveira'}
@@ -82,12 +82,12 @@ export default function Layout() {
           </div>
           <div className="flex flex-col min-w-0">
             <span
-              className="font-bold text-sm sm:text-base tracking-tight text-white leading-tight truncate"
+              className="font-bold text-sm sm:text-base tracking-tight text-foreground leading-tight truncate"
               title={appearance.studio_name || 'Studio Bru Oliveira'}
             >
               {appearance.studio_name || 'Studio Bru Oliveira'}
             </span>
-            <span className="text-[11px] text-secondary font-semibold tracking-wider uppercase">
+            <span className="text-[11px] text-primary font-semibold tracking-wider uppercase">
               Personal &amp; Pilates
             </span>
           </div>
@@ -111,7 +111,7 @@ export default function Layout() {
                     ? 'bg-primary text-primary-foreground shadow-md shadow-primary/25'
                     : item.highlight
                       ? 'text-primary bg-primary/10 hover:bg-primary/20'
-                      : 'text-[#8A8F98] hover:text-white hover:bg-[#1E1E1E]'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
                 }`}
               >
                 <Icon
@@ -120,7 +120,7 @@ export default function Layout() {
                       ? 'text-current'
                       : item.highlight
                         ? 'text-primary'
-                        : 'text-[#8A8F98] group-hover:text-white'
+                        : 'text-muted-foreground group-hover:text-foreground'
                   }`}
                 />
                 <span className="truncate">{item.name}</span>
@@ -130,7 +130,7 @@ export default function Layout() {
                   </span>
                 )}
                 {item.adminOnly && !isActive && (
-                  <span className="ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">
+                  <span className="ml-auto text-[10px] font-bold bg-amber-500/20 text-amber-600 px-2 py-0.5 rounded-full">
                     Admin
                   </span>
                 )}
@@ -140,29 +140,29 @@ export default function Layout() {
         </nav>
 
         {/* Footer / User info */}
-        <div className="p-3 border-t border-[#2A2A2A] bg-[#141414]">
-          <div className="flex items-center gap-3 p-2 rounded-xl bg-[#1E1E1E] border border-[#2A2A2A]">
+        <div className="p-3 border-t border-border bg-card">
+          <div className="flex items-center gap-3 p-2 rounded-xl bg-muted/50 border border-border">
             <button
               type="button"
               onClick={() => navigate('/perfil')}
-              className="flex items-center gap-3 min-w-0 flex-1 text-left rounded-lg p-1 -m-1 hover:bg-[#2A2A2A] transition-colors group"
+              className="flex items-center gap-3 min-w-0 flex-1 text-left rounded-lg p-1 -m-1 hover:bg-muted transition-colors group"
               title="Acessar Meu Perfil"
             >
-              <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-xs font-bold text-secondary shrink-0 group-hover:border-primary">
+              <div className="w-9 h-9 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-xs font-bold text-primary shrink-0 group-hover:border-primary">
                 {userInitials || 'P'}
               </div>
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-xs font-semibold text-white truncate group-hover:text-primary transition-colors">
+                <span className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                   {user?.name || user?.email || 'Professor'}
                 </span>
-                <span className="text-[10px] text-[#8A8F98] flex items-center gap-1">
+                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
                   {role === 'admin' ? (
                     <>
-                      <ShieldCheck className="w-3 h-3 text-secondary" /> Administrador
+                      <ShieldCheck className="w-3 h-3 text-primary" /> Administrador
                     </>
                   ) : (
                     <>
-                      <UserCheck className="w-3 h-3 text-emerald-400" /> Professor
+                      <UserCheck className="w-3 h-3 text-emerald-600" /> Professor
                     </>
                   )}
                 </span>
@@ -170,7 +170,7 @@ export default function Layout() {
             </button>
             <button
               onClick={() => setLogoutDialogOpen(true)}
-              className="p-1.5 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors shrink-0"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-muted transition-colors shrink-0"
               title="Sair"
               aria-label="Sair da conta"
             >
@@ -191,47 +191,47 @@ export default function Layout() {
               className="fixed inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
               onClick={() => setMobileMenuOpen(false)}
             />
-            <div className="relative ml-auto w-4/5 max-w-xs bg-[#171717] border-l border-[#2A2A2A] h-full flex flex-col p-5 shadow-2xl animate-fade-in-up">
-              <div className="flex items-center justify-between pb-4 border-b border-[#2A2A2A]">
+            <div className="relative ml-auto w-4/5 max-w-xs bg-card border-l border-border h-full flex flex-col p-5 shadow-2xl animate-fade-in-up">
+              <div className="flex items-center justify-between pb-4 border-b border-border">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="h-9 w-9 rounded-lg bg-white flex items-center justify-center p-1 shrink-0 overflow-hidden">
+                  <div className="h-9 w-9 rounded-lg bg-white border border-border flex items-center justify-center p-1 shrink-0 overflow-hidden shadow-sm">
                     <img
                       src={appearance.logo_url || STUDIO_LOGO_SRC}
                       alt="Logo"
                       className="max-h-full max-w-full object-contain"
                     />
                   </div>
-                  <span className="font-bold text-sm truncate text-white">
+                  <span className="font-bold text-sm truncate text-foreground">
                     {appearance.studio_name || 'Studio Bru Oliveira'}
                   </span>
                 </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1 rounded-lg text-[#8A8F98] hover:text-white"
+                  className="p-1 rounded-lg text-muted-foreground hover:text-foreground"
                   aria-label="Fechar menu"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
 
-              <div className="py-4 border-b border-[#2A2A2A]">
+              <div className="py-4 border-b border-border">
                 <button
                   type="button"
                   onClick={() => {
                     setMobileMenuOpen(false)
                     navigate('/perfil')
                   }}
-                  className="w-full flex items-center gap-3 p-2 -m-2 rounded-xl hover:bg-[#222222] text-left transition-colors"
+                  className="w-full flex items-center gap-3 p-2 -m-2 rounded-xl hover:bg-muted text-left transition-colors"
                   title="Abrir Meu Perfil"
                 >
-                  <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-sm font-bold text-secondary shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary flex items-center justify-center text-sm font-bold text-primary shrink-0">
                     {userInitials || 'P'}
                   </div>
                   <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-sm font-semibold truncate text-white">
+                    <span className="text-sm font-semibold truncate text-foreground">
                       {user?.name || user?.email || 'Professor'}
                     </span>
-                    <span className="text-xs text-[#8A8F98] flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
                       {role === 'admin' ? 'Administrador' : 'Professor'} • Ver perfil
                     </span>
                   </div>
@@ -254,7 +254,7 @@ export default function Layout() {
                       className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
                         isActive
                           ? 'bg-primary text-primary-foreground shadow-md'
-                          : 'text-[#8A8F98] hover:text-white hover:bg-[#1E1E1E]'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
                       }`}
                     >
                       <Icon className="w-5 h-5 shrink-0" />
@@ -264,14 +264,14 @@ export default function Layout() {
                 })}
               </nav>
 
-              <div className="pt-4 border-t border-[#2A2A2A]">
+              <div className="pt-4 border-t border-border">
                 <Button
                   variant="destructive"
                   onClick={() => {
                     setMobileMenuOpen(false)
                     setLogoutDialogOpen(true)
                   }}
-                  className="w-full flex items-center justify-center gap-2 h-11 bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/40"
+                  className="w-full flex items-center justify-center gap-2 h-11 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200"
                 >
                   <LogOut className="w-4 h-4" /> Sair da conta
                 </Button>
@@ -301,7 +301,7 @@ export default function Layout() {
 
         {/* BARRA DE NAVEGAÇÃO INFERIOR FIXA — MOBILE/TABLET ESTREITO (< 1024px) */}
         <nav
-          className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#141414]/95 backdrop-blur-md border-t border-[#2A2A2A] flex items-center justify-around gap-1 px-2 pt-1.5"
+          className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border flex items-center justify-around gap-1 px-2 pt-1.5 shadow-lg"
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.375rem)' }}
           aria-label="Navegação principal"
         >
@@ -310,12 +310,12 @@ export default function Layout() {
             type="button"
             onClick={() => navigate('/')}
             className={`flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
-              location.pathname === '/' ? 'text-primary' : 'text-[#8A8F98]'
+              location.pathname === '/' ? 'text-primary' : 'text-muted-foreground'
             }`}
             title={appearance.studio_name || 'Studio Bru Oliveira'}
             aria-label={`Início — ${appearance.studio_name || 'Studio Bru Oliveira'}`}
           >
-            <div className="h-7 w-7 rounded-md bg-white border border-white/20 flex items-center justify-center p-0.5 overflow-hidden shadow-sm">
+            <div className="h-7 w-7 rounded-md bg-white border border-border flex items-center justify-center p-0.5 overflow-hidden shadow-sm">
               <img
                 src={appearance.logo_url || STUDIO_LOGO_SRC}
                 alt={appearance.studio_name || 'Logo'}
@@ -334,7 +334,7 @@ export default function Layout() {
                 location.pathname === '/treino' ||
                 location.pathname.startsWith('/treino?')
                   ? 'text-primary'
-                  : 'text-[#8A8F98]'
+                  : 'text-muted-foreground'
               }`
             }
             title="Tela de Treino"
@@ -350,7 +350,7 @@ export default function Layout() {
               `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
                 isActive || location.pathname.startsWith('/alunos')
                   ? 'text-primary'
-                  : 'text-[#8A8F98]'
+                  : 'text-muted-foreground'
               }`
             }
             title="Alunos"
@@ -366,7 +366,7 @@ export default function Layout() {
               `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg gap-0.5 ${
                 isActive || location.pathname.startsWith('/treinos')
                   ? 'text-primary'
-                  : 'text-[#8A8F98]'
+                  : 'text-muted-foreground'
               }`
             }
             title="Fichas de Treino"
@@ -379,7 +379,7 @@ export default function Layout() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(true)}
-            className="flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg text-[#8A8F98] active:text-white active:bg-[#2A2A2A]"
+            className="flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-1.5 py-1 rounded-lg text-muted-foreground active:text-foreground active:bg-muted"
             title="Abrir menu completo"
             aria-label="Abrir menu"
           >
@@ -391,12 +391,12 @@ export default function Layout() {
 
       {/* MODAL DE CONFIRMAÇÃO DE LOGOUT */}
       <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white">
+            <DialogTitle className="text-lg font-bold text-foreground">
               Deseja realmente sair?
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Sua sessão atual será encerrada. Você precisará digitar seu e-mail e senha novamente
               para acessar o Studio Bru Oliveira.
             </DialogDescription>
@@ -406,7 +406,7 @@ export default function Layout() {
               type="button"
               variant="outline"
               onClick={() => setLogoutDialogOpen(false)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>

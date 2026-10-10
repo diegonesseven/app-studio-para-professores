@@ -80,7 +80,7 @@ export const InstallPromptBanner: React.FC = () => {
   // Banner para Android / Chrome / Desktop
   if (deferredPrompt) {
     return (
-      <div className="bg-gradient-to-r from-primary/20 via-[#1E1E1E] to-[#1E1E1E] border-b border-primary/30 px-4 py-2.5 text-xs sm:text-sm text-white flex items-center justify-between gap-3 shadow-md shrink-0">
+      <div className="bg-primary/10 border-b border-primary/20 px-4 py-2.5 text-xs sm:text-sm text-foreground flex items-center justify-between gap-3 shadow-sm shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="w-7 h-7 rounded-lg bg-primary/20 text-primary flex items-center justify-center shrink-0">
             <Smartphone className="w-4 h-4" />
@@ -100,7 +100,7 @@ export const InstallPromptBanner: React.FC = () => {
           </Button>
           <button
             onClick={handleDismiss}
-            className="p-1 rounded-md text-[#8A8F98] hover:text-white"
+            className="p-1 rounded-md text-muted-foreground hover:text-foreground"
             aria-label="Dispensar aviso"
           >
             <X className="w-4 h-4" />
@@ -113,19 +113,19 @@ export const InstallPromptBanner: React.FC = () => {
   // Banner discreto orientativo para Safari no iOS (iPad / iPhone)
   if (isIos) {
     return (
-      <div className="bg-[#181818] border-b border-[#2A2A2A] px-4 py-2 text-xs text-[#8A8F98] flex items-center justify-between gap-3 shrink-0">
+      <div className="bg-muted/80 border-b border-border px-4 py-2 text-xs text-muted-foreground flex items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <Smartphone className="w-4 h-4 text-primary shrink-0" />
           <p className="truncate">
             Para tela 100% cheia no iOS: toque em{' '}
-            <Share className="w-3.5 h-3.5 inline mx-0.5 text-white" /> e depois em{' '}
-            <PlusSquare className="w-3.5 h-3.5 inline mx-0.5 text-white" />{' '}
-            <strong className="text-white">Adicionar à Tela de Início</strong>.
+            <Share className="w-3.5 h-3.5 inline mx-0.5 text-foreground" /> e depois em{' '}
+            <PlusSquare className="w-3.5 h-3.5 inline mx-0.5 text-foreground" />{' '}
+            <strong className="text-foreground">Adicionar à Tela de Início</strong>.
           </p>
         </div>
         <button
           onClick={handleDismiss}
-          className="p-1 rounded-md text-[#8A8F98] hover:text-white shrink-0"
+          className="p-1 rounded-md text-muted-foreground hover:text-foreground shrink-0"
           aria-label="Dispensar aviso"
         >
           <X className="w-3.5 h-3.5" />

@@ -50,23 +50,23 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#121212] px-4 py-8 relative">
-      <div className="w-full max-w-md bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative">
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl relative z-10 animate-fade-in-up">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mb-4">
             <Lock className="w-7 h-7 text-white stroke-[2.5]" />
           </div>{' '}
-          <h1 className="text-2xl font-bold tracking-tight text-white">Redefinir Senha</h1>
-          <p className="text-sm text-[#8A8F98] mt-1">Studio Bru Oliveira</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Redefinir Senha</h1>
+          <p className="text-sm text-muted-foreground mt-1">Studio Bru Oliveira</p>
         </div>
 
         {success ? (
           <div className="text-center py-4 space-y-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h2 className="text-lg font-semibold text-white">Senha alterada com sucesso!</h2>
-            <p className="text-sm text-[#8A8F98]">
+            <h2 className="text-lg font-semibold text-foreground">Senha alterada com sucesso!</h2>
+            <p className="text-sm text-muted-foreground">
               Você será redirecionado para a tela de login em instantes...
             </p>
             <div className="pt-2">
@@ -80,21 +80,21 @@ export default function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3.5 rounded-lg bg-red-950/50 border border-red-800 text-red-300 text-sm flex items-start gap-2">
-                <AlertCircle className="w-5 h-5 shrink-0 text-red-400 mt-0.5" />
+              <div className="p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2">
+                <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {!token && (
-              <div className="p-3 rounded-lg bg-amber-950/40 border border-amber-800 text-amber-300 text-xs">
+              <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs">
                 Aviso: Nenhum token foi detectado no link. Certifique-se de acessar pelo link do
                 e-mail recebido.
               </div>
             )}
 
             <div className="space-y-1.5">
-              <Label htmlFor="pass" className="text-sm text-white font-medium">
+              <Label htmlFor="pass" className="text-sm text-foreground font-medium">
                 Nova senha (mínimo 8 caracteres)
               </Label>
               <div className="relative">
@@ -105,14 +105,14 @@ export default function ResetPassword() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-primary"
+                  className="bg-muted/40 border-border text-foreground placeholder:text-muted-foreground h-12 pr-10 focus-visible:ring-primary"
                 />
-                <Lock className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+                <Lock className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="passConf" className="text-sm text-white font-medium">
+              <Label htmlFor="passConf" className="text-sm text-foreground font-medium">
                 Confirmar nova senha
               </Label>
               <div className="relative">
@@ -123,9 +123,9 @@ export default function ResetPassword() {
                   placeholder="••••••••"
                   value={passwordConfirm}
                   onChange={(e) => setPasswordConfirm(e.target.value)}
-                  className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-primary"
+                  className="bg-muted/40 border-border text-foreground placeholder:text-muted-foreground h-12 pr-10 focus-visible:ring-primary"
                 />
-                <Lock className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+                <Lock className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
               </div>
             </div>
 
@@ -140,7 +140,7 @@ export default function ResetPassword() {
             <div className="pt-2 text-center">
               <Link
                 to="/login"
-                className="text-sm text-[#8A8F98] hover:text-white transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Voltar ao Login
               </Link>

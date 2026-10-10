@@ -73,35 +73,35 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative overflow-hidden">
       {/* Glow de fundo */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/25 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up text-[#ffffff]">
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl relative z-10 animate-fade-in-up text-card-foreground">
         {/* Branding Studio Bru Oliveira Oficial */}
         <div className="flex flex-col items-center text-center mb-8">
-          <div className="h-20 w-auto max-w-[220px] mb-4 p-2 bg-white rounded-2xl shadow-lg border border-white/20 flex items-center justify-center">
+          <div className="h-20 w-auto max-w-[220px] mb-4 p-2 bg-white rounded-2xl shadow-md border border-border flex items-center justify-center">
             <img
               src={appearance.logo_url || STUDIO_LOGO_SRC}
               alt={appearance.studio_name || 'Studio Bru Oliveira'}
               className="max-h-16 max-w-full object-contain"
             />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             {appearance.studio_name || 'Studio Bru Oliveira'}
           </h1>
-          <p className="text-sm text-secondary font-medium mt-1">Personal Trainer &amp; Pilates</p>
-          <p className="text-xs text-[#9CA5B8] mt-0.5">Plataforma do Professor</p>
+          <p className="text-sm text-primary font-medium mt-1">Personal Trainer &amp; Pilates</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Plataforma do Professor</p>
         </div>
 
         {error && (
-          <div className="mb-5 p-3.5 rounded-lg bg-red-950/50 border border-red-800/60 text-red-300 text-sm flex items-start gap-2.5">
-            <AlertCircle className="w-5 h-5 shrink-0 text-red-400 mt-0.5" />
+          <div className="mb-5 p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2.5">
+            <AlertCircle className="w-5 h-5 shrink-0 text-red-500 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-sm text-[#FFFFFF] font-medium">
+            <Label htmlFor="email" className="text-sm text-foreground font-medium">
               E-mail
             </Label>
             <Input
@@ -111,23 +111,23 @@ export default function Login() {
               placeholder="seu.email@studiobru.com.br"
               value={email}
               onChange={(e) => handleEmailChange(e.target.value)}
-              className={`bg-[#121212] ${
+              className={`bg-muted/40 ${
                 emailError
                   ? 'border-red-500 focus-visible:ring-red-500'
-                  : 'border-[#2E2E2E] focus-visible:ring-primary'
-              } text-white placeholder:text-[#8A8F98] h-12`}
+                  : 'border-border focus-visible:ring-primary'
+              } text-foreground placeholder:text-muted-foreground h-12`}
             />
-            {emailError && <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>}
+            {emailError && <p className="text-xs text-red-500 font-medium mt-1">{emailError}</p>}
           </div>
 
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="password" className="text-sm text-[#FFFFFF] font-medium">
+              <Label htmlFor="password" className="text-sm text-foreground font-medium">
                 Senha
               </Label>
               <Link
                 to="/forgot-password"
-                className="text-xs text-secondary hover:underline font-medium"
+                className="text-xs text-primary hover:underline font-medium"
               >
                 Recuperar senha
               </Link>
@@ -140,12 +140,12 @@ export default function Login() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-11 focus-visible:ring-primary"
+                className="bg-muted/40 border-border text-foreground placeholder:text-muted-foreground h-12 pr-11 focus-visible:ring-primary"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8F98] hover:text-white p-1"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
                 aria-label={showPassword ? 'Ocultar senha' : 'Exibir senha'}
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

@@ -39,23 +39,23 @@ export default function ForgotPassword() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-8 relative">
-      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl relative z-10 animate-fade-in-up">
+      <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl relative z-10 animate-fade-in-up">
         <div className="flex flex-col items-center text-center mb-6">
           <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mb-4">
             <KeyRound className="w-7 h-7 text-white stroke-[2.5]" />
           </div>{' '}
-          <h1 className="text-2xl font-bold tracking-tight text-white">Recuperar Senha</h1>
-          <p className="text-sm text-[#8A8F98] mt-1">Studio Bru Oliveira</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Recuperar Senha</h1>
+          <p className="text-sm text-muted-foreground mt-1">Studio Bru Oliveira</p>
         </div>
 
         {isSubmitted ? (
           <div className="text-center py-4 space-y-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 flex items-center justify-center mx-auto">
+            <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-600 flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-6 h-6" />
             </div>
-            <h2 className="text-lg font-semibold text-white">E-mail enviado!</h2>
-            <p className="text-sm text-[#8A8F98]">
-              Se houver uma conta associada a <strong className="text-white">{email}</strong>,
+            <h2 className="text-lg font-semibold text-foreground">E-mail enviado!</h2>
+            <p className="text-sm text-muted-foreground">
+              Se houver uma conta associada a <strong className="text-foreground">{email}</strong>,
               enviamos um link com as instruções para redefinir sua senha.
             </p>
             <div className="pt-4">
@@ -69,12 +69,12 @@ export default function ForgotPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-950/50 border border-red-800 text-red-300 text-sm">
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-sm">
                 {error}
               </div>
             )}
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-sm text-white font-medium">
+              <Label htmlFor="email" className="text-sm text-foreground font-medium">
                 Seu e-mail cadastrado
               </Label>
               <div className="relative">
@@ -90,15 +90,15 @@ export default function ForgotPassword() {
                       setEmailError(null)
                     }
                   }}
-                  className={`bg-[#121212] ${
+                  className={`bg-muted/40 ${
                     emailError
                       ? 'border-red-500 focus-visible:ring-red-500'
-                      : 'border-[#2E2E2E] focus-visible:ring-primary'
-                  } text-white placeholder:text-[#8A8F98] h-12 pr-10`}
+                      : 'border-border focus-visible:ring-primary'
+                  } text-foreground placeholder:text-muted-foreground h-12 pr-10`}
                 />
-                <Mail className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+                <Mail className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
               </div>
-              {emailError && <p className="text-xs text-red-400 font-medium mt-1">{emailError}</p>}
+              {emailError && <p className="text-xs text-red-500 font-medium mt-1">{emailError}</p>}
             </div>
 
             <Button
@@ -112,7 +112,7 @@ export default function ForgotPassword() {
             <div className="pt-4 text-center">
               <Link
                 to="/login"
-                className="inline-flex items-center gap-1.5 text-sm text-[#8A8F98] hover:text-white transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" /> Voltar ao Login
               </Link>

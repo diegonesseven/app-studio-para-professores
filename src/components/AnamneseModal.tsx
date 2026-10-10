@@ -78,7 +78,7 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             aria-label="Fechar anamnese"
           >
             <X className="w-5 h-5" />
@@ -88,32 +88,31 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         {/* Conteúdo com Scroll */}
         <div className="p-5 overflow-y-auto space-y-5 flex-1">
           {/* Informações básicas do aluno */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-[#141414] border border-[#2A2A2A]">
-            <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-[#8A8F98]" />
-              <div className="text-xs">
-                <span className="text-[#8A8F98] block">Idade</span>
-                <span className="text-white font-medium">
-                  {age !== null ? `${age} anos` : 'Não informada'}
-                </span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-3.5 rounded-xl bg-muted/40 border border-border">
+            <div className="flex items-center gap-2.5">
+              <User className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <span className="text-muted-foreground block">Idade</span>
+                <strong className="text-foreground text-xs">{age !== null ? `${age} anos` : 'Não informada'}</strong>
               </div>
             </div>
-
-            <div className="flex items-center gap-2">
-              <Phone className="w-4 h-4 text-[#8A8F98]" />
-              <div className="text-xs">
-                <span className="text-[#8A8F98] block">Contato</span>
-                <span className="text-white font-medium">{student.phone || 'Não informado'}</span>
+            <div className="flex items-center gap-2.5">
+              <Phone className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <span className="text-muted-foreground block">Contato</span>
+                <strong className="text-foreground text-xs">{student.phone || 'Sem telefone'}</strong>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 col-span-2 sm:col-span-1">
-              <Briefcase className="w-4 h-4 text-primary" />
-              <div className="text-xs">
-                <span className="text-[#8A8F98] block">Profissão</span>
-                <span className="text-white font-medium">{an.profissao || 'Não informada'}</span>
+            <div className="flex items-center gap-2.5 col-span-2 sm:col-span-1">
+              <Briefcase className="w-4 h-4 text-muted-foreground" />
+              <div>
+                <span className="text-muted-foreground block">Profissão</span>
+                <strong className="text-foreground text-xs truncate max-w-[120px] block">
+                  {student.profession || 'Não informada'}
+                </strong>
               </div>
             </div>
+          </div>            </div>
           </div>
 
           {/* Destaque de Restrições Médicas / Cuidados em aula (permanece exatamente com esse rótulo) */}
@@ -128,8 +127,8 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
           {/* Fotos da Anamnese (Item 5) */}
           {photos.length > 0 && (
-            <div className="space-y-2 p-3.5 rounded-xl bg-[#141414] border border-[#2A2A2A]">
-              <div className="flex items-center gap-2 text-xs text-[#8A8F98] font-bold uppercase">
+            <div className="space-y-2 p-3.5 rounded-xl bg-muted/40 border border-border">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground font-bold uppercase">
                 <Camera className="w-3.5 h-3.5 text-primary" /> Fotos na Anamnese ({photos.length})
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2.5 pt-1">
@@ -138,7 +137,7 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
                   return (
                     <div
                       key={pName}
-                      className="relative group rounded-lg overflow-hidden border border-[#2A2A2A] bg-black aspect-square cursor-pointer"
+                      className="relative group rounded-lg overflow-hidden border border-border bg-black aspect-square cursor-pointer"
                       onClick={() => setEnlargedPhoto(url)}
                     >
                       <img
@@ -160,26 +159,25 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
           <div className="space-y-3">
             {/* 1. Já treinou com Personal antes? */}
             {an.treinou_personal_antes && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Já treinou com Personal antes?
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Medicamentos de Uso Contínuo
                 </span>
-                <p className="text-white text-sm">{an.treinou_personal_antes}</p>
-              </div>
-            )}
+                <p className="text-foreground leading-relaxed">{anamnesis.medications}</p>
+              </div>            )}
 
             {/* 2. Objetivos */}
             {((an.objetivos && an.objetivos.length > 0) ||
               (student.goals && student.goals.length > 0)) && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs space-y-1.5">
-                <span className="text-[#8A8F98] font-bold block uppercase tracking-wider">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs space-y-1.5">
+                <span className="text-muted-foreground font-bold block uppercase tracking-wider">
                   Objetivo:
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {(an.objetivos || (student.goals as string[]) || []).map((obj) => (
                     <Badge
                       key={obj}
-                      className="bg-primary/20 text-primary border border-primary/40 text-xs px-2.5 py-0.5 font-medium"
+                      className="bg-primary/10 text-primary border border-primary/20 text-xs px-2.5 py-0.5 font-medium"
                     >
                       (x) {obj}
                     </Badge>
@@ -190,21 +188,20 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
             {/* 3. Você deseja dar ênfase em alguma musculatura? Qual? */}
             {an.enfase_musculatura && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Você deseja dar ênfase em alguma musculatura? Qual?
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Dores Articulares / Coluna
                 </span>
-                <p className="text-white text-sm">{an.enfase_musculatura}</p>
-              </div>
-            )}
+                <p className="text-foreground leading-relaxed">{anamnesis.joint_pain_details}</p>
+              </div>            )}
 
             {/* 4. Já praticou algum exercício físico? */}
             {an.praticou_exercicio && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
                   Já praticou algum exercício físico?
                 </span>
-                <p className="text-white text-sm">
+                <p className="text-foreground text-sm">
                   ({an.praticou_exercicio === 'SIM' ? 'x' : ' '}) SIM{' '}
                   {an.praticou_exercicio === 'SIM' && an.praticou_exercicio_quais
                     ? `— Quais: ${an.praticou_exercicio_quais}`
@@ -216,21 +213,20 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
             {/* 5. Há quanto tempo não pratica um exercício físico? */}
             {an.tempo_sem_praticar && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Há quanto tempo não pratica um exercício físico?
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Lesões Articulares ou Ósseas
                 </span>
-                <p className="text-white text-sm">{an.tempo_sem_praticar}</p>
-              </div>
-            )}
+                <p className="text-foreground leading-relaxed">{anamnesis.injuries_details}</p>
+              </div>            )}
 
             {/* 6. Possui alguma restrição à exercício físico? */}
             {an.restricao_exercicio && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
                   Possui alguma restrição à exercício físico?
                 </span>
-                <p className="text-white text-sm">
+                <p className="text-foreground text-sm">
                   ({an.restricao_exercicio === 'SIM' ? 'x' : ' '}) SIM{' '}
                   {an.restricao_exercicio === 'SIM' && an.restricao_exercicio_quais
                     ? `— Quais: ${an.restricao_exercicio_quais}`
@@ -242,8 +238,8 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
             {/* 7. Possui alguma doença? */}
             {an.possui_doenca && an.possui_doenca.length > 0 && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs space-y-1.5">
-                <span className="text-[#8A8F98] font-bold block uppercase tracking-wider">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs space-y-1.5">
+                <span className="text-muted-foreground font-bold block uppercase tracking-wider">
                   Possui alguma doença?
                 </span>
                 <div className="flex flex-wrap gap-1.5">
@@ -254,8 +250,8 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
                         key={d}
                         className={`text-xs px-2.5 py-0.5 font-medium ${
                           isNao
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            : 'bg-red-500/15 text-red-300 border border-red-500/30'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-red-50 text-red-700 border border-red-200'
                         }`}
                       >
                         (x) {d}
@@ -264,8 +260,8 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
                   })}
                 </div>
                 {an.possui_doenca_outros && (
-                  <p className="text-xs text-[#9CA5B8] pt-1">
-                    Outros: <span className="text-white">{an.possui_doenca_outros}</span>
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Outros: <span className="text-foreground">{an.possui_doenca_outros}</span>
                   </p>
                 )}
               </div>
@@ -273,21 +269,20 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
             {/* 8. Possui alguma lesão? (ou legacy injuries) */}
             {(an.possui_lesao || student.injuries) && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Possui alguma lesão?
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Alergias Conhecidas
                 </span>
-                <p className="text-white text-sm">{an.possui_lesao || student.injuries}</p>
-              </div>
-            )}
+                <p className="text-foreground leading-relaxed">{anamnesis.allergies_details}</p>
+              </div>            )}
 
             {/* 9. Dores em alguma parte do corpo? */}
             {an.dores_corpo && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
                   Dores em alguma parte do corpo?
                 </span>
-                <p className="text-white text-sm">
+                <p className="text-foreground text-sm">
                   ({an.dores_corpo === 'SIM' ? 'x' : ' '}) SIM{' '}
                   {an.dores_corpo === 'SIM' && an.dores_corpo_quais
                     ? `— Quais: ${an.dores_corpo_quais}`
@@ -299,78 +294,73 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
             {/* 10. Faz dieta? */}
             {an.faz_dieta && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Faz dieta?
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Nível de Estresse
                 </span>
-                <p className="text-white text-sm">
-                  {an.faz_dieta === 'SIM' ? '(x) SIM  ( ) NÃO' : '( ) SIM  (x) NÃO'}
+                <p className="text-foreground leading-relaxed">
+                  {anamnesis.stress_level || 'Não informado'}
                 </p>
-              </div>
-            )}
+              </div>            )}
 
             {/* 11. Faz acompanhamento com nutricionista? */}
             {an.faz_nutricionista && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Faz acompanhamento com nutricionista?
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Consumo de Água
                 </span>
-                <p className="text-white text-sm">
-                  {an.faz_nutricionista === 'SIM' ? '(x) SIM  ( ) NÃO' : '( ) SIM  (x) NÃO'}
+                <p className="text-foreground leading-relaxed">
+                  {anamnesis.water_intake || 'Não informado'}
                 </p>
-              </div>
-            )}
+              </div>            )}
 
             {/* 12. Faz uso de Álcool / Tabaco */}
             {an.uso_substancias && an.uso_substancias.length > 0 && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs space-y-1.5">
-                <span className="text-[#8A8F98] font-bold block uppercase tracking-wider">
-                  Faz uso de:
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs space-y-1.5">
+                <span className="text-muted-foreground font-bold block uppercase tracking-wider">
+                  Dias e Frequência Preferidos
                 </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {an.uso_substancias.map((sub) => {
-                    const isNao = sub.toLowerCase() === 'não' || sub.toLowerCase() === 'nao'
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => {
+                    const isSelected = anamnesis.preferred_days?.includes(day)
                     return (
-                      <Badge
-                        key={sub}
-                        className={`text-xs px-2.5 py-0.5 font-medium ${
-                          isNao
-                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                            : 'bg-[#2A2A2A] text-white border border-[#3A3A3A]'
+                      <span
+                        key={day}
+                        className={`text-[11px] px-2.5 py-1 rounded-md font-semibold ${
+                          isSelected
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-muted text-muted-foreground border border-border'
                         }`}
                       >
-                        (x) {sub}
-                      </Badge>
+                        {day}
+                      </span>
                     )
                   })}
                 </div>
-              </div>
-            )}
+              </div>            )}
 
             {/* Campos legados adicionais preservados (histórico clínico geral, cirurgias) */}
             {student.health_history && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Histórico Clínico Adicional
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Condições Crônicas
                 </span>
-                <p className="text-white text-sm">{student.health_history}</p>
-              </div>
-            )}
+                <p className="text-foreground leading-relaxed">{anamnesis.chronic_conditions_details}</p>
+              </div>            )}
 
             {student.surgeries && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="text-[#8A8F98] font-bold block mb-1 uppercase tracking-wider">
-                  Cirurgias Realizadas
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Observações Gerais do Professor
                 </span>
-                <p className="text-white text-sm">{student.surgeries}</p>
-              </div>
-            )}
+                <p className="text-foreground leading-relaxed">{anamnesis.general_observations}</p>
+              </div>            )}
           </div>
 
           {!hasAnamneseData && (
-            <div className="py-8 text-center text-[#8A8F98] space-y-1">
+            <div className="py-8 text-center text-muted-foreground space-y-1">
               <HeartPulse className="w-8 h-8 opacity-40 mx-auto mb-2" />
-              <p className="text-sm font-medium text-white">Anamnese não preenchida</p>
+              <p className="text-sm font-medium text-foreground">Anamnese não preenchida</p>
               <p className="text-xs">
                 O aluno pode treinar normalmente, mas você pode editar o cadastro a qualquer momento
                 para registrar a anamnese.
@@ -380,15 +370,15 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-card/60 border-t border-border flex items-center justify-between gap-2">
+        <div className="p-4 bg-muted/40 border-t border-border flex items-center justify-between gap-2">
           {student?.id ? (
             <Link to={`/alunos/${student.id}/editar`} onClick={onClose}>
               <Button
                 type="button"
                 variant="outline"
-                className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-white text-xs h-9 px-3 flex items-center gap-1.5"
+                className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-foreground text-xs h-9 px-3 flex items-center gap-1.5"
               >
-                <TrendingUp className="w-3.5 h-3.5 text-secondary" /> Ver Avaliação Física
+                <TrendingUp className="w-3.5 h-3.5 text-primary" /> Ver Avaliação Física
               </Button>
             </Link>
           ) : (
@@ -406,12 +396,12 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
 
       {/* Modal de foto ampliada */}
       <Dialog open={Boolean(enlargedPhoto)} onOpenChange={(o) => !o && setEnlargedPhoto(null)}>
-        <DialogContent className="bg-black/95 border-[#2A2A2A] text-white sm:max-w-3xl p-3 flex flex-col items-center">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-3xl p-3 flex flex-col items-center">
           <div className="w-full flex justify-end">
             <button
               type="button"
               onClick={() => setEnlargedPhoto(null)}
-              className="p-1 rounded text-[#8A8F98] hover:text-white"
+              className="p-1 rounded text-muted-foreground hover:text-foreground"
             >
               <X className="w-5 h-5" />
             </button>
