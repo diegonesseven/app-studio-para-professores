@@ -139,29 +139,29 @@ export default function Index() {
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* HEADER: Saudação e Data */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-[#252525]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-border">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs uppercase tracking-wider text-primary font-bold flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5" /> {capitalizedDate}
             </span>
-            <span className="text-xs text-[#8A8F98]">•</span>
-            <span className="text-xs text-[#8A8F98] flex items-center gap-1">
+            <span className="text-xs text-muted-foreground">•</span>
+            <span className="text-xs text-muted-foreground flex items-center gap-1">
               {isAdmin ? (
                 <>
                   <ShieldCheck className="w-3.5 h-3.5 text-primary" /> Perfil Administrador
                 </>
               ) : (
                 <>
-                  <UserCheck className="w-3.5 h-3.5 text-emerald-400" /> Perfil Professor
+                  <UserCheck className="w-3.5 h-3.5 text-emerald-600" /> Perfil Professor
                 </>
               )}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
             Olá, {firstName} 👋
           </h1>
-          <p className="text-sm text-[#8A8F98] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Pronto para conduzir as aulas de hoje no Studio Bru Oliveira?
           </p>
         </div>
@@ -169,7 +169,7 @@ export default function Index() {
         {/* Botão de Destaque Treino ao Vivo */}
         <Button
           onClick={() => navigate('/treino')}
-          className="bg-primary hover:opacity-90 text-primary-foreground font-bold h-12 px-6 shadow-xl shadow-primary/20 flex items-center gap-2 rounded-xl"
+          className="bg-primary hover:opacity-90 text-primary-foreground font-bold h-12 px-6 shadow-md flex items-center gap-2 rounded-xl"
         >
           <PlaySquare className="w-5 h-5" /> Abrir Tela de Treino
         </Button>
@@ -186,15 +186,15 @@ export default function Index() {
               setSearchQuery(e.target.value)
               setDropdownOpen(true)
             }}
-            className="w-full h-14 bg-[#1E1E1E] border-[#2E2E2E] hover:border-primary/50 text-white placeholder:text-[#8A8F98] pl-12 pr-4 text-base rounded-2xl shadow-lg focus-visible:ring-2 focus-visible:ring-primary"
+            className="w-full h-14 bg-card border-border hover:border-primary/50 text-foreground placeholder:text-muted-foreground pl-12 pr-4 text-base rounded-2xl shadow-sm focus-visible:ring-2 focus-visible:ring-primary"
           />
           <Search className="w-6 h-6 absolute left-4 top-1/2 -translate-y-1/2 text-primary" />
         </div>
 
         {/* Dropdown de Alunos Encontrados */}
         {dropdownOpen && filteredStudents.length > 0 && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl shadow-2xl z-30 max-h-72 overflow-y-auto p-2 space-y-1 animate-fade-in">
-            <span className="text-[11px] font-bold text-[#8A8F98] px-3 py-1 block uppercase tracking-wider">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-2xl shadow-xl z-30 max-h-72 overflow-y-auto p-2 space-y-1 animate-fade-in">
+            <span className="text-[11px] font-bold text-muted-foreground px-3 py-1 block uppercase tracking-wider">
               Selecione para abrir o treino:
             </span>
             {filteredStudents.map((st) => (
@@ -202,7 +202,7 @@ export default function Index() {
                 key={st.id}
                 type="button"
                 onClick={() => handleSelectStudentForTraining(st.id)}
-                className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-[#2A2A2A] text-left transition-colors group"
+                className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-muted text-left transition-colors group cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <StudentAvatar
@@ -212,20 +212,20 @@ export default function Index() {
                     alt={st.name}
                   />
                   <div className="min-w-0">
-                    <span className="text-sm font-bold text-white group-hover:text-primary transition-colors block truncate">
+                    <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors block truncate">
                       {st.name}
                     </span>
-                    <span className="text-xs text-[#8A8F98] truncate block">
+                    <span className="text-xs text-muted-foreground truncate block">
                       {st.phone || 'Sem telefone'} • {st.experience_level || 'Iniciante'}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <Badge className="bg-primary/20 text-primary border border-primary/40 text-xs">
+                  <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs">
                     Abrir Treino
                   </Badge>
-                  <ChevronRight className="w-4 h-4 text-[#8A8F98] group-hover:text-white" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
                 </div>
               </button>
             ))}
@@ -235,55 +235,59 @@ export default function Index() {
 
       {/* QUICK ACTIONS ROW (Ações Rápidas em Cards Grandes) */}
       <div>
-        <h2 className="text-sm font-bold text-[#8A8F98] uppercase tracking-wider mb-3">
+        <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-3">
           Ações Rápidas
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Card 1: Cadastrar Aluno */}
           <Link
             to="/alunos/novo"
-            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 group"
+            className="p-5 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-4 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
               <UserPlus className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors">
+              <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
                 Cadastrar Aluno
               </h3>
-              <p className="text-xs text-[#8A8F98]">Dados básicos e anamnese completa</p>
+              <p className="text-xs text-muted-foreground">Dados básicos e anamnese completa</p>
             </div>
           </Link>
 
           {/* Card 2: Novo Exercício */}
           <Link
             to="/acervo/novo"
-            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 group"
+            className="p-5 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-4 group"
           >
-            <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
               <Dumbbell className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors">
+              <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
                 Novo Exercício
               </h3>
-              <p className="text-xs text-[#8A8F98]">Cadastrar movimento com vídeo do YouTube</p>
+              <p className="text-xs text-muted-foreground">
+                Cadastrar movimento com vídeo do YouTube
+              </p>
             </div>
           </Link>
 
           {/* Card 3: Nova Ficha de Treino */}
           <div
             onClick={() => setSheetModalOpen(true)}
-            className="p-5 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center gap-4 cursor-pointer group"
+            className="p-5 rounded-2xl bg-card border border-border hover:border-primary/50 transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center gap-4 cursor-pointer group"
           >
-            <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
               <ClipboardList className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors">
+              <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">
                 Nova Ficha de Treino
               </h3>
-              <p className="text-xs text-[#8A8F98]">Montar séries A–E com cargas e repetições</p>
+              <p className="text-xs text-muted-foreground">
+                Montar séries A–E com cargas e repetições
+              </p>
             </div>
           </div>
         </div>
@@ -294,16 +298,16 @@ export default function Index() {
         <button
           type="button"
           onClick={() => navigate('/alunos')}
-          className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] hover:border-primary/60 hover:bg-[#1E1E1E] transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between text-left group cursor-pointer"
+          className="p-5 rounded-2xl bg-card border border-border hover:border-primary/60 transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between text-left group cursor-pointer"
           aria-label="Ver Alunos Ativos"
         >
           <div>
-            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold group-hover:text-primary transition-colors">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold group-hover:text-primary transition-colors">
               Alunos Ativos
             </span>
-            <div className="text-3xl font-extrabold text-white mt-1">{totalStudents}</div>
+            <div className="text-3xl font-extrabold text-foreground mt-1">{totalStudents}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
             <Users className="w-5 h-5" />
           </div>
         </button>
@@ -311,16 +315,16 @@ export default function Index() {
         <button
           type="button"
           onClick={() => navigate('/treinos')}
-          className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] hover:border-emerald-400/60 hover:bg-[#1E1E1E] transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between text-left group cursor-pointer"
+          className="p-5 rounded-2xl bg-card border border-border hover:border-emerald-500/60 transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between text-left group cursor-pointer"
           aria-label="Ver Fichas Montadas"
         >
           <div>
-            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold group-hover:text-emerald-400 transition-colors">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold group-hover:text-emerald-600 transition-colors">
               Fichas Montadas
             </span>
-            <div className="text-3xl font-extrabold text-white mt-1">{totalSheets}</div>
+            <div className="text-3xl font-extrabold text-foreground mt-1">{totalSheets}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
             <ClipboardList className="w-5 h-5" />
           </div>
         </button>
@@ -328,29 +332,29 @@ export default function Index() {
         <button
           type="button"
           onClick={() => navigate('/acervo')}
-          className="p-5 rounded-2xl bg-[#171717] border border-[#2A2A2A] hover:border-primary/60 hover:bg-[#1E1E1E] transition-all hover:-translate-y-0.5 hover:shadow-xl flex items-center justify-between text-left group cursor-pointer"
+          className="p-5 rounded-2xl bg-card border border-border hover:border-primary/60 transition-all hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between text-left group cursor-pointer"
           aria-label="Ver Exercícios no Acervo"
         >
           <div>
-            <span className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold group-hover:text-primary transition-colors">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold group-hover:text-primary transition-colors">
               Exercícios no Acervo
             </span>
-            <div className="text-3xl font-extrabold text-white mt-1">{totalExercises}</div>
+            <div className="text-3xl font-extrabold text-foreground mt-1">{totalExercises}</div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#2A2A2A] text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
             <Dumbbell className="w-5 h-5" />
           </div>
         </button>
       </div>
 
       {/* STUDENT QUICK LIST (Últimos alunos com chevron e próxima série) */}
-      <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-5 sm:p-6 shadow-xl space-y-4">
+      <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base sm:text-lg font-bold text-white">
+            <h2 className="text-base sm:text-lg font-bold text-foreground">
               Alunos com Atividade Recente
             </h2>
-            <p className="text-xs text-[#8A8F98]">
+            <p className="text-xs text-muted-foreground">
               Toque no aluno para abrir a tela de treino imediatamente de onde ele parou
             </p>
           </div>
@@ -363,26 +367,19 @@ export default function Index() {
         </div>
 
         {recentStudents.length === 0 ? (
-          <div className="py-8 text-center text-xs text-[#8A8F98]">
+          <div className="py-8 text-center text-xs text-muted-foreground">
             Nenhum aluno cadastrado no momento.
           </div>
         ) : (
-          <div className="divide-y divide-[#2A2A2A]">
+          <div className="divide-y divide-border">
             {recentStudents.map((st) => {
-              const initials = st.name
-                .split(' ')
-                .filter(Boolean)
-                .slice(0, 2)
-                .map((n) => n[0].toUpperCase())
-                .join('')
-
               const nextSeries = nextSeriesMap[st.id] || 'A'
 
               return (
                 <div
                   key={st.id}
                   onClick={() => navigate(`/treino?students=${st.id}`)}
-                  className="py-3.5 flex items-center justify-between gap-3 hover:bg-[#252525] px-3 rounded-xl transition-colors cursor-pointer group"
+                  className="py-3.5 flex items-center justify-between gap-3 hover:bg-muted/50 px-3 rounded-xl transition-colors cursor-pointer group"
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <StudentAvatar
@@ -392,20 +389,20 @@ export default function Index() {
                       alt={st.name}
                     />
                     <div className="min-w-0">
-                      <span className="text-sm font-bold text-white group-hover:text-primary transition-colors block truncate">
+                      <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors block truncate">
                         {st.name}
                       </span>
-                      <span className="text-xs text-[#8A8F98] truncate block">
+                      <span className="text-xs text-muted-foreground truncate block">
                         {st.phone || 'Sem contato'} • {st.experience_level || 'Personal'}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <Badge className="bg-primary/15 text-primary border border-primary/30 text-xs px-2.5 py-0.5 font-semibold">
+                    <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs px-2.5 py-0.5 font-semibold">
                       Próximo: Treino {nextSeries}
                     </Badge>
-                    <ChevronRight className="w-5 h-5 text-[#8A8F98] group-hover:text-white group-hover:translate-x-1 transition-all" />
+                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
                   </div>
                 </div>
               )
@@ -416,10 +413,12 @@ export default function Index() {
 
       {/* MODAL SELETOR DE ALUNO PARA NOVA FICHA */}
       <Dialog open={sheetModalOpen} onOpenChange={setSheetModalOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white">Nova Ficha de Treino</DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              Nova Ficha de Treino
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm">
               Selecione o aluno para montar o planejamento das séries A, B, C, D e E:
             </DialogDescription>
           </DialogHeader>
@@ -438,7 +437,7 @@ export default function Index() {
               type="button"
               variant="outline"
               onClick={() => setSheetModalOpen(false)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>

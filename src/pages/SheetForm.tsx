@@ -405,13 +405,12 @@ export default function SheetForm() {
 
   if (loading) {
     return (
-      <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
+      <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-sm">Carregando ficha de treino...</p>
+        <p className="text-sm">Carregando dados da ficha de treino...</p>
       </div>
     )
   }
-
   return (
     <div className="space-y-6 animate-fade-in pb-16">
       {/* Top Header */}
@@ -419,7 +418,7 @@ export default function SheetForm() {
         <div className="flex items-center gap-3">
           <Link
             to="/treinos"
-            className="p-2 rounded-xl bg-[#1E1E1E] border border-[#2E2E2E] text-[#8A8F98] hover:text-white transition-colors"
+            className="p-2 rounded-xl bg-card border border-border text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
@@ -436,19 +435,19 @@ export default function SheetForm() {
                       `/alunos?studentId=${student.id}&search=${encodeURIComponent(student.name)}`,
                     )
                   }
-                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#2A2A2A] hover:bg-primary/20 text-white hover:text-primary border border-transparent hover:border-primary/40 text-xs font-semibold transition-all cursor-pointer group"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-muted hover:bg-primary/10 text-foreground hover:text-primary border border-border hover:border-primary/40 text-xs font-semibold transition-all cursor-pointer group"
                   title={`Abrir cadastro completo de ${student.name} na aba Alunos`}
                 >
                   <User className="w-3 h-3 text-primary" />
                   <span className="underline-offset-2 group-hover:underline">{student.name}</span>
                 </button>
               ) : (
-                <Badge className="bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs">
+                <Badge className="bg-amber-500/15 text-amber-800 border border-amber-500/30 text-xs font-semibold">
                   Ficha Modelo
                 </Badge>
               )}
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white truncate">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
               {isEditing ? 'Editar Ficha de Séries' : 'Montar Nova Ficha'}
             </h1>
           </div>
@@ -466,10 +465,10 @@ export default function SheetForm() {
                 setSelectedSheetToImport(firstOther?.id || availableSheets[0]?.id || '')
                 setImportModalOpen(true)
               }}
-              className="border-[#2E2E2E] bg-[#1E1E1E] hover:bg-[#2A2A2A] text-white font-semibold h-11 px-3 sm:px-4 text-xs sm:text-sm flex items-center gap-1.5"
+              className="border-border bg-card hover:bg-muted text-foreground font-semibold h-11 px-3 sm:px-4 text-xs sm:text-sm flex items-center gap-1.5"
               title="Copiar séries de outro aluno como ponto de partida"
             >
-              <Copy className="w-4 h-4 text-secondary" />
+              <Copy className="w-4 h-4 text-primary" />
               <span>Usar outra ficha como base</span>
             </Button>
           )}
@@ -508,10 +507,10 @@ export default function SheetForm() {
                   })
                 }
               }}
-              className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-white font-semibold h-11 px-4 shadow-sm flex items-center gap-2"
+              className="border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-semibold h-11 px-4 shadow-sm flex items-center gap-2"
               title="Exportar ficha em PDF ou compartilhar via WhatsApp"
             >
-              <Share2 className="w-4 h-4 text-secondary" /> Exportar / PDF
+              <Share2 className="w-4 h-4" /> Exportar / PDF
             </Button>
           )}
 
@@ -527,11 +526,11 @@ export default function SheetForm() {
       </div>
 
       {/* Identificação da Ficha */}
-      <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-5 sm:p-6 shadow-md space-y-4">
+      <div className="bg-card border border-border rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
         {/* Badges de Início da Ficha e Sessões Concluídas */}
         {isEditing && (
-          <div className="flex items-center gap-2 flex-wrap pb-2 border-b border-[#282828]">
-            <Badge className="bg-[#141414] text-white border border-[#333333] text-xs px-3 py-1 font-semibold flex items-center gap-1.5">
+          <div className="flex items-center gap-2 flex-wrap pb-2 border-b border-border">
+            <Badge className="bg-muted text-foreground border border-border text-xs px-3 py-1 font-semibold flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-primary" />
               <span>
                 Início da ficha:{' '}
@@ -541,20 +540,20 @@ export default function SheetForm() {
               </span>
             </Badge>
 
-            <Badge className="bg-secondary/15 text-white border border-secondary/40 text-xs px-3 py-1 font-semibold flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-secondary" />
+            <Badge className="bg-primary/10 text-foreground border border-primary/20 text-xs px-3 py-1 font-semibold flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
               <span>
                 Sessões concluídas:{' '}
-                <strong className="text-secondary font-black">{completedSessionsCount}</strong>
+                <strong className="text-primary font-black">{completedSessionsCount}</strong>
               </span>
             </Badge>
           </div>
         )}
 
         {/* Escolha do tipo: Ficha com Aluno ou Ficha Modelo */}
-        <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="bg-muted/40 border border-border rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#8A8F98]">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
               Vínculo da Ficha:
             </span>
             <div className="flex items-center gap-1.5">
@@ -570,7 +569,7 @@ export default function SheetForm() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   !isTemplateMode
                     ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'bg-[#222222] text-[#8A8F98] hover:text-white'
+                    : 'bg-card text-muted-foreground hover:text-foreground border border-border'
                 }`}
               >
                 Vincular a Aluno
@@ -586,8 +585,8 @@ export default function SheetForm() {
                 }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   isTemplateMode
-                    ? 'bg-amber-500 text-black shadow-sm'
-                    : 'bg-[#222222] text-[#8A8F98] hover:text-white'
+                    ? 'bg-amber-500 text-white shadow-sm'
+                    : 'bg-card text-muted-foreground hover:text-foreground border border-border'
                 }`}
               >
                 Ficha Modelo (Sem Aluno)
@@ -597,7 +596,7 @@ export default function SheetForm() {
 
           {!isTemplateMode && (
             <div className="flex items-center gap-2 w-full sm:w-80">
-              <span className="text-xs text-[#8A8F98] font-medium shrink-0">Aluno:</span>
+              <span className="text-xs text-muted-foreground font-medium shrink-0">Aluno:</span>
               <StudentCombobox
                 students={allStudents}
                 value={student?.id || ''}
@@ -614,9 +613,9 @@ export default function SheetForm() {
 
         {/* Parâmetros da Ficha Modelo (Nível e Gênero) */}
         {isTemplateMode && (
-          <div className="p-3 bg-amber-950/20 border border-amber-800/40 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in">
+          <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in">
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+              <Label className="text-xs font-bold text-amber-800 uppercase tracking-wider">
                 Nível de Experiência do Modelo
               </Label>
               <select
@@ -626,7 +625,7 @@ export default function SheetForm() {
                   setTemplateLevel(lvl)
                   setTitle(`Ficha Modelo - ${lvl} (${templateGender})`)
                 }}
-                className="w-full h-10 bg-[#121212] border border-amber-800/50 text-white rounded-md px-3 text-xs focus:ring-1 focus:ring-amber-400"
+                className="w-full h-10 bg-card border border-border text-foreground rounded-md px-3 text-xs focus:ring-1 focus:ring-primary shadow-sm"
               >
                 <option value="Iniciante">Iniciante</option>
                 <option value="Intermediário">Intermediário</option>
@@ -635,7 +634,7 @@ export default function SheetForm() {
             </div>
 
             <div className="space-y-1">
-              <Label className="text-xs font-bold text-amber-300 uppercase tracking-wider">
+              <Label className="text-xs font-bold text-amber-800 uppercase tracking-wider">
                 Gênero / Público Alvo
               </Label>
               <select
@@ -645,7 +644,7 @@ export default function SheetForm() {
                   setTemplateGender(gen)
                   setTitle(`Ficha Modelo - ${templateLevel} (${gen})`)
                 }}
-                className="w-full h-10 bg-[#121212] border border-amber-800/50 text-white rounded-md px-3 text-xs focus:ring-1 focus:ring-amber-400"
+                className="w-full h-10 bg-card border border-border text-foreground rounded-md px-3 text-xs focus:ring-1 focus:ring-primary shadow-sm"
               >
                 <option value="Feminino">Feminino</option>
                 <option value="Masculino">Masculino</option>
@@ -657,46 +656,46 @@ export default function SheetForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-1.5 md:col-span-1">
-            <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
               Título da Ficha
             </Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Ficha Hipertrofia & Força Geral"
-              className="bg-[#121212] border-[#2E2E2E] text-white font-semibold h-11 focus-visible:ring-primary"
+              className="bg-card border-border text-foreground font-semibold h-11 focus-visible:ring-primary shadow-sm"
             />
           </div>
 
           <div className="space-y-1.5 md:col-span-1">
-            <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
               Data de Início da Ficha
             </Label>
             <Input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-[#121212] border-[#2E2E2E] text-white font-semibold h-11 focus-visible:ring-primary"
+              className="bg-card border-border text-foreground font-semibold h-11 focus-visible:ring-primary shadow-sm"
             />
           </div>
 
           <div className="space-y-1.5 md:col-span-1">
-            <Label className="text-xs text-[#8A8F98] uppercase tracking-wider font-semibold">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
               Observações / Recomendações
             </Label>
             <Input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Ex: Descanso 60s, priorizar cadência"
-              className="bg-[#121212] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+              className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-sm"
             />
           </div>
         </div>
       </div>
 
       {/* Tabs das Séries A, B, C, D, E */}
-      <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-4 sm:p-6 shadow-xl space-y-6">
-        <div className="flex items-center justify-between border-b border-[#2E2E2E] pb-3 gap-2 overflow-x-auto">
+      <div className="bg-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm space-y-6">
+        <div className="flex items-center justify-between border-b border-border pb-3 gap-2 overflow-x-auto">
           <div className="flex items-center gap-1.5">
             {(() => {
               // Na edição ou montagem de ficha: se for ficha existente já com séries específicas (ex: só A e B),
@@ -715,13 +714,13 @@ export default function SheetForm() {
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${
                       isActive
                         ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
-                        : 'bg-[#141414] text-[#8A8F98] hover:text-white border border-[#2A2A2A]'
+                        : 'bg-card text-muted-foreground hover:text-foreground border border-border'
                     }`}
                   >
                     <span>Série {key}</span>
                     <span
                       className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
-                        isActive ? 'bg-black/20 text-white' : 'bg-[#2A2A2A] text-[#8A8F98]'
+                        isActive ? 'bg-black/20 text-white' : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {count}
@@ -735,7 +734,7 @@ export default function SheetForm() {
           <Button
             type="button"
             onClick={() => setPickerOpen(true)}
-            className="bg-[#2A2A2A] hover:bg-[#333333] text-white text-xs font-semibold h-10 px-4 shrink-0 flex items-center gap-1.5 border border-[#3A3A3A]"
+            className="bg-muted hover:bg-muted/80 text-foreground text-xs font-semibold h-10 px-4 shrink-0 flex items-center gap-1.5 border border-border"
           >
             <Plus className="w-4 h-4 text-primary" /> Adicionar Exercício
           </Button>
@@ -743,9 +742,9 @@ export default function SheetForm() {
 
         {/* Lista de Exercícios da Série Ativa */}
         {currentBlocks.length === 0 ? (
-          <div className="py-14 text-center flex flex-col items-center justify-center text-[#8A8F98]">
+          <div className="py-14 text-center flex flex-col items-center justify-center text-muted-foreground">
             <ClipboardList className="w-12 h-12 stroke-[1.5] opacity-40 mb-3" />
-            <p className="text-sm font-bold text-white mb-1">Série {activeTab} vazia</p>
+            <p className="text-sm font-bold text-foreground mb-1">Série {activeTab} vazia</p>
             <p className="text-xs max-w-xs mb-4">
               Toque no botão abaixo para escolher exercícios do acervo para esta série.
             </p>
@@ -769,7 +768,7 @@ export default function SheetForm() {
               return (
                 <div
                   key={`${block.exercise_id}-${index}`}
-                  className="bg-[#141414] border border-[#2A2A2A] hover:border-primary/40 rounded-xl p-4 transition-all space-y-3"
+                  className="bg-card border border-border hover:border-primary/40 rounded-xl p-4 transition-all space-y-3 shadow-xs"
                 >
                   {/* Topo do Exercício */}
                   <div className="flex items-center justify-between gap-3">
@@ -781,7 +780,7 @@ export default function SheetForm() {
                             type="button"
                             disabled={index === 0}
                             onClick={() => handleMoveBlock(index, 'up')}
-                            className="p-1 text-[#8A8F98] hover:text-white disabled:opacity-20"
+                            className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-20"
                             title="Mover para cima"
                           >
                             <ChevronUp className="w-3.5 h-3.5" />
@@ -790,13 +789,13 @@ export default function SheetForm() {
                             type="button"
                             disabled={index === currentBlocks.length - 1}
                             onClick={() => handleMoveBlock(index, 'down')}
-                            className="p-1 text-[#8A8F98] hover:text-white disabled:opacity-20"
+                            className="p-1 text-muted-foreground hover:text-foreground disabled:opacity-20"
                             title="Mover para baixo"
                           >
                             <ChevronDown className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                        <span className="w-6 text-center text-xs font-bold text-secondary">
+                        <span className="w-6 text-center text-xs font-bold text-primary">
                           #{index + 1}
                         </span>
                       </div>
@@ -811,7 +810,7 @@ export default function SheetForm() {
                                 youtubeUrl: ytUrl,
                               })
                             }
-                            className="text-base font-bold text-white hover:text-secondary cursor-pointer transition-colors break-words leading-snug"
+                            className="text-base font-bold text-foreground hover:text-primary cursor-pointer transition-colors break-words leading-snug"
                           >
                             {exName}
                           </h4>
@@ -825,7 +824,7 @@ export default function SheetForm() {
                                   youtubeUrl: ytUrl,
                                 })
                               }
-                              className="p-1 rounded bg-primary/20 text-secondary hover:bg-primary/30 transition-colors shrink-0 mt-0.5"
+                              className="p-1 rounded bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0 mt-0.5"
                               title="Assistir demonstração"
                             >
                               <Play className="w-3 h-3 fill-current" />
@@ -840,15 +839,15 @@ export default function SheetForm() {
                                   youtubeUrl: ytUrl,
                                 })
                               }
-                              className="p-1 rounded bg-[#222222] text-[#8A8F98] hover:text-white transition-colors shrink-0 mt-0.5"
+                              className="p-1 rounded bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0 mt-0.5"
                               title="Sem vídeo cadastrado (toque para ver detalhes)"
                             >
                               <VideoOff className="w-3 h-3" />
                             </button>
                           )}
                         </div>
-                        <span className="text-[11px] text-[#8A8F98] block mt-0.5">
-                          Agrupamento: <strong className="text-white">{muscle}</strong>
+                        <span className="text-[11px] text-muted-foreground block mt-0.5">
+                          Agrupamento: <strong className="text-foreground">{muscle}</strong>
                         </span>
                       </div>
                     </div>
@@ -858,7 +857,7 @@ export default function SheetForm() {
                       <button
                         type="button"
                         onClick={() => setReplaceIndex(index)}
-                        className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-secondary hover:bg-secondary/15 border border-secondary/30 transition-colors flex items-center gap-1"
+                        className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-primary hover:bg-primary/10 border border-primary/20 transition-colors flex items-center gap-1"
                         title="Trocar este exercício por outro do acervo"
                       >
                         <ArrowRightLeft className="w-3.5 h-3.5" /> Trocar Exercício
@@ -867,7 +866,7 @@ export default function SheetForm() {
                       <button
                         type="button"
                         onClick={() => handleRemoveBlock(index)}
-                        className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
                         title="Remover exercício da série"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -876,9 +875,9 @@ export default function SheetForm() {
                   </div>
 
                   {/* Parâmetros em Linha Compacta (Séries, Reps, Tempo, Carga, Obs) */}
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-2 border-t border-[#222222]">
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 pt-2 border-t border-border">
                     <div className="space-y-1">
-                      <Label className="text-[11px] text-[#8A8F98]">Séries</Label>
+                      <Label className="text-[11px] text-muted-foreground">Séries</Label>
                       <Input
                         type="number"
                         min={1}
@@ -898,47 +897,47 @@ export default function SheetForm() {
                             handleUpdateBlock(index, 'sets', 1)
                           }
                         }}
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
+                        className="h-9 bg-card border-border text-foreground text-xs focus-visible:ring-primary shadow-xs"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-[11px] text-[#8A8F98]">Repetições</Label>
+                      <Label className="text-[11px] text-muted-foreground">Repetições</Label>
                       <Input
                         value={block.reps}
                         onChange={(e) => handleUpdateBlock(index, 'reps', e.target.value)}
                         placeholder="Ex: 10 a 12"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
+                        className="h-9 bg-card border-border text-foreground text-xs focus-visible:ring-primary shadow-xs"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-[11px] text-[#8A8F98]">Descanso / Tempo</Label>
+                      <Label className="text-[11px] text-muted-foreground">Descanso / Tempo</Label>
                       <Input
                         value={block.time}
                         onChange={(e) => handleUpdateBlock(index, 'time', e.target.value)}
                         placeholder="Ex: 60s"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
+                        className="h-9 bg-card border-border text-foreground text-xs focus-visible:ring-primary shadow-xs"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-[11px] text-[#8A8F98]">Carga Sugerida</Label>
+                      <Label className="text-[11px] text-muted-foreground">Carga Sugerida</Label>
                       <Input
                         value={block.load}
                         onChange={(e) => handleUpdateBlock(index, 'load', e.target.value)}
                         placeholder="Ex: 25kg"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
+                        className="h-9 bg-card border-border text-foreground text-xs focus-visible:ring-primary shadow-xs"
                       />
                     </div>
 
                     <div className="col-span-2 sm:col-span-1 space-y-1">
-                      <Label className="text-[11px] text-[#8A8F98]">Observações</Label>
+                      <Label className="text-[11px] text-muted-foreground">Observações</Label>
                       <Input
                         value={block.notes}
                         onChange={(e) => handleUpdateBlock(index, 'notes', e.target.value)}
                         placeholder="Ex: Pegada aberta"
-                        className="h-9 bg-[#1E1E1E] border-[#2E2E2E] text-white text-xs focus-visible:ring-primary"
+                        className="h-9 bg-card border-border text-foreground text-xs focus-visible:ring-primary shadow-xs"
                       />
                     </div>
                   </div>
@@ -951,7 +950,7 @@ export default function SheetForm() {
                 type="button"
                 variant="outline"
                 onClick={() => setPickerOpen(true)}
-                className="border-[#2E2E2E] bg-[#141414] hover:bg-[#252525] text-white text-xs h-10 px-5"
+                className="border-border bg-card hover:bg-muted text-foreground text-xs h-10 px-5"
               >
                 <Plus className="w-4 h-4 mr-1 text-primary" /> Adicionar Mais um Exercício na Série{' '}
                 {activeTab}
@@ -1009,12 +1008,12 @@ export default function SheetForm() {
 
       {/* Modal Usar Outra Ficha Como Base (Item 3) */}
       <Dialog open={importModalOpen} onOpenChange={setImportModalOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-lg">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-              <Copy className="w-5 h-5 text-secondary" /> Usar ficha de outro aluno como base
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Copy className="w-5 h-5 text-primary" /> Usar ficha de outro aluno como base
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Escolha uma ficha existente no Studio Bru Oliveira para copiar para este aluno. As
               séries A–E, exercícios, repetições, cargas e observações atuais serão substituídos
               pelas da ficha escolhida.
@@ -1023,13 +1022,13 @@ export default function SheetForm() {
 
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-[#8A8F98]">
+              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Selecione a ficha modelo:
               </label>
               <select
                 value={selectedSheetToImport}
                 onChange={(e) => setSelectedSheetToImport(e.target.value)}
-                className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full h-12 bg-card border border-border text-foreground rounded-md px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 {availableSheets.map((sh) => {
                   const sName = sh.expand?.student?.name || 'Aluno'
@@ -1051,20 +1050,22 @@ export default function SheetForm() {
                   (k) => (preview.series_data as Record<string, unknown[]>)?.[k]?.length > 0,
                 )
                 return (
-                  <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3 text-xs space-y-1">
-                    <p className="text-[#8A8F98]">
+                  <div className="bg-muted/40 border border-border rounded-xl p-3 text-xs space-y-1">
+                    <p className="text-muted-foreground">
                       Aluno de origem:{' '}
-                      <strong className="text-white">
+                      <strong className="text-foreground">
                         {preview.expand?.student?.name || 'Não identificado'}
                       </strong>
                     </p>
-                    <p className="text-[#8A8F98]">
+                    <p className="text-muted-foreground">
                       Séries com exercícios:{' '}
-                      <strong className="text-secondary">
+                      <strong className="text-primary">
                         {seriesCount.length > 0 ? seriesCount.join(', ') : 'Nenhuma'}
                       </strong>
                     </p>
-                    {preview.notes && <p className="text-[#8A8F98] italic">Obs: {preview.notes}</p>}
+                    {preview.notes && (
+                      <p className="text-muted-foreground italic">Obs: {preview.notes}</p>
+                    )}
                   </div>
                 )
               })()}
@@ -1075,7 +1076,7 @@ export default function SheetForm() {
               type="button"
               variant="outline"
               onClick={() => setImportModalOpen(false)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>

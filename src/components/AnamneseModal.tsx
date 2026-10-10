@@ -72,7 +72,7 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
               <span className="text-[11px] uppercase tracking-wider text-primary font-semibold flex items-center gap-1">
                 <HeartPulse className="w-3.5 h-3.5 inline text-primary" /> Saúde & Anamnese
               </span>{' '}
-              <h3 className="text-lg font-bold text-white truncate">{student.name}</h3>
+              <h3 className="text-lg font-bold text-foreground truncate">{student.name}</h3>
             </div>
           </div>
 
@@ -93,14 +93,18 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
               <User className="w-4 h-4 text-muted-foreground" />
               <div>
                 <span className="text-muted-foreground block">Idade</span>
-                <strong className="text-foreground text-xs">{age !== null ? `${age} anos` : 'Não informada'}</strong>
+                <strong className="text-foreground text-xs">
+                  {age !== null ? `${age} anos` : 'Não informada'}
+                </strong>
               </div>
             </div>
             <div className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-muted-foreground" />
               <div>
                 <span className="text-muted-foreground block">Contato</span>
-                <strong className="text-foreground text-xs">{student.phone || 'Sem telefone'}</strong>
+                <strong className="text-foreground text-xs">
+                  {student.phone || 'Sem telefone'}
+                </strong>
               </div>
             </div>
             <div className="flex items-center gap-2.5 col-span-2 sm:col-span-1">
@@ -108,20 +112,21 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
               <div>
                 <span className="text-muted-foreground block">Profissão</span>
                 <strong className="text-foreground text-xs truncate max-w-[120px] block">
-                  {student.profession || 'Não informada'}
+                  {an.profissao || 'Não informada'}
                 </strong>
               </div>
             </div>
-          </div>            </div>
           </div>
 
           {/* Destaque de Restrições Médicas / Cuidados em aula (permanece exatamente com esse rótulo) */}
           {student.restrictions && (
-            <div className="p-3.5 rounded-xl bg-amber-950/40 border border-amber-600/40 space-y-1">
-              <div className="flex items-center gap-2 text-amber-400 font-bold text-xs tracking-wider uppercase">
+            <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
+              <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-xs tracking-wider uppercase">
                 <ShieldAlert className="w-4 h-4" /> Restrições médicas / Cuidado em aula
               </div>
-              <p className="text-sm text-amber-100 font-medium">{student.restrictions}</p>
+              <p className="text-sm text-amber-900 dark:text-amber-100 font-medium">
+                {student.restrictions}
+              </p>
             </div>
           )}
 
@@ -155,16 +160,17 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             </div>
           )}
 
-          {/* Questionário de Anamnese no Modelo Exato (Item 6) */}
+          {/* Questionário de Anamnese */}
           <div className="space-y-3">
             {/* 1. Já treinou com Personal antes? */}
             {an.treinou_personal_antes && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Medicamentos de Uso Contínuo
+                  Já treinou com Personal antes?
                 </span>
-                <p className="text-foreground leading-relaxed">{anamnesis.medications}</p>
-              </div>            )}
+                <p className="text-foreground leading-relaxed">{an.treinou_personal_antes}</p>
+              </div>
+            )}
 
             {/* 2. Objetivos */}
             {((an.objetivos && an.objetivos.length > 0) ||
@@ -190,10 +196,11 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             {an.enfase_musculatura && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Dores Articulares / Coluna
+                  Ênfase em alguma musculatura
                 </span>
-                <p className="text-foreground leading-relaxed">{anamnesis.joint_pain_details}</p>
-              </div>            )}
+                <p className="text-foreground leading-relaxed">{an.enfase_musculatura}</p>
+              </div>
+            )}
 
             {/* 4. Já praticou algum exercício físico? */}
             {an.praticou_exercicio && (
@@ -215,16 +222,17 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             {an.tempo_sem_praticar && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Lesões Articulares ou Ósseas
+                  Há quanto tempo não pratica exercício físico?
                 </span>
-                <p className="text-foreground leading-relaxed">{anamnesis.injuries_details}</p>
-              </div>            )}
+                <p className="text-foreground leading-relaxed">{an.tempo_sem_praticar}</p>
+              </div>
+            )}
 
             {/* 6. Possui alguma restrição à exercício físico? */}
             {an.restricao_exercicio && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Possui alguma restrição à exercício físico?
+                  Possui alguma restrição a exercício físico?
                 </span>
                 <p className="text-foreground text-sm">
                   ({an.restricao_exercicio === 'SIM' ? 'x' : ' '}) SIM{' '}
@@ -271,10 +279,13 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             {(an.possui_lesao || student.injuries) && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Alergias Conhecidas
+                  Possui alguma lesão?
                 </span>
-                <p className="text-foreground leading-relaxed">{anamnesis.allergies_details}</p>
-              </div>            )}
+                <p className="text-foreground leading-relaxed">
+                  {an.possui_lesao || student.injuries}
+                </p>
+              </div>
+            )}
 
             {/* 9. Dores em alguma parte do corpo? */}
             {an.dores_corpo && (
@@ -296,67 +307,77 @@ export default function AnamneseModal({ isOpen, onClose, student }: AnamneseModa
             {an.faz_dieta && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Nível de Estresse
+                  Faz dieta?
                 </span>
                 <p className="text-foreground leading-relaxed">
-                  {anamnesis.stress_level || 'Não informado'}
+                  {an.faz_dieta === 'SIM' ? 'Sim' : an.faz_dieta === 'NAO' ? 'Não' : an.faz_dieta}
                 </p>
-              </div>            )}
+              </div>
+            )}
 
             {/* 11. Faz acompanhamento com nutricionista? */}
             {an.faz_nutricionista && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Consumo de Água
+                  Faz acompanhamento com nutricionista?
                 </span>
                 <p className="text-foreground leading-relaxed">
-                  {anamnesis.water_intake || 'Não informado'}
+                  {an.faz_nutricionista === 'SIM'
+                    ? 'Sim'
+                    : an.faz_nutricionista === 'NAO'
+                      ? 'Não'
+                      : an.faz_nutricionista}
                 </p>
-              </div>            )}
+              </div>
+            )}
 
             {/* 12. Faz uso de Álcool / Tabaco */}
             {an.uso_substancias && an.uso_substancias.length > 0 && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs space-y-1.5">
                 <span className="text-muted-foreground font-bold block uppercase tracking-wider">
-                  Dias e Frequência Preferidos
+                  Faz uso de álcool / tabaco?
                 </span>
                 <div className="flex flex-wrap gap-1.5 pt-1">
-                  {['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day) => {
-                    const isSelected = anamnesis.preferred_days?.includes(day)
-                    return (
-                      <span
-                        key={day}
-                        className={`text-[11px] px-2.5 py-1 rounded-md font-semibold ${
-                          isSelected
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted text-muted-foreground border border-border'
-                        }`}
-                      >
-                        {day}
-                      </span>
-                    )
-                  })}
+                  {an.uso_substancias.map((item) => (
+                    <Badge
+                      key={item}
+                      className="bg-muted text-foreground border border-border text-xs px-2.5 py-0.5"
+                    >
+                      {item}
+                    </Badge>
+                  ))}
                 </div>
-              </div>            )}
+              </div>
+            )}
 
-            {/* Campos legados adicionais preservados (histórico clínico geral, cirurgias) */}
+            {/* Campos legados adicionais preservados (histórico clínico geral, cirurgias, observações do professor) */}
             {student.health_history && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Condições Crônicas
+                  Histórico Clínico / Saúde Geral
                 </span>
-                <p className="text-foreground leading-relaxed">{anamnesis.chronic_conditions_details}</p>
-              </div>            )}
+                <p className="text-foreground leading-relaxed">{student.health_history}</p>
+              </div>
+            )}
 
             {student.surgeries && (
               <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
                 <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
-                  Observações Gerais do Professor
+                  Cirurgias / Procedimentos
                 </span>
-                <p className="text-foreground leading-relaxed">{anamnesis.general_observations}</p>
-              </div>            )}
-          </div>
+                <p className="text-foreground leading-relaxed">{student.surgeries}</p>
+              </div>
+            )}
 
+            {student.general_observations && (
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="text-muted-foreground font-bold block mb-1 uppercase tracking-wider">
+                  Observações Gerais
+                </span>
+                <p className="text-foreground leading-relaxed">{student.general_observations}</p>
+              </div>
+            )}
+          </div>
           {!hasAnamneseData && (
             <div className="py-8 text-center text-muted-foreground space-y-1">
               <HeartPulse className="w-8 h-8 opacity-40 mx-auto mb-2" />

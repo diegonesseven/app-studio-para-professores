@@ -140,22 +140,22 @@ export default function VideoModal({
             <span className="text-[11px] sm:text-xs uppercase tracking-wider text-primary font-semibold flex items-center gap-1.5">
               Demonstração do Exercício
               {platformLabel && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-[#C1C7D0] uppercase tracking-normal font-normal">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground uppercase tracking-normal font-normal border border-border">
                   {platformLabel}
                 </span>
               )}
               {isPortrait && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary uppercase tracking-normal font-semibold">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/15 text-primary uppercase tracking-normal font-semibold">
                   Vertical
                 </span>
               )}
             </span>
-            <h3 className="text-sm sm:text-lg font-bold text-white truncate">{title}</h3>
+            <h3 className="text-sm sm:text-lg font-bold text-foreground truncate">{title}</h3>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 sm:p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors shrink-0"
+            className="p-1.5 sm:p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
             aria-label="Fechar vídeo"
           >
             <X className="w-5 h-5" />
@@ -202,14 +202,14 @@ export default function VideoModal({
               />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 text-[#8A8F98]">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#1E1E1E] border border-[#2E2E2E] flex items-center justify-center text-[#8A8F98] mb-3">
-                <VideoOff className="w-6 h-6 sm:w-7 sm:h-7 text-[#8A8F98]/70" />
+            <div className="flex flex-col items-center justify-center text-center p-6 sm:p-8 text-muted-foreground bg-muted/20">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-card border border-border flex items-center justify-center text-muted-foreground mb-3">
+                <VideoOff className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground/70" />
               </div>
-              <p className="text-sm sm:text-base font-semibold text-white mb-1">
+              <p className="text-sm sm:text-base font-semibold text-foreground mb-1">
                 Vídeo não cadastrado ainda
               </p>
-              <p className="text-xs max-w-xs text-[#8A8F98]">
+              <p className="text-xs max-w-xs text-muted-foreground">
                 Este exercício foi salvo sem link de vídeo demonstrativo. Você pode editá-lo para
                 adicionar um link do YouTube ou Vimeo quando desejar.
               </p>
@@ -218,8 +218,8 @@ export default function VideoModal({
         </div>
 
         {/* Footer com link externo se houver vídeo */}
-        <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 bg-card/90 border-t border-border flex items-center justify-between gap-2 sm:gap-3 shrink-0">
-          <span className="text-[11px] sm:text-xs text-[#8A8F98] truncate">
+        <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 bg-card border-t border-border flex items-center justify-between gap-2 sm:gap-3 shrink-0">
+          <span className="text-[11px] sm:text-xs text-muted-foreground truncate">
             Studio Bru Oliveira • Ficha de Execução
           </span>
 
@@ -239,7 +239,7 @@ export default function VideoModal({
               size="sm"
               variant="outline"
               onClick={onClose}
-              className="border-border bg-card hover:bg-muted text-white text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
+              className="border-border bg-card hover:bg-muted text-foreground text-xs sm:text-sm h-8 sm:h-9 px-3 sm:px-4"
             >
               Fechar
             </Button>

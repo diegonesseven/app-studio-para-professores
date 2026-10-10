@@ -88,11 +88,11 @@ export default function HistoryPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
             <History className="w-7 h-7 text-primary" /> Histórico de Treinos
           </h1>
-          <p className="text-sm text-[#8A8F98] mt-1">
-            Registro cronológico das séries realizadas pelos alunos em aula no Studio Bru Oliveira
+          <p className="text-sm text-muted-foreground mt-1">
+            Registro cronológico das séries e treinos finalizados pelos alunos do estúdio
           </p>
         </div>
       </div>
@@ -104,16 +104,16 @@ export default function HistoryPage() {
             placeholder="Pesquisar por nome do aluno..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-primary"
+            className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 pl-11 pr-4 focus-visible:ring-primary shadow-xs"
           />
-          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
         </div>
 
         <div className="relative">
           <select
             value={selectedStudentFilter}
             onChange={(e) => setSelectedStudentFilter(e.target.value)}
-            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full h-12 bg-card border border-border text-foreground rounded-md px-3.5 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
           >
             <option value="all">Todos os Alunos</option>
             {students.map((st) => (
@@ -122,25 +122,25 @@ export default function HistoryPage() {
               </option>
             ))}
           </select>
-          <Filter className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98] pointer-events-none" />
+          <Filter className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         </div>
       </div>
 
       {/* Lista de Registros */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
+        <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando histórico do estúdio...</p>
         </div>
       ) : filteredList.length === 0 ? (
-        <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-10 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#2A2A2A] flex items-center justify-center text-[#8A8F98] mb-4">
+        <div className="bg-card border border-border rounded-2xl p-10 text-center flex flex-col items-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground mb-4">
             <History className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">
+          <h3 className="text-lg font-bold text-foreground mb-1">
             Nenhum registro de treino encontrado
           </h3>
-          <p className="text-sm text-[#8A8F98] max-w-sm">
+          <p className="text-sm text-muted-foreground max-w-sm">
             Conforme as aulas forem conduzidas na Tela de Treino e as séries concluídas, o histórico
             será preenchido automaticamente aqui.
           </p>
@@ -166,16 +166,16 @@ export default function HistoryPage() {
             return (
               <div
                 key={entry.id}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/40 rounded-xl p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                className="bg-card border border-border hover:border-primary/40 rounded-xl p-4 sm:p-5 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group shadow-xs"
               >
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-11 h-11 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center shrink-0">
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center shrink-0">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors truncate">
+                      <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors truncate">
                         {studentName}
                       </h3>
                       <Badge className="bg-primary text-primary-foreground font-bold text-xs px-2.5">
@@ -183,7 +183,7 @@ export default function HistoryPage() {
                       </Badge>
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-[#8A8F98] mt-1 flex-wrap">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1 flex-wrap">
                       <span className="flex items-center gap-1 capitalize">
                         <Calendar className="w-3.5 h-3.5" /> {dateFormatted}
                       </span>
@@ -194,7 +194,7 @@ export default function HistoryPage() {
                         <Dumbbell className="w-3.5 h-3.5" /> {exerciseCount} exercícios
                       </span>
                       {entry.expand?.teacher?.name && (
-                        <span className="flex items-center gap-1 text-secondary font-medium">
+                        <span className="flex items-center gap-1 text-primary font-medium">
                           <GraduationCap className="w-3.5 h-3.5" /> Prof.{' '}
                           {entry.expand.teacher.name}
                         </span>
@@ -207,7 +207,7 @@ export default function HistoryPage() {
                   <Button
                     variant="outline"
                     onClick={() => setSelectedSession(entry)}
-                    className="border-[#2E2E2E] bg-[#141414] hover:bg-[#2A2A2A] text-white text-xs h-9 px-3.5 flex items-center gap-1.5"
+                    className="border-border bg-card hover:bg-muted text-foreground text-xs h-9 px-3.5 flex items-center gap-1.5 cursor-pointer"
                   >
                     <Eye className="w-3.5 h-3.5 text-primary" /> Ver Detalhes
                   </Button>
@@ -223,8 +223,8 @@ export default function HistoryPage() {
         open={Boolean(selectedSession)}
         onOpenChange={(open) => !open && setSelectedSession(null)}
       >
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-xl max-h-[85vh] flex flex-col">
-          <DialogHeader className="border-b border-[#2E2E2E] pb-3">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="border-b border-border pb-3">
             <div className="flex items-center gap-2">
               <span className="text-xs uppercase tracking-wider text-primary font-bold">
                 Resumo da Aula
@@ -233,10 +233,10 @@ export default function HistoryPage() {
                 Treino {selectedSession?.series_completed}
               </Badge>{' '}
             </div>
-            <DialogTitle className="text-lg font-bold text-white">
+            <DialogTitle className="text-lg font-bold text-foreground">
               {selectedSession?.expand?.student?.name || 'Aluno'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#8A8F98] flex items-center gap-2 flex-wrap pt-0.5">
+            <DialogDescription className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap pt-0.5">
               <span>
                 Finalizado em{' '}
                 {selectedSession &&
@@ -245,7 +245,7 @@ export default function HistoryPage() {
                   )}
               </span>
               {selectedSession?.expand?.teacher?.name && (
-                <span className="text-secondary font-semibold flex items-center gap-1">
+                <span className="text-primary font-semibold flex items-center gap-1">
                   • Professor responsável: {selectedSession.expand.teacher.name}
                 </span>
               )}
@@ -253,7 +253,7 @@ export default function HistoryPage() {
           </DialogHeader>
 
           <div className="py-3 overflow-y-auto space-y-3 flex-1 pr-1">
-            <span className="text-xs font-semibold text-[#8A8F98] uppercase tracking-wider block">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
               Exercícios Executados na Sessão:
             </span>
 
@@ -267,20 +267,20 @@ export default function HistoryPage() {
                 return (
                   <div
                     key={i}
-                    className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] flex items-center justify-between gap-3 text-xs"
+                    className="p-3 rounded-xl bg-muted/40 border border-border flex items-center justify-between gap-3 text-xs"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-6 h-6 rounded-full bg-[#2EA55B]/20 text-[#2EA55B] flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-600 flex items-center justify-center shrink-0">
                         <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <span className="font-bold text-white block truncate">{name}</span>
-                        <span className="text-[11px] text-[#8A8F98]">{muscle}</span>
+                        <span className="font-bold text-foreground block truncate">{name}</span>
+                        <span className="text-[11px] text-muted-foreground">{muscle}</span>
                       </div>
                     </div>
 
                     <div className="text-right shrink-0">
-                      <span className="font-semibold text-white block">
+                      <span className="font-semibold text-foreground block">
                         {block.sets}x {block.reps || '10'}
                       </span>
                       <span className="text-[11px] text-primary">
@@ -291,24 +291,26 @@ export default function HistoryPage() {
                 )
               })
             ) : (
-              <p className="text-xs text-[#8A8F98] italic">
+              <p className="text-xs text-muted-foreground italic">
                 Nenhum detalhe individual de exercício arquivado neste registro.
               </p>
             )}
 
             {selectedSession?.notes && (
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#2A2A2A] text-xs">
-                <span className="font-bold text-[#8A8F98] block mb-1">Anotações da aula:</span>
-                <p className="text-white">{selectedSession.notes}</p>
+              <div className="p-3 rounded-xl bg-muted/40 border border-border text-xs">
+                <span className="font-bold text-muted-foreground block mb-1">
+                  Anotações da aula:
+                </span>
+                <p className="text-foreground">{selectedSession.notes}</p>
               </div>
             )}
           </div>
 
-          <DialogFooter className="border-t border-[#2E2E2E] pt-3">
+          <DialogFooter className="border-t border-border pt-3">
             <Button
               type="button"
               onClick={() => setSelectedSession(null)}
-              className="w-full sm:w-auto bg-primary hover:opacity-90 text-primary-foreground text-xs h-9"
+              className="w-full sm:w-auto bg-primary hover:opacity-90 text-primary-foreground text-xs h-9 cursor-pointer"
             >
               Fechar Detalhes
             </Button>

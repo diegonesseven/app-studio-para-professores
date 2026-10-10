@@ -338,17 +338,17 @@ export default function TeachersPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
             <GraduationCap className="w-7 h-7 text-primary" /> Gestão de Professores
           </h1>
-          <p className="text-sm text-[#8A8F98] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Cadastre os professores que utilizarão o app e crie o login de acesso de cada um
           </p>
         </div>
 
         <Button
           onClick={handleOpenCreateModal}
-          className="bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11 px-5 shadow-md flex items-center gap-2 shrink-0"
+          className="bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11 px-5 shadow-md flex items-center gap-2 shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Cadastrar Novo Professor
         </Button>
@@ -361,16 +361,16 @@ export default function TeachersPage() {
             placeholder="Pesquisar por nome ou e-mail..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#1E1E1E] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pl-11 pr-4 focus-visible:ring-primary"
+            className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 pl-11 pr-4 focus-visible:ring-primary shadow-xs"
           />
-          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+          <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
         </div>
 
         <div>
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as 'all' | 'professor' | 'admin')}
-            className="w-full h-12 bg-[#1E1E1E] border border-[#2E2E2E] text-white rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full h-12 bg-card border border-border text-foreground rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary shadow-xs"
           >
             <option value="all">Todos os papéis ({teachers.length})</option>
             <option value="professor">Apenas Professores</option>
@@ -381,17 +381,17 @@ export default function TeachersPage() {
 
       {/* Conteúdo / Cards de Professores */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
+        <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando lista de professores...</p>
         </div>
       ) : filteredTeachers.length === 0 ? (
-        <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-10 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#2A2A2A] flex items-center justify-center text-[#8A8F98] mb-4">
+        <div className="bg-card border border-border rounded-2xl p-10 text-center flex flex-col items-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground mb-4">
             <GraduationCap className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">Nenhum professor encontrado</h3>
-          <p className="text-sm text-[#8A8F98] max-w-sm mb-6">
+          <h3 className="text-lg font-bold text-foreground mb-1">Nenhum professor encontrado</h3>
+          <p className="text-sm text-muted-foreground max-w-sm mb-6">
             Não há professores cadastrados com os filtros informados.
           </p>
           <Button
@@ -417,27 +417,27 @@ export default function TeachersPage() {
             return (
               <div
                 key={teacher.id}
-                className="bg-[#1E1E1E] border border-[#2E2E2E] hover:border-primary/40 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group"
+                className="bg-card border border-border hover:border-primary/40 rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex flex-col justify-between group"
               >
                 <div>
                   {/* Topo do Card */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border-2 border-primary/30 text-primary font-black text-sm flex items-center justify-center shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 border-2 border-primary/30 text-primary font-black text-sm flex items-center justify-center shrink-0">
                         {initials}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
-                          <h3 className="text-base font-bold text-white group-hover:text-primary transition-colors truncate">
+                          <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors truncate">
                             {teacher.name || 'Sem nome'}
                           </h3>
                           {isSelf && (
-                            <span className="text-[10px] font-bold bg-white/10 text-white/80 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold bg-muted text-muted-foreground px-1.5 py-0.5 rounded border border-border">
                               Você
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-[#8A8F98] truncate mt-0.5">
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground truncate mt-0.5">
                           <Mail className="w-3.5 h-3.5 shrink-0" />
                           <span className="truncate">{teacher.email}</span>
                         </div>
@@ -447,8 +447,8 @@ export default function TeachersPage() {
                     <Badge
                       className={`text-xs px-2.5 py-0.5 font-bold shrink-0 ${
                         isAdm
-                          ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                          : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                          ? 'bg-amber-500/15 text-amber-800 border border-amber-500/30'
+                          : 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30'
                       }`}
                     >
                       {isAdm ? (
@@ -464,16 +464,16 @@ export default function TeachersPage() {
                   </div>
 
                   {/* Detalhes de status */}
-                  <div className="mt-3 pt-3 border-t border-[#262626] text-xs space-y-1 text-[#8A8F98]">
+                  <div className="mt-3 pt-3 border-t border-border text-xs space-y-1 text-muted-foreground">
                     <div className="flex items-center justify-between">
                       <span>Status de acesso:</span>
-                      <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                      <span className="text-emerald-600 font-semibold flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" /> Ativo
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span>Cadastrado em:</span>
-                      <span className="text-white font-medium">
+                      <span className="text-foreground font-medium">
                         {teacher.created
                           ? new Date(teacher.created).toLocaleDateString('pt-BR')
                           : '—'}
@@ -483,13 +483,13 @@ export default function TeachersPage() {
                 </div>
 
                 {/* Ações inferiores */}
-                <div className="pt-3.5 mt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2">
+                <div className="pt-3.5 mt-3 border-t border-border flex items-center justify-between gap-2">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => handleOpenResetModal(teacher)}
-                    className="border-[#2E2E2E] bg-[#141414] hover:bg-[#2A2A2A] text-white text-xs h-9 px-3 flex items-center gap-1.5"
+                    className="border-border bg-card hover:bg-muted text-foreground text-xs h-9 px-3 flex items-center gap-1.5 cursor-pointer"
                     title="Redefinir Senha do Professor"
                   >
                     <KeyRound className="w-3.5 h-3.5 text-primary" />
@@ -500,7 +500,7 @@ export default function TeachersPage() {
                     <button
                       type="button"
                       onClick={() => handleOpenEditModal(teacher)}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                       title="Editar dados"
                       aria-label={`Editar ${teacher.name}`}
                     >
@@ -511,10 +511,10 @@ export default function TeachersPage() {
                       type="button"
                       onClick={() => handleOpenDeleteModal(teacher)}
                       disabled={isSelf}
-                      className={`p-2 rounded-lg transition-colors ${
+                      className={`p-2 rounded-lg transition-colors cursor-pointer ${
                         isSelf
-                          ? 'opacity-30 cursor-not-allowed text-[#666666]'
-                          : 'text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A]'
+                          ? 'opacity-30 cursor-not-allowed text-muted-foreground'
+                          : 'text-muted-foreground hover:text-red-500 hover:bg-red-50'
                       }`}
                       title={
                         isSelf
@@ -535,14 +535,14 @@ export default function TeachersPage() {
 
       {/* MODAL DE CADASTRO / EDIÇÃO */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-lg">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-lg">
           <form onSubmit={handleSubmitTeacher}>
             <DialogHeader>
-              <DialogTitle className="text-xl font-bold text-white flex items-center gap-2">
+              <DialogTitle className="text-xl font-bold text-foreground flex items-center gap-2">
                 <GraduationCap className="w-5 h-5 text-primary" />
                 {editingTeacher ? 'Editar Professor' : 'Cadastrar Novo Professor'}
               </DialogTitle>
-              <DialogDescription className="text-[#8A8F98] text-sm">
+              <DialogDescription className="text-muted-foreground text-sm">
                 {editingTeacher
                   ? 'Atualize os dados cadastrais e as credenciais de acesso.'
                   : 'Preencha o formulário para criar uma conta e o login do professor no Studio.'}
@@ -550,8 +550,8 @@ export default function TeachersPage() {
             </DialogHeader>
 
             {formError && (
-              <div className="mt-4 p-3 rounded-lg bg-red-950/40 border border-red-800/60 flex items-start gap-2 text-xs text-red-200">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+              <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-2 text-xs text-red-700">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
                 <span>{formError}</span>
               </div>
             )}
@@ -559,7 +559,7 @@ export default function TeachersPage() {
             <div className="space-y-4 py-4">
               {/* Nome */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <UserIcon className="w-3.5 h-3.5" /> Nome Completo *
                 </label>
                 <Input
@@ -568,13 +568,13 @@ export default function TeachersPage() {
                   placeholder="Ex: Carlos Silva"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                  className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                 />
               </div>
 
               {/* E-mail */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Mail className="w-3.5 h-3.5" /> E-mail de Login *
                 </label>
                 <Input
@@ -583,30 +583,30 @@ export default function TeachersPage() {
                   placeholder="professor@studiobru.com.br"
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
-                  className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                  className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                 />
               </div>
 
               {/* Papel */}
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5" /> Tipo de Acesso
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setFormRole('professor')}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                       formRole === 'professor'
-                        ? 'bg-primary/15 border-primary text-white font-bold ring-1 ring-primary'
-                        : 'bg-[#141414] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
+                        ? 'bg-primary/10 border-primary text-foreground font-bold ring-1 ring-primary'
+                        : 'bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <UserCheck className="w-4 h-4 text-emerald-400" />
+                      <UserCheck className="w-4 h-4 text-emerald-600" />
                       <span className="text-sm font-semibold">Professor</span>
                     </div>
-                    <p className="text-[11px] text-[#8A8F98] mt-1">
+                    <p className="text-[11px] text-muted-foreground mt-1">
                       Acesso aos treinos, alunos e acervo de vídeos.
                     </p>
                   </button>
@@ -614,17 +614,17 @@ export default function TeachersPage() {
                   <button
                     type="button"
                     onClick={() => setFormRole('admin')}
-                    className={`p-3 rounded-xl border text-left transition-all ${
+                    className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                       formRole === 'admin'
-                        ? 'bg-amber-500/15 border-amber-500 text-white font-bold ring-1 ring-amber-500'
-                        : 'bg-[#141414] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
+                        ? 'bg-amber-500/10 border-amber-500 text-foreground font-bold ring-1 ring-amber-500'
+                        : 'bg-card border-border text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-amber-400" />
+                      <ShieldCheck className="w-4 h-4 text-amber-600" />
                       <span className="text-sm font-semibold">Administrador</span>
                     </div>
-                    <p className="text-[11px] text-[#8A8F98] mt-1">
+                    <p className="text-[11px] text-muted-foreground mt-1">
                       Acesso total, gerencia professores e aparência.
                     </p>
                   </button>
@@ -632,11 +632,11 @@ export default function TeachersPage() {
               </div>
 
               {/* Senha e Confirmação */}
-              <div className="space-y-3 pt-2 border-t border-[#282828]">
+              <div className="space-y-3 pt-2 border-t border-border">
                 {/* Campo de Senha Atual exibido apenas ao editar o PRÓPRIO usuário logado */}
                 {editingTeacher && editingTeacher.id === currentUser?.id && (
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                       <KeyRound className="w-3.5 h-3.5" /> Senha Atual (obrigatória para alterar sua
                       senha)
                     </label>
@@ -645,13 +645,13 @@ export default function TeachersPage() {
                       placeholder="Digite sua senha atual"
                       value={formOldPassword}
                       onChange={(e) => setFormOldPassword(e.target.value)}
-                      className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                      className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                     />
                   </div>
                 )}
 
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                     <Lock className="w-3.5 h-3.5" />
                     {editingTeacher
                       ? 'Nova Senha (deixe em branco para manter a atual)'
@@ -663,13 +663,13 @@ export default function TeachersPage() {
                     placeholder="••••••••"
                     value={formPassword}
                     onChange={(e) => setFormPassword(e.target.value)}
-                    className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                    className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                   />
                 </div>
 
                 {(!editingTeacher || formPassword) && (
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                    <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                       <Lock className="w-3.5 h-3.5" /> Confirmar Senha *
                     </label>
                     <Input
@@ -678,7 +678,7 @@ export default function TeachersPage() {
                       placeholder="••••••••"
                       value={formPasswordConfirm}
                       onChange={(e) => setFormPasswordConfirm(e.target.value)}
-                      className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                      className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                     />
                   </div>
                 )}
@@ -691,14 +691,14 @@ export default function TeachersPage() {
                 variant="outline"
                 onClick={() => setModalOpen(false)}
                 disabled={submitting}
-                className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+                className="border-border bg-card hover:bg-muted text-foreground cursor-pointer"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-primary hover:opacity-90 text-primary-foreground font-semibold"
+                className="bg-primary hover:opacity-90 text-primary-foreground font-semibold cursor-pointer"
               >
                 {submitting ? (
                   <>
@@ -717,15 +717,15 @@ export default function TeachersPage() {
 
       {/* MODAL DE REDEFINIÇÃO DE SENHA RÁPIDA */}
       <Dialog open={resetModalOpen} onOpenChange={setResetModalOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <form onSubmit={handleConfirmResetPassword}>
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+              <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
                 <KeyRound className="w-5 h-5 text-primary" /> Redefinir Senha de Acesso
               </DialogTitle>
-              <DialogDescription className="text-[#8A8F98] text-sm">
+              <DialogDescription className="text-muted-foreground text-sm">
                 Defina uma nova senha para o professor{' '}
-                <strong className="text-white">
+                <strong className="text-foreground">
                   {teacherForReset?.name || teacherForReset?.email}
                 </strong>
                 .
@@ -733,8 +733,8 @@ export default function TeachersPage() {
             </DialogHeader>
 
             {resetError && (
-              <div className="mt-4 p-3 rounded-lg bg-red-950/40 border border-red-800/60 flex items-start gap-2 text-xs text-red-200">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-red-400 mt-0.5" />
+              <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-2 text-xs text-red-700">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-red-600 mt-0.5" />
                 <span>{resetError}</span>
               </div>
             )}
@@ -742,7 +742,7 @@ export default function TeachersPage() {
             <div className="space-y-3 py-4">
               {teacherForReset && teacherForReset.id === currentUser?.id && (
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                     <KeyRound className="w-3.5 h-3.5" /> Senha Atual *
                   </label>
                   <Input
@@ -751,13 +751,13 @@ export default function TeachersPage() {
                     placeholder="Digite sua senha atual"
                     value={resetOldPassword}
                     onChange={(e) => setResetOldPassword(e.target.value)}
-                    className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                    className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                   />
                 </div>
               )}
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5" /> Nova Senha (mín. 8 caracteres) *
                 </label>
                 <Input
@@ -766,12 +766,12 @@ export default function TeachersPage() {
                   placeholder="••••••••"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                  className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5" /> Confirmar Nova Senha *
                 </label>
                 <Input
@@ -780,7 +780,7 @@ export default function TeachersPage() {
                   placeholder="••••••••"
                   value={newPasswordConfirm}
                   onChange={(e) => setNewPasswordConfirm(e.target.value)}
-                  className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                  className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                 />
               </div>
             </div>
@@ -791,14 +791,14 @@ export default function TeachersPage() {
                 variant="outline"
                 onClick={() => setResetModalOpen(false)}
                 disabled={resettingPassword}
-                className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+                className="border-border bg-card hover:bg-muted text-foreground cursor-pointer"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={resettingPassword}
-                className="bg-primary hover:opacity-90 text-primary-foreground font-semibold"
+                className="bg-primary hover:opacity-90 text-primary-foreground font-semibold cursor-pointer"
               >
                 {resettingPassword ? (
                   <>
@@ -815,14 +815,14 @@ export default function TeachersPage() {
 
       {/* MODAL DE CONFIRMAÇÃO DE EXCLUSÃO */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-              <Trash2 className="w-5 h-5 text-red-400" /> Remover Acesso do Professor
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-500" /> Remover Acesso do Professor
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Tem certeza que deseja remover o acesso de{' '}
-              <strong className="text-white">
+              <strong className="text-foreground">
                 {teacherToDelete?.name || teacherToDelete?.email}
               </strong>
               ? Esse professor não conseguirá mais entrar no aplicativo.
@@ -835,7 +835,7 @@ export default function TeachersPage() {
               variant="outline"
               onClick={() => setDeleteModalOpen(false)}
               disabled={deleting}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground cursor-pointer"
             >
               Cancelar
             </Button>
@@ -843,7 +843,7 @@ export default function TeachersPage() {
               type="button"
               onClick={handleConfirmDelete}
               disabled={deleting}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold cursor-pointer"
             >
               {deleting ? (
                 <>

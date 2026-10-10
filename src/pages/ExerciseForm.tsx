@@ -166,7 +166,11 @@ export default function ExerciseForm() {
   }
 
   if (loading) {
-    return <div className="py-20 text-center text-[#8A8F98]">Carregando dados do exercício...</div>
+    return (
+      <div className="py-20 text-center text-muted-foreground">
+        Carregando dados do exercício...
+      </div>
+    )
   }
 
   return (
@@ -174,7 +178,7 @@ export default function ExerciseForm() {
       <div className="flex items-center justify-between">
         <Link
           to="/acervo"
-          className="inline-flex items-center gap-1.5 text-sm text-[#8A8F98] hover:text-white transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Voltar ao Acervo
         </Link>
@@ -183,23 +187,23 @@ export default function ExerciseForm() {
             type="button"
             variant="ghost"
             onClick={() => setDeleteDialogOpen(true)}
-            className="text-red-400 hover:text-red-300 hover:bg-red-950/30 text-xs h-9"
+            className="text-red-500 hover:text-red-600 hover:bg-red-50 text-xs h-9"
           >
             <Trash2 className="w-4 h-4 mr-1.5" /> Excluir Exercício
           </Button>
         )}
       </div>
 
-      <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-8 shadow-xl">
-        <div className="flex items-center gap-3 pb-6 mb-6 border-b border-[#2E2E2E]">
-          <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 text-primary flex items-center justify-center">
+      <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
+        <div className="flex items-center gap-3 pb-6 mb-6 border-b border-border">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
             <Dumbbell className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
               {isEditing ? 'Editar Exercício' : 'Novo Exercício'}
             </h1>
-            <p className="text-xs sm:text-sm text-[#8A8F98]">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Cadastre o movimento do acervo. O vídeo do YouTube ou Vimeo é opcional.
             </p>
           </div>
@@ -208,7 +212,7 @@ export default function ExerciseForm() {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Nome */}
           <div className="space-y-1.5">
-            <Label htmlFor="name" className="text-sm text-white font-medium">
+            <Label htmlFor="name" className="text-sm text-foreground font-medium">
               Nome do Exercício *
             </Label>
             <Input
@@ -217,20 +221,20 @@ export default function ExerciseForm() {
               placeholder="Ex: Agachamento Búlgaro, Supino Inclinado com Halteres"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 focus-visible:ring-primary"
+              className="bg-background border-border text-foreground placeholder:text-muted-foreground h-12 focus-visible:ring-primary"
             />
           </div>
 
           {/* Agrupamento muscular */}
           <div className="space-y-1.5">
-            <Label htmlFor="muscle" className="text-sm text-white font-medium">
+            <Label htmlFor="muscle" className="text-sm text-foreground font-medium">
               Agrupamento Muscular Principal *
             </Label>
             <select
               id="muscle"
               value={muscleGroup}
               onChange={(e) => setMuscleGroup(e.target.value as MuscleGroup)}
-              className="w-full h-12 bg-[#121212] border border-[#2E2E2E] text-white rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full h-12 bg-background border border-border text-foreground rounded-md px-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {TARGET_MUSCLE_GROUPS.map((mg) => (
                 <option key={mg} value={mg}>
@@ -243,10 +247,10 @@ export default function ExerciseForm() {
           {/* URL do Vídeo (YouTube ou Vimeo) - Opcional */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <Label htmlFor="videoUrl" className="text-sm text-white font-medium">
+              <Label htmlFor="videoUrl" className="text-sm text-foreground font-medium">
                 Link do Vídeo demonstrativo
               </Label>
-              <span className="text-xs text-[#8A8F98] font-normal">Opcional</span>
+              <span className="text-xs text-muted-foreground font-normal">Opcional</span>
             </div>
             <div className="relative">
               <Input
@@ -254,11 +258,11 @@ export default function ExerciseForm() {
                 placeholder="Ex: https://vimeo.com/123456789 ou https://youtu.be/..."
                 value={youtubeUrl}
                 onChange={(e) => setYoutubeUrl(e.target.value)}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-12 pr-10 focus-visible:ring-primary"
+                className="bg-background border-border text-foreground placeholder:text-muted-foreground h-12 pr-10 focus-visible:ring-primary"
               />
-              <Video className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+              <Video className="w-5 h-5 absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             </div>
-            <p className="text-[11px] text-[#8A8F98]">
+            <p className="text-[11px] text-muted-foreground">
               Aceita links do <strong>Vimeo</strong> (ex: vimeo.com/123456789,
               player.vimeo.com/video/...) e do <strong>YouTube</strong> (web, celular ou ID). Se não
               tiver vídeo, pode deixar em branco.
@@ -267,12 +271,12 @@ export default function ExerciseForm() {
 
           {/* Prévia dinâmica do vídeo (YouTube ou Vimeo) */}
           {parsedVideo.platform === 'youtube' && parsedVideo.thumbnailUrl ? (
-            <div className="p-3 bg-[#121212] border border-[#2E2E2E] rounded-xl space-y-2">
-              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Vídeo do YouTube
+            <div className="p-3 bg-muted/40 border border-border rounded-xl space-y-2">
+              <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Vídeo do YouTube
                 identificado (ID: {parsedVideo.id})
               </span>
-              <div className="relative aspect-video rounded-lg overflow-hidden border border-[#2E2E2E] max-w-sm">
+              <div className="relative aspect-video rounded-lg overflow-hidden border border-border max-w-sm">
                 <img
                   src={parsedVideo.thumbnailUrl}
                   alt="Prévia YouTube"
@@ -281,13 +285,13 @@ export default function ExerciseForm() {
               </div>
             </div>
           ) : parsedVideo.platform === 'vimeo' ? (
-            <div className="p-3 bg-[#121212] border border-[#2E2E2E] rounded-xl space-y-2">
-              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Vídeo do Vimeo
+            <div className="p-3 bg-muted/40 border border-border rounded-xl space-y-2">
+              <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Vídeo do Vimeo
                 identificado (ID: {parsedVideo.id})
               </span>
               {parsedVideo.embedUrl && (
-                <div className="relative aspect-video rounded-lg overflow-hidden border border-[#2E2E2E] max-w-sm bg-black">
+                <div className="relative aspect-video rounded-lg overflow-hidden border border-border max-w-sm bg-black">
                   <iframe
                     src={parsedVideo.embedUrl}
                     title="Prévia Vimeo"
@@ -298,7 +302,7 @@ export default function ExerciseForm() {
               )}
             </div>
           ) : youtubeUrl.trim() ? (
-            <div className="p-3 bg-amber-950/30 border border-amber-800/40 rounded-xl text-xs text-amber-300 flex items-center gap-2">
+            <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs text-amber-700 flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>
                 Não conseguimos identificar um vídeo válido do YouTube ou Vimeo nesta URL. Verifique
@@ -306,8 +310,8 @@ export default function ExerciseForm() {
               </span>
             </div>
           ) : (
-            <div className="p-3 bg-[#161616] border border-[#2A2A2A] rounded-xl text-xs text-[#8A8F98] flex items-center gap-2">
-              <Video className="w-4 h-4 shrink-0 text-[#8A8F98]" />
+            <div className="p-3 bg-muted/30 border border-border rounded-xl text-xs text-muted-foreground flex items-center gap-2">
+              <Video className="w-4 h-4 shrink-0 text-muted-foreground" />
               <span>
                 Exercício sem vídeo cadastrado. Ele será salvo normalmente e poderá ser usado nas
                 fichas.
@@ -316,12 +320,12 @@ export default function ExerciseForm() {
           )}
 
           {/* Botões de Ação */}
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-[#2E2E2E]">
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-border">
             <Link to="/acervo">
               <Button
                 type="button"
                 variant="outline"
-                className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white h-11"
+                className="border-border bg-card hover:bg-muted text-foreground h-11"
               >
                 Cancelar
               </Button>
@@ -340,12 +344,12 @@ export default function ExerciseForm() {
 
       {/* Modal de confirmação de exclusão */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-red-500" /> Excluir este exercício?
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Tem certeza que deseja excluir o exercício &quot;{name}&quot; do acervo do Studio Bru
               Oliveira?
             </DialogDescription>
@@ -355,7 +359,7 @@ export default function ExerciseForm() {
               type="button"
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>

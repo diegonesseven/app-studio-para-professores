@@ -1048,32 +1048,32 @@ export default function Training() {
     <div className="flex flex-col flex-1 min-h-0 max-w-full space-y-1.5 sm:space-y-2 animate-fade-in h-full">
       {/* BARRA SUPERIOR DE CONTROLE E SELEÇÃO DE ALUNOS (compacta) */}
       <div
-        className={`bg-card/60 border border-border rounded-xl shadow-md shrink-0 transition-all ${
+        className={`bg-card border border-border rounded-xl shadow-sm shrink-0 transition-all ${
           selectedStudents.length > 0 ? 'px-2 py-1.5 sm:px-2.5 sm:py-2' : 'p-2.5 sm:p-3'
         }`}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-1.5 sm:gap-2">
           {/* Alunos Selecionados (Chips) */}
           <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-            <span className="text-[11px] sm:text-xs uppercase tracking-wider text-[#8A8F98] font-bold mr-1 flex items-center gap-1">
+            <span className="text-[11px] sm:text-xs uppercase tracking-wider text-muted-foreground font-bold mr-1 flex items-center gap-1">
               <Users className="w-3.5 h-3.5 text-primary" /> Sessão ({selectedStudents.length}/4):
             </span>
 
             {selectedStudents.length === 0 ? (
-              <span className="text-xs text-[#8A8F98] italic">
+              <span className="text-xs text-muted-foreground italic">
                 Nenhum aluno selecionado. Pesquise ao lado para começar.
               </span>
             ) : (
               selectedStudents.map((st) => (
                 <div
                   key={st.id}
-                  className="flex items-center gap-1.5 bg-[#2A2A2A] border border-[#3A3A3A] px-2.5 py-1 rounded-lg text-xs font-semibold text-white animate-fade-in"
+                  className="flex items-center gap-1.5 bg-muted border border-border px-2.5 py-1 rounded-lg text-xs font-semibold text-foreground animate-fade-in"
                 >
                   <span className="truncate max-w-[120px] sm:max-w-[160px]">{st.name}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveStudentFromSession(st.id)}
-                    className="text-[#8A8F98] hover:text-white p-0.5 rounded"
+                    className="text-muted-foreground hover:text-foreground p-0.5 rounded cursor-pointer"
                     title="Remover da sessão"
                   >
                     <X className="w-3 h-3" />
@@ -1094,14 +1094,14 @@ export default function Training() {
                   setStudentSearch(e.target.value)
                   setSearchDropdownOpen(true)
                 }}
-                className="bg-[#121212] border-[#2E2E2E] text-white placeholder:text-[#8A8F98] h-9 pl-8 pr-3 text-xs sm:text-sm focus-visible:ring-primary"
+                className="bg-card border-border text-foreground placeholder:text-muted-foreground h-9 pl-8 pr-3 text-xs sm:text-sm focus-visible:ring-primary shadow-xs"
               />
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8A8F98]" />
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             </div>
 
             {/* Dropdown de Alunos */}
             {searchDropdownOpen && filteredSearchStudents.length > 0 && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#1E1E1E] border border-[#2E2E2E] rounded-xl shadow-2xl z-30 max-h-60 overflow-y-auto p-1.5 space-y-1 animate-fade-in">
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-card border border-border rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto p-1.5 space-y-1 animate-fade-in">
                 {filteredSearchStudents.map((st) => {
                   const isAlreadySelected = selectedStudentIds.includes(st.id)
                   return (
@@ -1110,15 +1110,15 @@ export default function Training() {
                       type="button"
                       disabled={isAlreadySelected}
                       onClick={() => handleAddStudentToSession(st)}
-                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-left text-xs transition-colors ${
+                      className={`w-full flex items-center justify-between p-2.5 rounded-lg text-left text-xs transition-colors cursor-pointer ${
                         isAlreadySelected
-                          ? 'opacity-40 cursor-not-allowed bg-black/20 text-[#8A8F98]'
-                          : 'hover:bg-[#2A2A2A] text-white'
+                          ? 'opacity-40 cursor-not-allowed bg-muted/50 text-muted-foreground'
+                          : 'hover:bg-muted text-foreground'
                       }`}
                     >
                       <div className="flex flex-col min-w-0 pr-2">
                         <span className="font-bold truncate">{st.name}</span>
-                        <span className="text-[10px] text-[#8A8F98]">
+                        <span className="text-[10px] text-muted-foreground">
                           {st.phone || 'Sem telefone'}
                         </span>
                       </div>
@@ -1136,31 +1136,31 @@ export default function Training() {
 
       {/* ÁREA DE TREINO PRINCIPAL */}
       {loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center text-[#8A8F98] gap-3">
+        <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-3">
           <Loader2 className="w-9 h-9 animate-spin text-primary" />
           <p className="text-sm">Carregando painel de condução de treinos...</p>
         </div>
       ) : selectedStudents.length === 0 ? (
         /* Empty State com busca em destaque */
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-card border border-border rounded-3xl p-8 sm:p-12 text-center shadow-2xl space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-lg shadow-primary/25 mx-auto">
+          <div className="w-full max-w-lg bg-card border border-border rounded-3xl p-8 sm:p-12 text-center shadow-lg space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-purple-400 flex items-center justify-center shadow-md shadow-primary/20 mx-auto">
               <PlaySquare className="w-8 h-8 text-white stroke-[2.5]" />
             </div>
 
             <div className="space-y-2">
-              <h2 className="text-xl sm:text-2xl font-bold text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-foreground">
                 Pesquise os alunos para iniciar a sessão
               </h2>
-              <p className="text-sm text-[#8A8F98] max-w-sm mx-auto">
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 Selecione até 4 alunos simultâneos. As fichas abrirão lado a lado no tablet ou em
                 abas deslizáveis no celular.
               </p>
             </div>
 
             {/* Acesso rápido aos alunos cadastrados */}
-            <div className="pt-2 border-t border-[#2A2A2A]">
-              <p className="text-xs text-[#8A8F98] mb-3 font-medium">
+            <div className="pt-2 border-t border-border">
+              <p className="text-xs text-muted-foreground mb-3 font-medium">
                 Ou selecione rapidamente um aluno:
               </p>
               <div className="flex flex-wrap gap-2 justify-center">
@@ -1169,7 +1169,7 @@ export default function Training() {
                     key={st.id}
                     variant="outline"
                     onClick={() => handleAddStudentToSession(st)}
-                    className="border-[#2E2E2E] bg-[#141414] hover:bg-[#2A2A2A] text-white text-xs h-9 px-3"
+                    className="border-border bg-card hover:bg-muted text-foreground text-xs h-9 px-3"
                   >
                     <Plus className="w-3.5 h-3.5 mr-1 text-primary" /> {st.name}
                   </Button>
@@ -1276,7 +1276,7 @@ export default function Training() {
                       className={`flex-1 min-w-[110px] min-h-[40px] flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl text-xs sm:text-sm font-black transition-all border ${
                         isActive
                           ? 'bg-primary border-primary text-primary-foreground shadow-md shadow-primary/25'
-                          : 'bg-[#1E1E1E] border-[#2E2E2E] text-[#8A8F98] hover:text-white'
+                          : 'bg-card border-border text-muted-foreground hover:text-foreground'
                       }`}
                     >
                       <StudentAvatar
@@ -1379,16 +1379,16 @@ export default function Training() {
         open={Boolean(advanceDialog)}
         onOpenChange={(open) => !open && setAdvanceDialog(null)}
       >
-        <DialogContent className="bg-card border-border text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
               Série {advanceDialog?.completedSeries} concluída!
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
-              O treino de <strong className="text-white">{advanceDialog?.student.name}</strong> para
-              a Série {advanceDialog?.completedSeries} foi salvo no histórico com data e horário.
-              Deseja já avançar a ficha para a Série {advanceDialog?.nextSeries}?
+            <DialogDescription className="text-muted-foreground text-sm">
+              O treino de <strong className="text-foreground">{advanceDialog?.student.name}</strong>{' '}
+              para a Série {advanceDialog?.completedSeries} foi salvo no histórico com data e
+              horário. Deseja já avançar a ficha para a Série {advanceDialog?.nextSeries}?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex sm:justify-end gap-2 pt-2">
@@ -1396,7 +1396,7 @@ export default function Training() {
               type="button"
               variant="outline"
               onClick={() => setAdvanceDialog(null)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Agora não
             </Button>
@@ -1416,14 +1416,14 @@ export default function Training() {
         open={Boolean(editingStartDateSheet)}
         onOpenChange={(open) => !open && setEditingStartDateSheet(null)}
       >
-        <DialogContent className="bg-card border-border text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
               <Calendar className="w-5 h-5 text-primary" /> Alterar Data de Início da Ficha
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Altere a data oficial de início da ficha de{' '}
-              <strong className="text-white">
+              <strong className="text-foreground">
                 {editingStartDateSheet?.expand?.student?.name || 'aluno'}
               </strong>
               . Essa data será exibida no treino, nos cabeçalhos e na ficha impressa/PDF.
@@ -1433,7 +1433,7 @@ export default function Training() {
           <div className="py-2 space-y-2">
             <label
               htmlFor="startDateInput"
-              className="text-xs uppercase tracking-wider text-[#9CA5B8] font-bold block"
+              className="text-xs uppercase tracking-wider text-muted-foreground font-bold block"
             >
               Nova data de início
             </label>
@@ -1442,7 +1442,7 @@ export default function Training() {
               type="date"
               value={newStartDateInput}
               onChange={(e) => setNewStartDateInput(e.target.value)}
-              className="bg-[#121522] border-[#252B3E] text-white h-11 focus-visible:ring-primary"
+              className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
             />
           </div>
 
@@ -1452,7 +1452,7 @@ export default function Training() {
               variant="outline"
               disabled={savingStartDate}
               onClick={() => setEditingStartDateSheet(null)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>
@@ -1473,15 +1473,15 @@ export default function Training() {
         open={Boolean(sheetCompleteConfirm)}
         onOpenChange={(open) => !open && setSheetCompleteConfirm(null)}
       >
-        <DialogContent className="bg-card border-border text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-primary" /> Marcar toda a ficha como concluída?
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Confirmar a conclusão de toda a ficha para o aluno{' '}
-              <strong className="text-white">{sheetCompleteConfirm?.student.name}</strong>? Isso
-              marcará todos os exercícios e registrará a data e hora no histórico da aula.
+              <strong className="text-foreground">{sheetCompleteConfirm?.student.name}</strong>?
+              Isso marcará todos os exercícios e registrará a data e hora no histórico da aula.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex sm:justify-end gap-2 pt-2">
@@ -1489,14 +1489,14 @@ export default function Training() {
               type="button"
               variant="outline"
               onClick={() => setSheetCompleteConfirm(null)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>
             <Button
               type="button"
               onClick={handleCompleteEntireSheet}
-              className="bg-[#2EA55B] hover:bg-[#289150] text-white font-semibold"
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
             >
               Confirmar
             </Button>

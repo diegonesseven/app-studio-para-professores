@@ -299,10 +299,10 @@ export default function SheetList() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
             <ClipboardList className="w-7 h-7 text-primary" /> Fichas de Treino
           </h1>
-          <p className="text-sm text-[#8A8F98] mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Planejamento das séries A, B, C, D e E com cargas, repetições e observações
           </p>
         </div>
@@ -310,7 +310,7 @@ export default function SheetList() {
         <div className="flex items-center gap-2">
           <Button
             onClick={() => navigate('/fichas/nova')}
-            className="bg-amber-500 hover:bg-amber-400 text-black font-bold h-11 px-4 shadow-md flex items-center gap-2"
+            className="bg-amber-500 hover:bg-amber-600 text-white font-bold h-11 px-4 shadow-md flex items-center gap-2"
           >
             <Sparkles className="w-4 h-4" /> Criar Ficha Modelo
           </Button>
@@ -329,14 +329,14 @@ export default function SheetList() {
 
       {/* Abas e Filtros de Fichas Modelo vs Fichas de Aluno */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 p-1 bg-[#141414] border border-[#2A2A2A] rounded-xl">
+        <div className="flex items-center gap-1.5 p-1 bg-muted/50 border border-border rounded-xl">
           <button
             type="button"
             onClick={() => setViewTab('all')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               viewTab === 'all'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-[#8A8F98] hover:text-white'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Todas ({sheets.length})
@@ -346,8 +346,8 @@ export default function SheetList() {
             onClick={() => setViewTab('templates')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               viewTab === 'templates'
-                ? 'bg-amber-500 text-black shadow-sm font-extrabold'
-                : 'text-amber-400/80 hover:text-amber-300'
+                ? 'bg-amber-500 text-white shadow-sm font-extrabold'
+                : 'text-amber-700 hover:text-amber-800'
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
@@ -358,8 +358,8 @@ export default function SheetList() {
             onClick={() => setViewTab('students')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               viewTab === 'students'
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-[#8A8F98] hover:text-white'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Fichas de Alunos ({studentCount})
@@ -371,7 +371,7 @@ export default function SheetList() {
             <select
               value={levelFilter}
               onChange={(e) => setLevelFilter(e.target.value)}
-              className="h-9 px-3 rounded-lg bg-[#181C2E] border border-amber-600/40 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-9 px-3 rounded-lg bg-card border border-border text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
             >
               <option value="all">Todos os Níveis</option>
               <option value="Iniciante">Iniciante</option>
@@ -382,7 +382,7 @@ export default function SheetList() {
             <select
               value={genderFilter}
               onChange={(e) => setGenderFilter(e.target.value)}
-              className="h-9 px-3 rounded-lg bg-[#181C2E] border border-amber-600/40 text-xs font-semibold text-white focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-9 px-3 rounded-lg bg-card border border-border text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-sm"
             >
               <option value="all">Todos os Gêneros</option>
               <option value="Feminino">Feminino</option>
@@ -403,24 +403,24 @@ export default function SheetList() {
           }
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-[#181C2E] border-[#252B3E] text-white placeholder:text-[#9CA5B8] h-12 pl-11 pr-4 focus-visible:ring-primary"
+          className="bg-card border-border text-foreground placeholder:text-muted-foreground h-12 pl-11 pr-4 focus-visible:ring-primary shadow-sm"
         />
-        <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9CA5B8]" />
+        <Search className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
       </div>
 
       {/* Lista */}
       {loading ? (
-        <div className="py-20 flex flex-col items-center justify-center text-[#9CA5B8] gap-3">
+        <div className="py-20 flex flex-col items-center justify-center text-muted-foreground gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
           <p className="text-sm">Carregando fichas do Studio Bru Oliveira...</p>
         </div>
       ) : filteredSheets.length === 0 ? (
-        <div className="bg-[#181C2E] border border-[#252B3E] rounded-2xl p-10 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#121522] flex items-center justify-center text-[#9CA5B8] mb-4">
+        <div className="bg-card border border-border rounded-2xl p-10 text-center flex flex-col items-center shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center text-muted-foreground mb-4">
             <ClipboardList className="w-8 h-8" />
           </div>
-          <h3 className="text-lg font-bold text-white mb-1">Nenhuma ficha encontrada</h3>
-          <p className="text-sm text-[#9CA5B8] max-w-sm mb-6">
+          <h3 className="text-lg font-bold text-foreground mb-1">Nenhuma ficha encontrada</h3>
+          <p className="text-sm text-muted-foreground max-w-sm mb-6">
             Crie a primeira ficha estruturada para seus alunos ou duplique uma ficha existente como
             base.
           </p>
@@ -470,24 +470,24 @@ export default function SheetList() {
                     handleCardClick()
                   }
                 }}
-                className={`border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary ${
+                className={`border rounded-xl p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md flex flex-col justify-between group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary ${
                   isTemplate
-                    ? 'bg-gradient-to-br from-[#1A1813] to-[#141414] border-amber-500/40 hover:border-amber-400 shadow-md shadow-amber-950/20 focus:ring-amber-400'
-                    : 'bg-[#181C2E] border-[#252B3E] hover:border-primary/50'
+                    ? 'bg-amber-500/5 border-amber-500/40 hover:border-amber-500 shadow-sm focus:ring-amber-400'
+                    : 'bg-card border-border hover:border-primary/50'
                 }`}
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     {isTemplate ? (
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <Badge className="bg-amber-500 text-black font-extrabold text-[11px] px-2.5 py-0.5 tracking-wider shadow-sm flex items-center gap-1">
+                        <Badge className="bg-amber-500 text-white font-extrabold text-[11px] px-2.5 py-0.5 tracking-wider shadow-sm flex items-center gap-1">
                           <Sparkles className="w-3 h-3" />
                           MODELO
                         </Badge>
                         {sheet.template_level && (
                           <Badge
                             variant="outline"
-                            className="border-amber-500/40 text-amber-300 text-[10px] font-semibold bg-amber-950/30"
+                            className="border-amber-500/40 text-amber-800 text-[10px] font-semibold bg-amber-500/10"
                           >
                             {sheet.template_level}
                           </Badge>
@@ -495,7 +495,7 @@ export default function SheetList() {
                         {sheet.template_gender && (
                           <Badge
                             variant="outline"
-                            className="border-amber-500/40 text-amber-200 text-[10px] font-semibold bg-amber-950/30"
+                            className="border-amber-500/40 text-amber-800 text-[10px] font-semibold bg-amber-500/10"
                           >
                             {sheet.template_gender}
                           </Badge>
@@ -510,17 +510,17 @@ export default function SheetList() {
                             `/alunos?studentId=${sheet.student}&search=${encodeURIComponent(studentName)}`,
                           )
                         }}
-                        className="text-xs uppercase tracking-wider text-secondary hover:text-white font-bold flex items-center gap-1.5 hover:underline underline-offset-2 transition-colors cursor-pointer text-left"
+                        className="text-xs uppercase tracking-wider text-primary hover:underline font-bold flex items-center gap-1.5 underline-offset-2 transition-colors cursor-pointer text-left"
                         title={`Abrir cadastro completo de ${studentName} na aba Alunos`}
                       >
                         <User className="w-3.5 h-3.5 text-primary" /> {studentName}
                       </button>
                     ) : (
-                      <span className="text-xs uppercase tracking-wider text-secondary font-bold flex items-center gap-1.5">
+                      <span className="text-xs uppercase tracking-wider text-primary font-bold flex items-center gap-1.5">
                         <User className="w-3.5 h-3.5" /> {studentName}
                       </span>
                     )}
-                    <span className="text-[11px] text-[#9CA5B8] flex items-center gap-1 shrink-0">
+                    <span className="text-[11px] text-muted-foreground flex items-center gap-1 shrink-0">
                       <Calendar className="w-3 h-3" /> {updatedDate}
                     </span>
                   </div>
@@ -528,41 +528,43 @@ export default function SheetList() {
                   <h3
                     className={`text-base font-bold transition-colors mb-2 line-clamp-1 ${
                       isTemplate
-                        ? 'text-white group-hover:text-amber-300'
-                        : 'text-white group-hover:text-secondary'
+                        ? 'text-foreground group-hover:text-amber-700'
+                        : 'text-foreground group-hover:text-primary'
                     }`}
                   >
                     {sheet.title || 'Ficha de Treino Personalizada'}
                   </h3>
 
                   {sheet.notes && (
-                    <p className="text-xs text-[#8A8F98] line-clamp-2 mb-3">{sheet.notes}</p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{sheet.notes}</p>
                   )}
 
                   {/* Séries ativas */}
                   <div className="flex items-center gap-1.5 mb-4">
-                    <span className="text-[11px] text-[#8A8F98]">Séries configuradas:</span>
+                    <span className="text-[11px] text-muted-foreground">Séries configuradas:</span>
                     {seriesKeys.length > 0 ? (
                       seriesKeys.map((s) => (
                         <span
                           key={s}
                           className={`w-5 h-5 rounded-md text-[11px] font-bold flex items-center justify-center ${
                             isTemplate
-                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                              : 'bg-[#2A2A2A] text-white'
+                              ? 'bg-amber-500/20 text-amber-800 border border-amber-500/40'
+                              : 'bg-muted text-foreground border border-border'
                           }`}
                         >
                           {s}
                         </span>
                       ))
                     ) : (
-                      <span className="text-[11px] text-[#8A8F98] italic">Vazia (em montagem)</span>
+                      <span className="text-[11px] text-muted-foreground italic">
+                        Vazia (em montagem)
+                      </span>
                     )}
                   </div>
                 </div>
 
                 {/* Ações */}
-                <div className="pt-3 border-t border-[#2A2A2A] flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-border flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                     <button
                       type="button"
@@ -570,7 +572,7 @@ export default function SheetList() {
                         e.stopPropagation()
                         handleExportSheet(sheet)
                       }}
-                      className="p-2 rounded-lg text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                      className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                       title="Exportar / Compartilhar Ficha (PDF/Impressão)"
                       aria-label={`Exportar ficha de ${studentName}`}
                     >
@@ -580,7 +582,7 @@ export default function SheetList() {
                     <Link to={`/fichas/${sheet.id}/editar`} onClick={(e) => e.stopPropagation()}>
                       <button
                         type="button"
-                        className="p-2 rounded-lg text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                         title="Editar ficha"
                         aria-label={`Editar ficha de ${studentName}`}
                       >
@@ -597,8 +599,8 @@ export default function SheetList() {
                       }}
                       className={`p-2 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold cursor-pointer ${
                         isTemplate
-                          ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-black'
-                          : 'text-[#8A8F98] hover:text-secondary hover:bg-[#2A2A2A]'
+                          ? 'bg-amber-500/15 text-amber-800 hover:bg-amber-500 hover:text-white'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                       }`}
                       title={
                         isTemplate
@@ -618,7 +620,7 @@ export default function SheetList() {
                           e.stopPropagation()
                           setDeleteId(sheet.id)
                         }}
-                        className="p-2 rounded-lg text-[#8A8F98] hover:text-red-400 hover:bg-[#2A2A2A] transition-colors cursor-pointer"
+                        className="p-2 rounded-lg text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                         title="Excluir ficha"
                         aria-label={`Excluir ficha de ${studentName}`}
                       >
@@ -636,7 +638,7 @@ export default function SheetList() {
                       }}
                       className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
                     >
-                      <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Treinar Agora
+                      <PlaySquare className="w-3.5 h-3.5" /> Treinar Agora
                     </Button>
                   ) : (
                     <Button
@@ -647,7 +649,7 @@ export default function SheetList() {
                       }}
                       className="bg-primary hover:opacity-90 text-primary-foreground text-xs font-semibold h-9 px-3.5 flex items-center gap-1.5 shadow-sm cursor-pointer"
                     >
-                      <PlaySquare className="w-3.5 h-3.5 text-secondary" /> Treinar Agora
+                      <PlaySquare className="w-3.5 h-3.5" /> Treinar Agora
                     </Button>
                   )}
                 </div>
@@ -662,17 +664,17 @@ export default function SheetList() {
         open={Boolean(viewingTemplateSheet)}
         onOpenChange={(open) => !open && setViewingTemplateSheet(null)}
       >
-        <DialogContent className="bg-[#181C2E] border-[#252B3E] text-white sm:max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader className="border-b border-[#252B3E] pb-3">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-2xl max-h-[85vh] flex flex-col">
+          <DialogHeader className="border-b border-border pb-3">
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge className="bg-amber-500 text-black font-extrabold text-[11px] px-2.5 py-0.5 tracking-wider shadow-sm flex items-center gap-1">
+              <Badge className="bg-amber-500 text-white font-extrabold text-[11px] px-2.5 py-0.5 tracking-wider shadow-sm flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
                 MODELO
               </Badge>
               {viewingTemplateSheet?.template_level && (
                 <Badge
                   variant="outline"
-                  className="border-amber-500/40 text-amber-300 text-[10px] font-semibold bg-amber-950/30"
+                  className="border-amber-500/40 text-amber-800 text-[10px] font-semibold bg-amber-500/10"
                 >
                   {viewingTemplateSheet.template_level}
                 </Badge>
@@ -680,16 +682,16 @@ export default function SheetList() {
               {viewingTemplateSheet?.template_gender && (
                 <Badge
                   variant="outline"
-                  className="border-amber-500/40 text-amber-200 text-[10px] font-semibold bg-amber-950/30"
+                  className="border-amber-500/40 text-amber-800 text-[10px] font-semibold bg-amber-500/10"
                 >
                   {viewingTemplateSheet.template_gender}
                 </Badge>
               )}
             </div>
-            <DialogTitle className="text-lg font-bold text-white mt-1">
+            <DialogTitle className="text-lg font-bold text-foreground mt-1">
               {viewingTemplateSheet?.title || 'Ficha Modelo'}
             </DialogTitle>
-            <DialogDescription className="text-xs text-[#9CA5B8]">
+            <DialogDescription className="text-xs text-muted-foreground">
               {viewingTemplateSheet?.notes ||
                 'Estrutura pré-definida com séries, repetições e exercícios selecionados.'}
             </DialogDescription>
@@ -703,11 +705,13 @@ export default function SheetList() {
               return (
                 <div key={k} className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-md bg-amber-500 text-black font-black text-xs flex items-center justify-center">
+                    <span className="w-6 h-6 rounded-md bg-amber-500 text-white font-black text-xs flex items-center justify-center">
                       {k}
                     </span>
-                    <span className="font-bold text-sm text-white">Série {k}</span>
-                    <span className="text-xs text-[#9CA5B8]">({blocks.length} exercícios)</span>
+                    <span className="font-bold text-sm text-foreground">Série {k}</span>
+                    <span className="text-xs text-muted-foreground">
+                      ({blocks.length} exercícios)
+                    </span>
                   </div>
 
                   <div className="space-y-1.5 pl-2">
@@ -716,21 +720,21 @@ export default function SheetList() {
                       return (
                         <div
                           key={i}
-                          className="p-2.5 rounded-lg bg-[#121522] border border-[#252B3E] flex items-center justify-between text-xs gap-2"
+                          className="p-2.5 rounded-lg bg-muted/40 border border-border flex items-center justify-between text-xs gap-2"
                         >
                           <div className="min-w-0">
-                            <span className="font-bold text-white block truncate">
+                            <span className="font-bold text-foreground block truncate">
                               #{i + 1} {ex?.name || 'Exercício'}
                             </span>
-                            <span className="text-[11px] text-[#9CA5B8]">
+                            <span className="text-[11px] text-muted-foreground">
                               {ex?.muscle_group || 'Geral'} {b.notes ? `• ${b.notes}` : ''}
                             </span>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="text-amber-300 font-bold block">
+                            <span className="text-amber-700 font-bold block">
                               {b.sets}x {b.reps || '12'}
                             </span>
-                            <span className="text-[11px] text-[#9CA5B8]">
+                            <span className="text-[11px] text-muted-foreground">
                               {b.load ? `Carga: ${b.load}` : 'Carga padrão'}
                               {b.time ? ` • ${b.time}` : ''}
                             </span>
@@ -744,7 +748,7 @@ export default function SheetList() {
             })}
           </div>
 
-          <DialogFooter className="border-t border-[#252B3E] pt-3 flex sm:justify-between items-center gap-2">
+          <DialogFooter className="border-t border-border pt-3 flex sm:justify-between items-center gap-2">
             <div className="flex items-center gap-2">
               {viewingTemplateSheet && (
                 <Button
@@ -752,9 +756,9 @@ export default function SheetList() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleExportSheet(viewingTemplateSheet)}
-                  className="border-amber-500/40 bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 font-bold text-xs h-9 px-3 flex items-center gap-1.5"
+                  className="border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-800 font-bold text-xs h-9 px-3 flex items-center gap-1.5"
                 >
-                  <Share2 className="w-3.5 h-3.5 text-amber-400" /> Exportar PDF
+                  <Share2 className="w-3.5 h-3.5 text-amber-600" /> Exportar PDF
                 </Button>
               )}
             </div>
@@ -764,7 +768,7 @@ export default function SheetList() {
                 type="button"
                 variant="outline"
                 onClick={() => setViewingTemplateSheet(null)}
-                className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white text-xs h-9"
+                className="border-border bg-card hover:bg-muted text-foreground text-xs h-9"
               >
                 Fechar
               </Button>
@@ -776,7 +780,7 @@ export default function SheetList() {
                     setViewingTemplateSheet(null)
                     handleOpenCopyModal(templateToCopy)
                   }}
-                  className="bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
+                  className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs h-9 px-3.5 flex items-center gap-1.5 shadow-sm"
                 >
                   <Copy className="w-3.5 h-3.5" /> Copiar / Usar Modelo
                 </Button>
@@ -791,12 +795,12 @@ export default function SheetList() {
         open={Boolean(copyModalSheet)}
         onOpenChange={(open) => !open && setCopyModalSheet(null)}
       >
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-lg">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
-              <Copy className="w-5 h-5 text-secondary" /> Copiar ficha para outro aluno
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+              <Copy className="w-5 h-5 text-primary" /> Copiar ficha para outro aluno
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Use esta ficha já estruturada como base para outro aluno. Todas as séries (A–E),
               exercícios, séries/reps, cargas, descanso e observações serão copiados para uma nova
               ficha independente, sem alterar o treino do aluno original.
@@ -806,24 +810,24 @@ export default function SheetList() {
           {copyModalSheet && (
             <div className="space-y-4 py-2">
               {/* Origem */}
-              <div className="bg-[#141414] border border-[#2A2A2A] rounded-xl p-3 space-y-1">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#8A8F98]">
+              <div className="bg-muted/40 border border-border rounded-xl p-3 space-y-1">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                   Ficha de Origem:
                 </span>
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-foreground">
                     {copyModalSheet.title || 'Ficha de Treino'}
                   </p>
                   {(copyModalSheet.is_template || !copyModalSheet.student) && (
-                    <Badge className="bg-amber-500 text-black text-[10px] font-extrabold">
+                    <Badge className="bg-amber-500 text-white text-[10px] font-extrabold">
                       {copyModalSheet.template_level || 'Modelo'} •{' '}
                       {copyModalSheet.template_gender || 'Geral'}
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-secondary flex items-center gap-1 font-medium">
+                <p className="text-xs text-primary flex items-center gap-1 font-medium">
                   <User className="w-3.5 h-3.5" /> Origem:{' '}
-                  <strong className="text-white">
+                  <strong className="text-foreground">
                     {copyModalSheet.is_template || !copyModalSheet.student
                       ? 'Ficha Modelo Pré-Programada'
                       : copyModalSheet.expand?.student?.name ||
@@ -835,7 +839,7 @@ export default function SheetList() {
 
               {/* Destino */}
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-[#8A8F98]">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   Copiar para qual aluno? (Destino):
                 </label>
                 <StudentCombobox
@@ -844,7 +848,7 @@ export default function SheetList() {
                   placeholder="Selecione ou busque o aluno destino..."
                   onChange={(id) => setCopyTargetStudentId(id)}
                 />
-                <p className="text-[11px] text-[#8A8F98]">
+                <p className="text-[11px] text-muted-foreground">
                   Ao confirmar, uma cópia nova será criada e você será levado à tela de edição para
                   fazer os ajustes finos.
                 </p>
@@ -858,7 +862,7 @@ export default function SheetList() {
               variant="outline"
               disabled={copyingToOther}
               onClick={() => setCopyModalSheet(null)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>
@@ -882,10 +886,12 @@ export default function SheetList() {
 
       {/* Modal Selecionar Aluno para Nova Ficha */}
       <Dialog open={createModalOpen} onOpenChange={setCreateModalOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white">Nova Ficha de Treino</DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogTitle className="text-lg font-bold text-foreground">
+              Nova Ficha de Treino
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground text-sm">
               Selecione o aluno do Studio Bru Oliveira para o qual deseja montar a ficha, ou opte
               por criar uma Ficha Modelo sem aluno:
             </DialogDescription>
@@ -893,7 +899,7 @@ export default function SheetList() {
 
           <div className="py-3 space-y-3">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#8A8F98] uppercase tracking-wider">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 Vincular Aluno:
               </label>
               <StudentCombobox
@@ -904,7 +910,7 @@ export default function SheetList() {
               />
             </div>
 
-            <div className="pt-2 border-t border-[#2A2A2A]">
+            <div className="pt-2 border-t border-border">
               <Button
                 type="button"
                 variant="outline"
@@ -912,9 +918,9 @@ export default function SheetList() {
                   setCreateModalOpen(false)
                   navigate('/fichas/nova')
                 }}
-                className="w-full border-amber-500/40 text-amber-300 hover:bg-amber-500/10 font-semibold text-xs h-10"
+                className="w-full border-amber-500/40 text-amber-800 hover:bg-amber-500/10 font-semibold text-xs h-10"
               >
-                <Sparkles className="w-3.5 h-3.5 mr-2" />
+                <Sparkles className="w-3.5 h-3.5 mr-2 text-amber-600" />
                 Criar como Ficha Modelo (sem aluno vinculado)
               </Button>
             </div>
@@ -925,7 +931,7 @@ export default function SheetList() {
               type="button"
               variant="outline"
               onClick={() => setCreateModalOpen(false)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>
@@ -942,12 +948,12 @@ export default function SheetList() {
 
       {/* Confirmação de Exclusão */}
       <Dialog open={Boolean(deleteId)} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+            <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
               <AlertCircle className="w-5 h-5 text-red-500" /> Excluir esta ficha?
             </DialogTitle>
-            <DialogDescription className="text-[#8A8F98] text-sm">
+            <DialogDescription className="text-muted-foreground text-sm">
               Esta ação excluirá permanentemente esta ficha de treino do aluno.
             </DialogDescription>
           </DialogHeader>
@@ -955,7 +961,7 @@ export default function SheetList() {
             <Button
               variant="outline"
               onClick={() => setDeleteId(null)}
-              className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+              className="border-border bg-card hover:bg-muted text-foreground"
             >
               Cancelar
             </Button>

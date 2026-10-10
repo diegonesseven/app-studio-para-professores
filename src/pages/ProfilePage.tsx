@@ -274,19 +274,19 @@ export default function ProfilePage() {
     <div className="space-y-6 animate-fade-in pb-16 max-w-4xl mx-auto">
       {/* Top Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white flex items-center gap-2.5">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2.5">
           <UserIcon className="w-7 h-7 text-primary" /> Meu Perfil
         </h1>
-        <p className="text-sm text-[#8A8F98] mt-1">
+        <p className="text-sm text-muted-foreground mt-1">
           Gerencie seus dados de identificação, credenciais de acesso e segurança da conta.
         </p>
       </div>
 
       {/* Cartão de Identificação do Usuário */}
-      <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 sm:p-7 shadow-lg flex flex-col sm:flex-row items-center sm:items-start gap-6">
+      <div className="bg-card border border-border rounded-2xl p-6 sm:p-7 shadow-sm flex flex-col sm:flex-row items-center sm:items-start gap-6">
         {/* Avatar grande com botão de upload */}
         <div className="relative group shrink-0">
-          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-tr from-[#2A2A2A] to-[#3A3A3A] border-2 border-primary/40 flex items-center justify-center overflow-hidden shadow-inner">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-primary/10 border-2 border-primary/30 flex items-center justify-center overflow-hidden shadow-xs">
             {avatarPreview ? (
               <img
                 src={avatarPreview}
@@ -299,7 +299,7 @@ export default function ProfilePage() {
           </div>
           <label
             htmlFor="avatar-upload"
-            className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-primary text-primary-foreground shadow-lg cursor-pointer hover:opacity-90 transition-opacity"
+            className="absolute -bottom-2 -right-2 p-2 rounded-xl bg-primary text-primary-foreground shadow-md cursor-pointer hover:opacity-90 transition-opacity"
             title="Alterar foto de perfil"
           >
             <Camera className="w-4 h-4" />
@@ -316,14 +316,14 @@ export default function ProfilePage() {
         {/* Resumo cadastral */}
         <div className="flex-1 text-center sm:text-left min-w-0">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 mb-2">
-            <h2 className="text-xl sm:text-2xl font-bold text-white truncate">
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground truncate">
               {user?.name || 'Usuário Studio'}
             </h2>
             <Badge
               className={`text-xs px-2.5 py-0.5 font-bold ${
                 isAdmin
-                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-                  : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                  ? 'bg-amber-500/15 text-amber-800 border border-amber-500/30'
+                  : 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/30'
               }`}
             >
               {isAdmin ? (
@@ -338,7 +338,7 @@ export default function ProfilePage() {
             </Badge>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 text-xs text-[#8A8F98]">
+          <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5 truncate">
               <Mail className="w-3.5 h-3.5 text-primary shrink-0" />
               {user?.email}
@@ -363,24 +363,26 @@ export default function ProfilePage() {
         {/* SEÇÃO 1: DADOS BÁSICOS & E-MAIL */}
         <div className="space-y-6">
           {/* Formulário de Nome e Foto */}
-          <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 shadow-md flex flex-col justify-between">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div className="border-b border-[#2A2A2A] pb-3 mb-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <div className="border-b border-border pb-3 mb-4">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <UserIcon className="w-4 h-4 text-primary" /> Dados Pessoais
                 </h3>
-                <p className="text-xs text-[#8A8F98] mt-0.5">Edite seu nome de exibição no app.</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Edite seu nome de exibição no app.
+                </p>
               </div>
 
               {profileSuccess && (
-                <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-700/50 flex items-center gap-2 text-xs text-emerald-300">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Dados salvos com sucesso!</span>
                 </div>
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   Nome Completo
                 </label>
                 <Input
@@ -389,7 +391,7 @@ export default function ProfilePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Seu nome completo"
-                  className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                  className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                 />
               </div>
 
@@ -397,7 +399,7 @@ export default function ProfilePage() {
                 <Button
                   type="submit"
                   disabled={savingProfile}
-                  className="w-full bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11"
+                  className="w-full bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11 cursor-pointer"
                 >
                   {savingProfile ? (
                     <>
@@ -412,32 +414,32 @@ export default function ProfilePage() {
           </div>
 
           {/* Cartão de E-mail de Acesso */}
-          <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 shadow-md">
-            <div className="border-b border-[#2A2A2A] pb-3 mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-sm">
+            <div className="border-b border-border pb-3 mb-4">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Mail className="w-4 h-4 text-primary" /> E-mail de Login
               </h3>
-              <p className="text-xs text-[#8A8F98] mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Endereço de e-mail utilizado para autenticação no Studio Bru Oliveira.
               </p>
             </div>
 
             <div className="space-y-3">
-              <div className="p-3.5 rounded-xl bg-[#141414] border border-[#2E2E2E] flex items-center justify-between gap-3">
+              <div className="p-3.5 rounded-xl bg-muted/40 border border-border flex items-center justify-between gap-3">
                 <div className="min-w-0">
-                  <span className="text-[11px] uppercase font-bold text-[#8A8F98] block">
+                  <span className="text-[11px] uppercase font-bold text-muted-foreground block">
                     E-mail atual
                   </span>
-                  <span className="text-sm font-semibold text-white truncate block">
+                  <span className="text-sm font-semibold text-foreground truncate block">
                     {user?.email}
                   </span>
                 </div>
-                <Badge className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[11px] shrink-0">
+                <Badge className="bg-emerald-500/15 text-emerald-700 border border-emerald-500/30 text-[11px] shrink-0">
                   Verificado
                 </Badge>
               </div>
 
-              <div className="p-3 rounded-xl bg-[#141414] border border-[#262626] flex items-start gap-2.5 text-xs text-[#8A8F98]">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border flex items-start gap-2.5 text-xs text-muted-foreground">
                 <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
                 <span>
                   Por motivos de segurança, ao alterar seu e-mail um link de confirmação será
@@ -453,7 +455,7 @@ export default function ProfilePage() {
                   setEmailSuccessSent(false)
                   setEmailModalOpen(true)
                 }}
-                className="w-full border-[#2E2E2E] bg-[#141414] hover:bg-[#2A2A2A] text-white h-11 font-medium"
+                className="w-full border-border bg-card hover:bg-muted text-foreground h-11 font-medium cursor-pointer"
               >
                 <Mail className="w-4 h-4 mr-2 text-primary" />
                 Alterar Endereço de E-mail
@@ -463,27 +465,27 @@ export default function ProfilePage() {
         </div>
 
         {/* SEÇÃO 2: SEGURANÇA & ALTERAÇÃO DE SENHA */}
-        <div className="bg-[#1E1E1E] border border-[#2E2E2E] rounded-2xl p-6 shadow-md flex flex-col justify-between">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
           <form onSubmit={handleChangePassword} className="space-y-4">
-            <div className="border-b border-[#2A2A2A] pb-3 mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <div className="border-b border-border pb-3 mb-4">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Lock className="w-4 h-4 text-primary" /> Segurança &amp; Senha
               </h3>
-              <p className="text-xs text-[#8A8F98] mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Altere sua senha de login informando sua senha atual para confirmação.
               </p>
             </div>
 
             {passwordSuccess && (
-              <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-700/50 flex items-center gap-2 text-xs text-emerald-300">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center gap-2 text-xs text-emerald-700">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>Sua senha foi alterada com sucesso!</span>
               </div>
             )}
 
             {/* Senha Atual */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <KeyRound className="w-3.5 h-3.5" /> Senha Atual *
               </label>
               <Input
@@ -492,16 +494,16 @@ export default function ProfilePage() {
                 placeholder="Digite sua senha atual"
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
-                className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
               />
-              <p className="text-[11px] text-[#8A8F98]">
+              <p className="text-[11px] text-muted-foreground">
                 Necessária para validar que você é o proprietário desta conta.
               </p>
             </div>
 
             {/* Nova Senha */}
             <div className="space-y-1.5 pt-2">
-              <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" /> Nova Senha (mín. 8 caracteres) *
               </label>
               <Input
@@ -510,13 +512,13 @@ export default function ProfilePage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
               />
             </div>
 
             {/* Confirmar Nova Senha */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" /> Confirmar Nova Senha *
               </label>
               <Input
@@ -525,7 +527,7 @@ export default function ProfilePage() {
                 placeholder="••••••••"
                 value={passwordConfirm}
                 onChange={(e) => setPasswordConfirm(e.target.value)}
-                className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
               />
             </div>
 
@@ -533,7 +535,7 @@ export default function ProfilePage() {
               <Button
                 type="submit"
                 disabled={changingPassword}
-                className="w-full bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11"
+                className="w-full bg-primary hover:opacity-90 text-primary-foreground font-semibold h-11 cursor-pointer"
               >
                 {changingPassword ? (
                   <>
@@ -550,18 +552,18 @@ export default function ProfilePage() {
 
       {/* MODAL DE SOLICITAÇÃO DE ALTERAÇÃO DE E-MAIL */}
       <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
-        <DialogContent className="bg-[#1E1E1E] border-[#2E2E2E] text-white sm:max-w-md">
+        <DialogContent className="bg-card border-border text-foreground sm:max-w-md">
           {emailSuccessSent ? (
             <div className="py-4 space-y-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-emerald-950/60 border border-emerald-600/40 text-emerald-400 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
-              <DialogTitle className="text-lg font-bold text-white">
+              <DialogTitle className="text-lg font-bold text-foreground">
                 E-mail de confirmação enviado!
               </DialogTitle>
-              <p className="text-sm text-[#8A8F98]">
+              <p className="text-sm text-muted-foreground">
                 Enviamos um link de confirmação para{' '}
-                <strong className="text-white">{newEmail}</strong>. Abra sua caixa de entrada e
+                <strong className="text-foreground">{newEmail}</strong>. Abra sua caixa de entrada e
                 clique no link para concluir a alteração.
               </p>
               <DialogFooter className="pt-2">
@@ -577,10 +579,10 @@ export default function ProfilePage() {
           ) : (
             <form onSubmit={handleRequestEmailChange}>
               <DialogHeader>
-                <DialogTitle className="text-lg font-bold text-white flex items-center gap-2">
+                <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
                   <Mail className="w-5 h-5 text-primary" /> Alterar E-mail da Conta
                 </DialogTitle>
-                <DialogDescription className="text-[#8A8F98] text-sm">
+                <DialogDescription className="text-muted-foreground text-sm">
                   Informe o novo endereço de e-mail. Um e-mail de confirmação será enviado para este
                   endereço antes que a alteração seja concluída.
                 </DialogDescription>
@@ -588,7 +590,7 @@ export default function ProfilePage() {
 
               <div className="space-y-3 py-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-[#9CA3AF] uppercase tracking-wider">
+                  <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                     Novo E-mail
                   </label>
                   <Input
@@ -597,12 +599,12 @@ export default function ProfilePage() {
                     placeholder="novoemail@studiobru.com.br"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    className="bg-[#141414] border-[#2E2E2E] text-white h-11 focus-visible:ring-primary"
+                    className="bg-card border-border text-foreground h-11 focus-visible:ring-primary shadow-xs"
                   />
                 </div>
 
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs text-amber-800 flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
                   <span>
                     Após confirmar o link que chegará no novo e-mail, você precisará fazer login
                     novamente com as novas credenciais.
@@ -616,14 +618,14 @@ export default function ProfilePage() {
                   variant="outline"
                   onClick={() => setEmailModalOpen(false)}
                   disabled={sendingEmailChange}
-                  className="border-[#2E2E2E] bg-[#121212] hover:bg-[#2A2A2A] text-white"
+                  className="border-border bg-card hover:bg-muted text-foreground cursor-pointer"
                 >
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={sendingEmailChange}
-                  className="bg-primary hover:opacity-90 text-primary-foreground font-semibold"
+                  className="bg-primary hover:opacity-90 text-primary-foreground font-semibold cursor-pointer"
                 >
                   {sendingEmailChange ? (
                     <>

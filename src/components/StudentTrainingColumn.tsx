@@ -242,17 +242,17 @@ export default function StudentTrainingColumn({
               <button
                 type="button"
                 onClick={onEditStudent}
-                className="text-left group/name block max-w-full"
+                className="text-left group/name block max-w-full cursor-pointer"
                 title={`Ver cadastro de ${student.name} na aba Alunos`}
                 aria-label={`Ver cadastro de ${student.name} na aba Alunos`}
               >
-                <h2 className="text-xs sm:text-sm font-black text-white group-hover/name:text-primary transition-colors leading-tight break-words underline-offset-2 hover:underline line-clamp-1">
+                <h2 className="text-xs sm:text-sm font-black text-foreground group-hover/name:text-primary transition-colors leading-tight break-words underline-offset-2 hover:underline line-clamp-1">
                   {student.name}
                 </h2>
               </button>
-              <span className="text-[10px] text-[#9CA3AF] truncate block font-medium">
+              <span className="text-[10px] text-muted-foreground truncate block font-medium">
                 {student.experience_level || 'Personal'} •{' '}
-                <strong className="text-white font-bold">
+                <strong className="text-foreground font-bold">
                   {completedCount}/{totalCount}
                 </strong>{' '}
                 feitos
@@ -266,7 +266,7 @@ export default function StudentTrainingColumn({
               <button
                 type="button"
                 onClick={() => onExportPdf(student, sheet)}
-                className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-[#9CA5B8] hover:text-secondary hover:bg-[#252B3E] transition-all flex items-center justify-center"
+                className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-muted transition-all flex items-center justify-center cursor-pointer"
                 title="Exportar / Compartilhar Ficha (PDF/Impressão)"
                 aria-label={`Exportar ficha de ${student.name}`}
               >
@@ -278,10 +278,10 @@ export default function StudentTrainingColumn({
             <button
               type="button"
               onClick={onOpenAnamnese}
-              className={`h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md transition-all flex items-center justify-center ${
+              className={`h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md transition-all flex items-center justify-center cursor-pointer ${
                 student.restrictions
-                  ? 'bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40'
-                  : 'text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E]'
+                  ? 'bg-amber-500/15 text-amber-800 hover:bg-amber-500/25 border border-amber-500/30'
+                  : 'text-muted-foreground hover:text-primary hover:bg-muted'
               }`}
               title="Consultar Anamnese / Restrições"
               aria-label={`Anamnese de ${student.name}`}
@@ -293,7 +293,7 @@ export default function StudentTrainingColumn({
             <button
               type="button"
               onClick={onEditStudent}
-              className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-[#9CA5B8] hover:text-white hover:bg-[#252B3E] transition-all flex items-center justify-center"
+              className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-all flex items-center justify-center cursor-pointer"
               title="Editar Aluno"
               aria-label={`Editar ${student.name}`}
             >
@@ -306,11 +306,11 @@ export default function StudentTrainingColumn({
         {sheet && (
           <div className="flex items-center gap-1.5 flex-wrap mt-1">
             <div className="flex items-center gap-1">
-              <Badge className="bg-[#181C2E] text-[#9CA5B8] border border-[#2B324D] text-[9px] sm:text-[10px] px-1 py-0.2 font-medium flex items-center gap-1">
+              <Badge className="bg-muted text-muted-foreground border border-border text-[9px] sm:text-[10px] px-1 py-0.2 font-medium flex items-center gap-1">
                 <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary" />
                 <span>
                   Início:{' '}
-                  <strong className="text-white">
+                  <strong className="text-foreground">
                     {parseAndFormatDate(sheet.start_date || sheet.created, 'Recente')}
                   </strong>
                 </span>
@@ -319,7 +319,7 @@ export default function StudentTrainingColumn({
                 <button
                   type="button"
                   onClick={() => onEditStartDate(sheet)}
-                  className="p-0.5 rounded text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E] transition-colors"
+                  className="p-0.5 rounded text-muted-foreground hover:text-primary hover:bg-muted transition-colors cursor-pointer"
                   title="Alterar data de início da ficha"
                   aria-label="Alterar data de início da ficha"
                 >
@@ -329,10 +329,11 @@ export default function StudentTrainingColumn({
             </div>
 
             {completedSessionsCount !== undefined && (
-              <Badge className="bg-secondary/15 text-white border border-secondary/35 text-[9px] sm:text-[10px] px-1 py-0.2 font-semibold flex items-center gap-1">
-                <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-secondary" />
+              <Badge className="bg-primary/10 text-foreground border border-primary/20 text-[9px] sm:text-[10px] px-1 py-0.2 font-semibold flex items-center gap-1">
+                <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-primary" />
                 <span>
-                  Sessões: <strong className="text-secondary">{completedSessionsCount}</strong>
+                  Sessões:{' '}
+                  <strong className="text-primary font-black">{completedSessionsCount}</strong>
                 </span>
               </Badge>
             )}
@@ -341,14 +342,14 @@ export default function StudentTrainingColumn({
 
         {/* Alerta de Restrição rápida se existir (compacto) */}
         {student.restrictions && (
-          <div className="mt-1 px-1.5 py-0.5 rounded bg-amber-950/40 border border-amber-800/60 flex items-start gap-1 text-[10px] text-amber-200 font-medium leading-tight">
-            <AlertTriangle className="w-3 h-3 shrink-0 text-amber-400 mt-0.5" />
+          <div className="mt-1 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 flex items-start gap-1 text-[10px] text-amber-800 font-medium leading-tight">
+            <AlertTriangle className="w-3 h-3 shrink-0 text-amber-600 mt-0.5" />
             <span className="break-words line-clamp-1">{student.restrictions}</span>
           </div>
         )}
 
         {/* Seletor de Séries A, B, C, D, E + Atalho de Adicionar Exercício na série */}
-        <div className="flex items-center gap-1 mt-1.5 pt-1 border-t border-[#252525]">
+        <div className="flex items-center gap-1 mt-1.5 pt-1 border-t border-border">
           <div className="flex-1 flex items-center gap-1">
             {(() => {
               // Exibe apenas as séries que a ficha realmente possui (ou pelo menos Série A se vazia)
@@ -361,10 +362,10 @@ export default function StudentTrainingColumn({
                     key={key}
                     type="button"
                     onClick={() => onSelectSeries(key)}
-                    className={`flex-1 min-h-[30px] sm:min-h-[32px] py-0.5 px-1 rounded-md text-[11px] sm:text-xs font-black transition-all relative ${
+                    className={`flex-1 min-h-[30px] sm:min-h-[32px] py-0.5 px-1 rounded-md text-[11px] sm:text-xs font-black transition-all relative cursor-pointer ${
                       isCurrent
                         ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25 ring-1 ring-primary/40'
-                        : 'bg-[#252B3E] text-white hover:bg-[#30374e]'
+                        : 'bg-muted text-foreground hover:bg-muted/80 border border-border'
                     }`}
                   >
                     <span>Série {key}</span>
@@ -379,7 +380,7 @@ export default function StudentTrainingColumn({
             <button
               type="button"
               onClick={() => setAddExerciseModalOpen(true)}
-              className="min-h-[30px] sm:min-h-[32px] px-1.5 rounded-md bg-primary/20 text-secondary hover:bg-primary/30 border border-primary/40 text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1 shrink-0"
+              className="min-h-[30px] sm:min-h-[32px] px-1.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 border border-primary/30 text-[11px] sm:text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer"
               title={`Adicionar exercício à Série ${activeSeries}`}
               aria-label={`Adicionar exercício à Série ${activeSeries}`}
             >
@@ -393,17 +394,19 @@ export default function StudentTrainingColumn({
       {/* LISTA DE EXERCÍCIOS DA SÉRIE - rolagem interna por ficha sem travar coluna */}
       <div className="flex-1 min-h-[140px] overflow-y-auto p-1.5 sm:p-2 space-y-1.5">
         {!sheet ? (
-          <div className="py-10 text-center text-sm text-[#8A8F98] px-4 space-y-2">
+          <div className="py-10 text-center text-sm text-muted-foreground px-4 space-y-2">
             <ClipboardList className="w-9 h-9 opacity-40 mx-auto" />
-            <p className="font-semibold text-white text-sm sm:text-base">Nenhuma ficha vinculada</p>
+            <p className="font-semibold text-foreground text-sm sm:text-base">
+              Nenhuma ficha vinculada
+            </p>
             <p className="text-xs">
               Monte uma ficha para este aluno na aba &quot;Fichas de Treino&quot;.
             </p>
           </div>
         ) : currentExercises.length === 0 ? (
-          <div className="py-10 text-center text-sm text-[#8A8F98] px-4 space-y-2">
+          <div className="py-10 text-center text-sm text-muted-foreground px-4 space-y-2">
             <ClipboardList className="w-9 h-9 opacity-40 mx-auto" />
-            <p className="font-semibold text-white text-sm sm:text-base">
+            <p className="font-semibold text-foreground text-sm sm:text-base">
               Série {activeSeries} vazia
             </p>
             <p className="text-xs">Selecione outra série ou edite a ficha do aluno.</p>
@@ -424,23 +427,23 @@ export default function StudentTrainingColumn({
                 key={`${block.exercise_id}-${idx}`}
                 className={`p-2 sm:p-2.5 rounded-xl border flex flex-col justify-between transition-all ${
                   isEditingThis
-                    ? 'bg-[#181C2E] border-primary ring-2 ring-primary/30 shadow-xl'
+                    ? 'bg-card border-primary ring-2 ring-primary/20 shadow-md'
                     : isDone
-                      ? 'bg-emerald-950/25 border-emerald-500/50 shadow-sm ring-1 ring-emerald-500/30'
+                      ? 'bg-emerald-500/10 border-emerald-500/40 shadow-xs ring-1 ring-emerald-500/20'
                       : isInProgress
-                        ? 'bg-amber-950/25 border-amber-500/60 shadow-md ring-2 ring-amber-500/50'
-                        : 'bg-[#151515] border-[#2A2A2A] hover:border-primary/50 shadow-sm'
+                        ? 'bg-amber-500/10 border-amber-500/50 shadow-sm ring-1 ring-amber-500/30'
+                        : 'bg-card border-border hover:border-primary/40 shadow-xs'
                 }`}
               >
                 {isInProgress && (
-                  <div className="flex items-center gap-1 mb-1 text-[10px] font-black uppercase tracking-wider text-amber-300">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                  <div className="flex items-center gap-1 mb-1 text-[10px] font-black uppercase tracking-wider text-amber-700">
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
                     <span>Em execução • 1º toque</span>
                   </div>
                 )}
                 {isDone && (
-                  <div className="flex items-center gap-1 mb-1 text-[10px] font-black uppercase tracking-wider text-emerald-400">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                  <div className="flex items-center gap-1 mb-1 text-[10px] font-black uppercase tracking-wider text-emerald-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                     <span>Concluído • 2º toque</span>
                   </div>
                 )}
@@ -451,12 +454,12 @@ export default function StudentTrainingColumn({
                     <button
                       type="button"
                       onClick={() => onToggleExercise(idx)}
-                      className={`min-w-[36px] min-h-[36px] w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform active:scale-95 ${
+                      className={`min-w-[36px] min-h-[36px] w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform active:scale-95 cursor-pointer ${
                         isDone
-                          ? 'bg-emerald-500 text-black shadow-md shadow-emerald-500/40 ring-2 ring-emerald-400 font-black'
+                          ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-500 font-black'
                           : isInProgress
-                            ? 'bg-amber-400 text-black shadow-md shadow-amber-400/40 ring-2 ring-amber-300 font-black animate-pulse'
-                            : 'border-2 border-[#454545] bg-[#1F1F1F] text-transparent hover:border-amber-400 hover:text-amber-400/50'
+                            ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-400 font-black animate-pulse'
+                            : 'border-2 border-border bg-muted/60 text-transparent hover:border-amber-400 hover:text-amber-500'
                       }`}
                       title={
                         isDone
@@ -485,10 +488,10 @@ export default function StudentTrainingColumn({
                     {/* Nome do exercício com badge número e grupo muscular ampliado */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1 leading-none mb-0.5">
-                        <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-[#252525] text-primary shrink-0 border border-primary/25">
+                        <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded bg-muted text-primary shrink-0 border border-primary/25">
                           #{idx + 1}
                         </span>
-                        <span className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-wider truncate">
+                        <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider truncate">
                           {muscle}
                         </span>
                       </div>
@@ -497,10 +500,10 @@ export default function StudentTrainingColumn({
                         onClick={() => ex && onOpenVideo(ex)}
                         className={`text-xs sm:text-sm md:text-base font-black leading-snug break-words transition-colors cursor-pointer ${
                           isDone
-                            ? 'line-through text-emerald-200/60'
+                            ? 'line-through text-muted-foreground'
                             : isInProgress
-                              ? 'text-amber-200 hover:text-amber-100'
-                              : 'text-white hover:text-primary'
+                              ? 'text-amber-800 hover:text-amber-900'
+                              : 'text-foreground hover:text-primary'
                         }`}
                         title={name}
                       >
@@ -516,7 +519,7 @@ export default function StudentTrainingColumn({
                       <button
                         type="button"
                         onClick={() => setReplaceModalIdx(idx)}
-                        className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-[#9CA5B8] hover:text-secondary hover:bg-secondary/15 border border-transparent hover:border-secondary/40 transition-all flex items-center justify-center active:scale-95"
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 border border-transparent hover:border-primary/20 transition-all flex items-center justify-center active:scale-95 cursor-pointer"
                         title="Trocar este exercício por outro do acervo"
                         aria-label={`Trocar ${name} por outro exercício`}
                       >
@@ -528,7 +531,7 @@ export default function StudentTrainingColumn({
                       <button
                         type="button"
                         onClick={() => handleStartEdit(idx, block)}
-                        className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-[#9CA5B8] hover:text-primary hover:bg-[#252B3E] border border-transparent hover:border-[#383838] transition-all flex items-center justify-center active:scale-95"
+                        className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-muted border border-transparent hover:border-border transition-all flex items-center justify-center active:scale-95 cursor-pointer"
                         title="Editar parâmetros (séries, reps, carga, descanso, obs)"
                         aria-label={`Editar ${name}`}
                       >
@@ -543,7 +546,7 @@ export default function StudentTrainingColumn({
                           <button
                             type="button"
                             onClick={() => onOpenVideo(ex)}
-                            className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md bg-primary/20 text-secondary hover:bg-primary/30 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/40 shadow-sm"
+                            className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md bg-primary/10 text-primary hover:bg-primary/20 active:scale-95 transition-all flex items-center justify-center font-bold border border-primary/20 shadow-xs cursor-pointer"
                             title="Ver demonstração em vídeo"
                             aria-label={`Ver vídeo de ${name}`}
                           >
@@ -553,7 +556,7 @@ export default function StudentTrainingColumn({
                           <button
                             type="button"
                             onClick={() => onOpenVideo(ex)}
-                            className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md bg-[#202020] text-[#8A8F98] hover:text-white hover:bg-[#2A2A2A] active:scale-95 transition-all flex items-center justify-center border border-[#333333]"
+                            className="h-7 w-7 sm:h-8 sm:w-8 p-1 rounded-md bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80 active:scale-95 transition-all flex items-center justify-center border border-border cursor-pointer"
                             title="Vídeo não cadastrado ainda (toque para ver)"
                             aria-label={`Vídeo não cadastrado de ${name}`}
                           >
@@ -566,7 +569,7 @@ export default function StudentTrainingColumn({
 
                 {/* 2. FORMULÁRIO DE EDIÇÃO INLINE (quando aberto) */}
                 {isEditingThis && editDraft ? (
-                  <div className="mt-3 pt-3 border-t border-[#2C2C2C] space-y-2.5 bg-[#141414] p-3 rounded-xl border border-primary/40 animate-fade-in">
+                  <div className="mt-3 pt-3 border-t border-border space-y-2.5 bg-muted/30 p-3 rounded-xl border border-primary/30 animate-fade-in">
                     <div className="flex items-center justify-between pb-0.5">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-black uppercase tracking-wider text-primary flex items-center gap-1">
@@ -576,7 +579,7 @@ export default function StudentTrainingColumn({
                         <button
                           type="button"
                           onClick={() => setReplaceModalIdx(idx)}
-                          className="text-[11px] font-bold text-secondary hover:underline flex items-center gap-1 bg-secondary/15 px-2 py-0.5 rounded border border-secondary/30"
+                          className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1 bg-primary/10 px-2 py-0.5 rounded border border-primary/20 cursor-pointer"
                         >
                           <ArrowRightLeft className="w-3 h-3" /> Substituir exercício
                         </button>
@@ -588,7 +591,7 @@ export default function StudentTrainingColumn({
                           type="button"
                           onClick={() => handleRemoveExercise(idx)}
                           disabled={deletingIdx === idx}
-                          className="text-[11px] text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 hover:bg-red-950/30 px-1.5 py-0.5 rounded"
+                          className="text-[11px] text-red-500 hover:text-red-600 font-semibold flex items-center gap-1 hover:bg-red-50 px-1.5 py-0.5 rounded cursor-pointer"
                           title="Remover exercício da ficha"
                         >
                           <Trash2 className="w-3.5 h-3.5" /> Remover
@@ -597,15 +600,15 @@ export default function StudentTrainingColumn({
                     </div>
 
                     {/* Exibe o nome do exercício selecionado no draft */}
-                    <div className="bg-[#1C2033] p-2 rounded-lg border border-[#2B324D] flex items-center justify-between text-xs">
-                      <span className="text-[#9CA5B8]">Exercício selecionado:</span>
-                      <strong className="text-white truncate max-w-[180px]">{name}</strong>
+                    <div className="bg-card p-2 rounded-lg border border-border flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Exercício selecionado:</span>
+                      <strong className="text-foreground truncate max-w-[180px]">{name}</strong>
                     </div>
 
                     {/* Grid com Séries, Reps, Carga, Descanso */}
                     <div className="grid grid-cols-4 gap-2">
                       <div className="space-y-1">
-                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                        <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold block truncate">
                           Séries
                         </label>
                         <Input
@@ -636,12 +639,12 @@ export default function StudentTrainingColumn({
                               })
                             }
                           }}
-                          className="h-10 bg-[#1E1E1E] border-[#383838] text-white font-black text-center text-sm focus-visible:ring-primary px-1"
+                          className="h-10 bg-card border-border text-foreground font-black text-center text-sm focus-visible:ring-primary px-1 shadow-xs"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                        <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold block truncate">
                           Reps
                         </label>
                         <Input
@@ -654,12 +657,12 @@ export default function StudentTrainingColumn({
                               reps: e.target.value,
                             })
                           }
-                          className="h-10 bg-[#1E1E1E] border-[#383838] text-white font-black text-center text-sm focus-visible:ring-primary px-1"
+                          className="h-10 bg-card border-border text-foreground font-black text-center text-sm focus-visible:ring-primary px-1 shadow-xs"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                        <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold block truncate">
                           Carga
                         </label>
                         <Input
@@ -672,12 +675,12 @@ export default function StudentTrainingColumn({
                               load: e.target.value,
                             })
                           }
-                          className="h-10 bg-[#1E1E1E] border-[#383838] text-primary font-black text-center text-sm focus-visible:ring-primary px-1"
+                          className="h-10 bg-card border-border text-primary font-black text-center text-sm focus-visible:ring-primary px-1 shadow-xs"
                         />
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block truncate">
+                        <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold block truncate">
                           Descanso
                         </label>
                         <Input
@@ -690,14 +693,14 @@ export default function StudentTrainingColumn({
                               time: e.target.value,
                             })
                           }
-                          className="h-10 bg-[#1E1E1E] border-[#383838] text-white font-black text-center text-sm focus-visible:ring-primary px-1"
+                          className="h-10 bg-card border-border text-foreground font-black text-center text-sm focus-visible:ring-primary px-1 shadow-xs"
                         />
                       </div>
                     </div>
 
                     {/* Observações */}
                     <div className="space-y-1">
-                      <label className="text-[11px] uppercase tracking-wider text-[#9CA3AF] font-bold block">
+                      <label className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold block">
                         Observações
                       </label>
                       <Input
@@ -710,7 +713,7 @@ export default function StudentTrainingColumn({
                             notes: e.target.value,
                           })
                         }
-                        className="h-10 bg-[#1E1E1E] border-[#383838] text-white text-xs sm:text-sm focus-visible:ring-primary"
+                        className="h-10 bg-card border-border text-foreground text-xs sm:text-sm focus-visible:ring-primary shadow-xs"
                       />
                     </div>
 
@@ -722,7 +725,7 @@ export default function StudentTrainingColumn({
                         size="sm"
                         onClick={handleCancelEdit}
                         disabled={savingEdit}
-                        className="h-9 px-3 border-[#333333] bg-[#1E1E1E] hover:bg-[#282828] text-white text-xs font-bold"
+                        className="h-9 px-3 border-border bg-card hover:bg-muted text-foreground text-xs font-bold"
                       >
                         <X className="w-3.5 h-3.5 mr-1" /> Cancelar
                       </Button>
@@ -731,7 +734,7 @@ export default function StudentTrainingColumn({
                         size="sm"
                         onClick={() => handleSaveEdit(idx)}
                         disabled={savingEdit}
-                        className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs shadow-sm shadow-primary/30"
+                        className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-black text-xs shadow-sm"
                       >
                         {savingEdit ? (
                           <>
@@ -747,31 +750,31 @@ export default function StudentTrainingColumn({
                   </div>
                 ) : (
                   /* Modo de Visualização: 4 colunas horizontais com min-h-[44px] e tipografia adaptativa */
-                  <div className="mt-1.5 pt-1.5 border-t border-[#242424]">
+                  <div className="mt-1.5 pt-1.5 border-t border-border">
                     <div className="grid grid-cols-4 gap-1 sm:gap-1.5 text-center">
                       {/* Séries */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-muted/40 border border-border rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-0.5">
                           Séries
                         </span>
-                        <span className="text-xs sm:text-sm md:text-base font-black text-white leading-tight">
+                        <span className="text-xs sm:text-sm md:text-base font-black text-foreground leading-tight">
                           {block.sets}x
                         </span>
                       </div>
 
                       {/* Repetições */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-muted/40 border border-border rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-0.5">
                           Reps
                         </span>
-                        <span className="text-xs sm:text-sm md:text-base font-black text-white leading-tight break-words max-w-full px-0.5">
+                        <span className="text-xs sm:text-sm md:text-base font-black text-foreground leading-tight break-words max-w-full px-0.5">
                           {block.reps || '10'}
                         </span>
                       </div>
 
                       {/* Carga */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-muted/40 border border-border rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-0.5">
                           Carga
                         </span>
                         <span className="text-xs sm:text-sm md:text-base font-black text-primary leading-tight break-words max-w-full px-0.5">
@@ -780,11 +783,11 @@ export default function StudentTrainingColumn({
                       </div>
 
                       {/* Descanso */}
-                      <div className="bg-[#1A1A1A] border border-[#282828] rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
-                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-[#9CA3AF] font-bold leading-none mb-0.5">
+                      <div className="bg-muted/40 border border-border rounded-lg py-1 px-1 flex flex-col items-center justify-center min-h-[44px]">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-bold leading-none mb-0.5">
                           Pausa
                         </span>
-                        <span className="text-xs sm:text-sm md:text-base font-black text-white leading-tight break-words max-w-full px-0.5">
+                        <span className="text-xs sm:text-sm md:text-base font-black text-foreground leading-tight break-words max-w-full px-0.5">
                           {block.time || '60s'}
                         </span>
                       </div>
@@ -795,7 +798,7 @@ export default function StudentTrainingColumn({
                       <button
                         type="button"
                         onClick={() => toggleNote(idx)}
-                        className="mt-1.5 w-full text-left text-[11px] sm:text-xs text-[#D1D5DB] bg-[#181818] px-2 py-1 rounded-md border border-[#262626] hover:border-[#3A3A3A] transition-colors flex items-start gap-1"
+                        className="mt-1.5 w-full text-left text-[11px] sm:text-xs text-muted-foreground bg-muted/30 px-2 py-1 rounded-md border border-border hover:border-primary/30 transition-colors flex items-start gap-1 cursor-pointer"
                         title={block.notes}
                       >
                         <strong className="text-primary font-bold shrink-0 text-[10px] sm:text-[11px]">
@@ -819,11 +822,11 @@ export default function StudentTrainingColumn({
       </div>
 
       {/* FOOTER DA COLUNA: Conclusão da Série e Ficha (otimizado verticalmente) */}
-      <div className="px-2 py-1.5 sm:px-2.5 sm:py-2 bg-card/60 border-t border-border space-y-1 shrink-0">
+      <div className="px-2 py-1.5 sm:px-2.5 sm:py-2 bg-card border-t border-border space-y-1 shrink-0">
         <Button
           onClick={onCompleteSeries}
           disabled={!sheet || currentExercises.length === 0}
-          className={`w-full min-h-[32px] sm:min-h-[34px] h-8 sm:h-8.5 text-xs font-black transition-all flex items-center justify-center gap-1.5 rounded-lg shadow-md ${
+          className={`w-full min-h-[32px] sm:min-h-[34px] h-8 sm:h-8.5 text-xs font-black transition-all flex items-center justify-center gap-1.5 rounded-lg shadow-sm cursor-pointer ${
             isSeriesAllDone
               ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/30'
               : 'bg-primary hover:opacity-90 text-primary-foreground shadow-primary/25'
@@ -842,7 +845,7 @@ export default function StudentTrainingColumn({
             type="button"
             onClick={onCompleteSheet}
             disabled={!sheet}
-            className="text-left text-[10px] text-[#8A8F98] hover:text-white transition-colors font-semibold truncate"
+            className="text-left text-[10px] text-muted-foreground hover:text-foreground transition-colors font-semibold truncate cursor-pointer"
           >
             Marcar ficha concluída
           </button>
@@ -851,7 +854,7 @@ export default function StudentTrainingColumn({
             <button
               type="button"
               onClick={() => onExportPdf(student, sheet)}
-              className="text-[10px] text-secondary hover:underline flex items-center gap-1 font-bold shrink-0"
+              className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold shrink-0 cursor-pointer"
             >
               <Printer className="w-3 h-3" /> PDF
             </button>
