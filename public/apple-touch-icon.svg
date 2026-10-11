@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="appleTouchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9333EA" />
+      <stop offset="50%" stop-color="#8B5CF6" />
+      <stop offset="100%" stop-color="#7C3AED" />
+    </linearGradient>
+    <filter id="softShadowApple" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#4C1D95" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <!-- iOS adiciona cantos arredondados automaticamente aos apple-touch-icons, preencher 100% -->
+  <rect width="180" height="180" fill="url(#appleTouchGrad)" />
+
+  <!-- Monograma 'B' com respiro perfeito -->
+  <g filter="url(#softShadowApple)" transform="translate(50, 21) scale(0.42)">
+    <path d="M 170 330 C 145 285, 155 210, 190 170 C 215 140, 248 130, 260 135 C 250 160, 230 200, 205 245 C 185 280, 172 315, 170 330 Z" fill="#EDE9FE" opacity="0.9" />
+    <path d="M 180 165 C 210 130, 260 120, 285 140 C 310 160, 310 195, 280 220 C 260 236, 235 240, 218 242 C 255 244, 298 255, 308 288 C 320 325, 285 355, 240 355 C 195 355, 170 325, 175 305 C 180 290, 195 292, 192 305 C 190 325, 215 338, 242 338 C 275 338, 290 315, 282 290 C 272 262, 230 258, 195 258 C 215 220, 242 178, 265 152 C 275 140, 255 135, 240 145 C 210 165, 188 200, 172 235 C 165 210, 170 185, 180 165 Z" fill="#FFFFFF" />
+    <path d="M 170 330 C 165 350, 180 375, 200 375 C 180 365, 172 345, 170 330 Z" fill="#DDD6FE" />
+  </g>
+</svg>

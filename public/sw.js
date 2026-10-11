@@ -3,14 +3,14 @@
  * Service Worker do Studio Bru Oliveira
  *
  * Estratégia de Cache:
- * - App Shell / Assets estáticos: Stale-While-Revalidate com Network-First para a navegação HTML
- * - Sempre busca a versão mais recente na rede e faz skipWaiting para que novos deploys
- *   sejam carregados instantaneamente ao recarregar a página.
- * - API / PocketBase (/api/*): Network-only com fallback transparente (não interfere no banco online).
- * - Recursos externos (ex: YouTube, Google Fonts): Cache-First ou Network-First controlado.
+ * - App Shell / Assets estáticos: Stale-While-Revalidate com Network-First para a navegação HTML.
+ * - Cache versionado com skipWaiting + clients.claim() para que qualquer atualização de versão
+ *   seja ativada e assuma as abas/janelas imediatamente ao recarregar ou reabrir.
+ * - API / PocketBase (/api/* e /realtime): NUNCA em cache (rede primária e exclusiva),
+ *   garantindo que dados de alunos, treinos e avaliações nunca venham desatualizados.
  */
 
-const CACHE_NAME = 'studio-bru-shell-v1'
+const CACHE_NAME = 'studio-bru-shell-v2'
 
 const PRECACHE_ASSETS = [
   '/',
@@ -21,10 +21,11 @@ const PRECACHE_ASSETS = [
   '/icon-maskable.svg',
   '/icon-192.svg',
   '/icon-maskable-192.svg',
+  '/apple-touch-icon.svg',
   '/favicon.ico',
 ]
 
-// Instalação: baixa os assets essenciais do shell
+// Instalação: baixa os assets essenciais do shell e ativa imediatamente
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
@@ -33,7 +34,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll(PRECACHE_ASSETS)
       })
       .then(() => {
-        // Ativa o novo service worker sem esperar as abas fecharem
+        // Assume controle sem aguardar o fechamento do navegador
         return self.skipWaiting()
       })
       .catch((err) => {
@@ -42,7 +43,7 @@ self.addEventListener('install', (event) => {
   )
 })
 
-// Ativação: limpa caches antigos e assume o controle imediatamente
+// Ativação: limpa versões de cache antigas e assume controle dos clientes
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches
@@ -58,7 +59,7 @@ self.addEventListener('activate', (event) => {
         )
       })
       .then(() => {
-        // Assume controle de todas as abas e janelas abertas
+        // Assume controle imediato de todas as abas e janelas abertas
         return self.clients.claim()
       }),
   )
@@ -74,10 +75,11 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // 2. Não interceptar requisições para a API do PocketBase ou Skip Connector
-  // Deixa ir direto para a rede para garantir dados sempre frescos
+  // 2. REGRA CRÍTICA: NÃO cachear chamadas de API ou realtime do PocketBase / backend externo
+  // Nunca intercepta nem armazena em cache para jamais servir dados de alunos ou fichas desatualizados
   if (
     url.pathname.startsWith('/api/') ||
+    url.pathname.includes('/api/') ||
     url.pathname.includes('/realtime') ||
     (url.hostname.includes('skip') && url.pathname.includes('/api'))
   ) {
@@ -85,8 +87,8 @@ self.addEventListener('fetch', (event) => {
   }
 
   // 3. Navegação HTML (quando o usuário acessa ou recarrega a página)
-  // Estratégia Network-First: busca na rede para pegar a versão atualizada do app;
-  // se falhar (sem internet temporária), entrega a casca do app (/index.html em cache)
+  // Estratégia Network-First: busca na rede a versão mais recente do app;
+  // se falhar (offline), entrega a casca do app (/index.html) em cache
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -100,7 +102,6 @@ self.addEventListener('fetch', (event) => {
           return networkResponse
         })
         .catch(async () => {
-          // Fallback offline para a casca do app
           const cachedResponse = await caches.match(request)
           if (cachedResponse) {
             return cachedResponse
@@ -115,8 +116,8 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  // 4. Assets estáticos do mesmo domínio (/assets/*, .js, .css, .svg, .png)
-  // Estratégia Stale-While-Revalidate: entrega rápido do cache enquanto busca a versão atualizada
+  // 4. Assets estáticos do mesmo domínio (/assets/*, .js, .css, .svg, .png, etc.)
+  // Estratégia Stale-While-Revalidate: entrega imediata do cache com atualização em background
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
@@ -131,18 +132,16 @@ self.addEventListener('fetch', (event) => {
             return networkResponse
           })
           .catch(() => {
-            // Se falhar rede e não tiver cache, apenas não quebra
             return cachedResponse
           })
 
-        // Retorna imediatamente o cache se houver, ou a rede
         return cachedResponse || fetchPromise
       }),
     )
     return
   }
 
-  // 5. Fontes do Google e CDNs conhecidos (Stale-While-Revalidate)
+  // 5. Fontes do Google e scripts essenciais (Stale-While-Revalidate)
   if (
     url.hostname.includes('fonts.googleapis.com') ||
     url.hostname.includes('fonts.gstatic.com') ||
@@ -168,7 +167,7 @@ self.addEventListener('fetch', (event) => {
   }
 })
 
-// Permite que o app envie mensagem pedindo skipWaiting
+// Mensagem para disparar skipWaiting sob demanda
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting()

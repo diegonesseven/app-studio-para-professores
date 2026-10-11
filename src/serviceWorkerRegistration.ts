@@ -15,7 +15,13 @@ export function registerServiceWorker(callbacks?: SWRegistrationCallbacks) {
     return
   }
 
-  // Apenas roda no browser
+  // Registra Service Worker apenas em ambiente de produção (não em dev para não interferir no HMR)
+  if (import.meta.env.DEV) {
+    console.log('[PWA] Service Worker não registrado em ambiente de desenvolvimento (DEV).')
+    return
+  }
+
+  // Apenas roda no browser em produção
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('/sw.js', {

@@ -7,7 +7,7 @@
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay", "minimal-ui"],
   "orientation": "any",
-  "background_color": "#0F0E17",
+  "background_color": "#F8FAFC",
   "theme_color": "#8B5CF6",
   "categories": ["fitness", "health", "sports", "productivity"],
   "lang": "pt-BR",
@@ -48,6 +48,12 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ],
   "shortcuts": [
@@ -68,7 +74,7 @@
     {
       "name": "Exercícios",
       "short_name": "Exercícios",
-      "description": "Biblioteca de exercícios com vídeos do YouTube",
+      "description": "Biblioteca de exercícios com vídeos",
       "url": "/exercicios",
       "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     }
